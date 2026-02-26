@@ -52,8 +52,14 @@ export default function AdminStores() {
             // Update
             await supabase.from('stores').update(payload).eq('id', currentStore.id);
         } else {
-            // Insert
-            await supabase.from('stores').insert([payload]);
+            // Insert - generate URL-friendly ID from name
+            const generatedId = currentStore.name
+                .toLowerCase()
+                .replace(/[^a-z0-9가-힣]/g, '-') // 한글, 영문, 숫자 외 하이픈으로 변경
+                .replace(/-+/g, '-') // 연속된 하이픈 제거
+                .replace(/^-|-$/g, ''); // 앞뒤 하이픈 제거
+
+            await supabase.from('stores').insert([{ ...payload, id: generatedId }]);
         }
 
         setIsEditing(false);
