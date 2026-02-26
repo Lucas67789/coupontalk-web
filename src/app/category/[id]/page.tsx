@@ -8,7 +8,8 @@ import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const params = await props.params;
     const { data: category } = await supabase.from('categories').select('*').eq('id', params.id).single();
     if (!category) return { title: 'Not Found' };
 
@@ -27,7 +28,8 @@ export async function generateStaticParams() {
     return categories || [];
 }
 
-export default async function CategoryPage({ params }: { params: { id: string } }) {
+export default async function CategoryPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const { data: category } = await supabase.from('categories').select('*').eq('id', params.id).single();
 
     if (!category) {

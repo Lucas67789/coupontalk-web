@@ -7,7 +7,8 @@ import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const params = await props.params;
     const { data: store } = await supabase.from('stores').select('*').eq('id', params.id).single();
     if (!store) return { title: 'Not Found' };
 
@@ -26,7 +27,8 @@ export async function generateStaticParams() {
     return stores || [];
 }
 
-export default async function StorePage({ params }: { params: { id: string } }) {
+export default async function StorePage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const { data: store } = await supabase
         .from('stores')
         .select('*, coupons(*)')
