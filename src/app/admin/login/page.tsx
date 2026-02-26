@@ -1,0 +1,88 @@
+"use client";
+
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+
+export default function AdminLogin() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+        } else {
+            router.push('/admin');
+            router.refresh();
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl">
+                <div>
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 border-b pb-4">
+                        쿠폰톡 관리자 로그인
+                    </h2>
+                </div>
+                <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+                    <div className="rounded-md shadow-sm -space-y-px flex flex-col gap-4">
+                        <div>
+                            <input
+                                id="email-address"
+                                name="email"
+                                type="email"
+                                required
+                                className="appearance-none relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-gray-50"
+                                placeholder="관리자 이메일"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                required
+                                className="appearance-none relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-gray-50"
+                                placeholder="비밀번호"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="text-red-500 text-sm text-center font-medium bg-red-50 p-3 rounded-lg">
+                            {error === 'Invalid login credentials' ? '이메일 또는 비밀번호가 일치하지 않습니다.' : error}
+                        </div>
+                    )}
+
+                    <div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+                        >
+                            {loading ? '인증 중...' : '마스터 계정 로그인'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
