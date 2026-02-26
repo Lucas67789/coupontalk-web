@@ -38,7 +38,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
 
     const { data: categoryStores } = await supabase
         .from('stores')
-        .select('*')
+        .select('*, coupons(*)')
         .contains('tags', [category.id]);
 
     const storesList = categoryStores || [];

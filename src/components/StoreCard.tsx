@@ -3,7 +3,7 @@ import { Store } from '@/data';
 import { Star, ChevronRight } from 'lucide-react';
 
 export default function StoreCard({ store }: { store: Store }) {
-    const latestEventTitle = store.events.length > 0 ? store.events[0].title : `${store.coupons.length}개의 할인코드`;
+    const latestEventTitle = store.events?.length > 0 ? store.events[0].title : `${store.coupons?.length || 0}개의 할인코드`;
 
     return (
         <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
