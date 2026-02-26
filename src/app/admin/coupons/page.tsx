@@ -48,7 +48,7 @@ export default function AdminCoupons() {
             code: currentCoupon.code,
             condition: currentCoupon.condition,
             expiry: currentCoupon.expiry,
-            affiliateUrl: currentCoupon.affiliateUrl,
+            affiliate_url: currentCoupon.affiliateUrl || currentCoupon.affiliate_url,
             is_verified: currentCoupon.is_verified ?? true
         };
 
@@ -159,7 +159,7 @@ export default function AdminCoupons() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">어필리에이트 제휴 링크 URL (이 쿠폰 클릭시 이동할 주소)</label>
-                                <input required type="url" value={currentCoupon?.affiliateUrl || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, affiliateUrl: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                <input required type="url" value={currentCoupon?.affiliateUrl || currentCoupon?.affiliate_url || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, affiliateUrl: e.target.value, affiliate_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
 
                             <div className="flex justify-end gap-3 mt-4">

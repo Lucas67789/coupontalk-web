@@ -35,7 +35,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
 
         // 2. Open Affiliate link in new tab after slightly delay
         setTimeout(() => {
-            window.open(coupon.affiliateUrl, '_blank');
+            window.open(coupon.affiliateUrl || coupon.affiliate_url, '_blank');
             setCopied(false); // Reset after a while
         }, 1000);
     };
