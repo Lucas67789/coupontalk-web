@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
     description: "가장 최신의 검증된 할인코드만 모았습니다. 쿠팡, 알리 등 인기 스토어의 할인 혜택을 확인하세요.",
+    images: [
+      {
+        url: "https://coupontalk.kr/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "쿠폰톡(coupontalk) 메인 썸네일",
+      },
+    ],
     type: "website",
     locale: "ko_KR",
   }
