@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import StoreList from '@/components/StoreList';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function AllStoresPage() {
     // Note: We need to pull tags and description to allow search matching

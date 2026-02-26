@@ -3,7 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import StoreCard from '@/components/StoreCard';
 import { supabase } from '@/lib/supabase';
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const { data: categories } = await supabase.from('categories').select('*');

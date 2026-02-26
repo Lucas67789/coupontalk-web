@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
