@@ -55,7 +55,9 @@ export default function AdminCoupons() {
         if (currentCoupon.id) {
             await supabase.from('coupons').update(payload).eq('id', currentCoupon.id);
         } else {
-            await supabase.from('coupons').insert([payload]);
+            // Insert - generate unique ID (Unix timestamp + random string)
+            const uniqueId = `coupon-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+            await supabase.from('coupons').insert([{ ...payload, id: uniqueId }]);
         }
 
         setIsEditing(false);
