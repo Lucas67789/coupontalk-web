@@ -6,7 +6,7 @@ import { ToastProvider } from "@/components/ToastProvider";
 
 export const metadata: Metadata = {
   title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
-  description: "가장 최신의 검증된 할인코드만 모았습니다. 쿠팡, 알리익스프레스, 아고다 등 인기 스토어의 할인 쿠폰 및 프로모션 코드를 매일 업데이트 된 정보로 만나보세요.",
+  description: "가장 최신의 검증된 할인코드 모음. 쿠팡, 알리익스프레스, 아고다 등 인기 쇼핑몰 할인 쿠폰 및 프로모션 코드를 매일 업데이트합니다.",
   openGraph: {
     title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
     description: "가장 최신의 검증된 할인코드만 모았습니다. 쿠팡, 알리 등 인기 스토어의 할인 혜택을 확인하세요.",
