@@ -19,6 +19,24 @@ export default function AdminCoupons() {
         ? coupons
         : coupons.filter(c => c.store_id === selectedStore);
 
+    // Helper to parse condition JSON
+    const parseCondition = (coupon: any) => {
+        let cond = coupon.condition;
+        let url = coupon.affiliate_url || coupon.affiliateUrl || '';
+        let verified = coupon.is_verified ?? true;
+        try {
+            if (cond && cond.startsWith('{')) {
+                const p = JSON.parse(cond);
+                if (p.text !== undefined) {
+                    cond = p.text;
+                    url = p.url;
+                    verified = p.v;
+                }
+            }
+        } catch (e) { }
+        return { cond, url, verified };
+    };
+
     const fetchCouponsAndStores = async () => {
         setLoading(true);
         const { data: couponsData } = await supabase.from('coupons').select('*, stores(name)').order('created_at', { ascending: false });
@@ -46,10 +64,12 @@ export default function AdminCoupons() {
             title: currentCoupon.title,
             discount: currentCoupon.discount,
             code: currentCoupon.code,
-            condition: currentCoupon.condition,
             expiry: currentCoupon.expiry,
-            affiliate_url: currentCoupon.affiliateUrl || currentCoupon.affiliate_url,
-            is_verified: currentCoupon.is_verified ?? true
+            condition: JSON.stringify({
+                text: currentCoupon.condition,
+                url: currentCoupon.affiliateUrl,
+                v: currentCoupon.is_verified ?? true
+            })
         };
 
         if (currentCoupon.id) {
@@ -83,7 +103,7 @@ export default function AdminCoupons() {
                     </div>
                     {!isEditing && (
                         <button
-                            onClick={() => { setIsEditing(true); setCurrentCoupon({ is_verified: true, code: 'NO_CODE_REQUIRED' }); }}
+                            onClick={() => { setIsEditing(true); setCurrentCoupon({ is_verified: true, code: 'NO_CODE_REQUIRED', condition: '', affiliateUrl: '' }); }}
                             className="btn-primary py-2 px-4 text-sm flex items-center gap-2"
                         >
                             <Plus size={16} /> 새 쿠폰 추가
@@ -190,32 +210,36 @@ export default function AdminCoupons() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {filteredCoupons.map(coupon => (
-                                            <tr key={coupon.id} className="hover:bg-gray-50/50">
-                                                <td className="p-4 font-bold text-gray-700">{coupon.stores?.name || '알수없음'}</td>
-                                                <td className="p-4">
-                                                    <p className="font-bold text-gray-900 line-clamp-1">{coupon.title}</p>
-                                                    <p className="text-xs text-mono text-gray-500">{coupon.code}</p>
-                                                </td>
-                                                <td className="p-4 hidden md:table-cell text-blue-600 font-bold">{coupon.discount}</td>
-                                                <td className="p-4 text-center">
-                                                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-mono text-sm font-bold">
-                                                        {coupon.click_count || 0}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 hidden md:table-cell">
-                                                    <span className={`px-2 py-1 rounded text-xs font-bold ${coupon.is_verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                                        {coupon.is_verified ? '활성' : '비활성'}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <button onClick={() => { setCurrentCoupon({ ...coupon }); setIsEditing(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit2 size={16} /></button>
-                                                        <button onClick={() => handleDelete(coupon.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {filteredCoupons.map(coupon => {
+                                            const p = parseCondition(coupon);
+                                            return (
+                                                <tr key={coupon.id} className="hover:bg-gray-50/50">
+                                                    <td className="p-4 font-bold text-gray-700">{coupon.stores?.name || '알수없음'}</td>
+                                                    <td className="p-4">
+                                                        <p className="font-bold text-gray-900 line-clamp-1">{coupon.title}</p>
+                                                        <p className="text-xs text-mono text-gray-500">{coupon.code}</p>
+                                                        <p className="text-xs text-gray-400 mt-1 line-clamp-1">{p.cond}</p>
+                                                    </td>
+                                                    <td className="p-4 hidden md:table-cell text-blue-600 font-bold">{coupon.discount}</td>
+                                                    <td className="p-4 text-center">
+                                                        <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-mono text-sm font-bold">
+                                                            {coupon.click_count || 0}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 hidden md:table-cell">
+                                                        <span className={`px-2 py-1 rounded text-xs font-bold ${p.verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                            {p.verified ? '활성' : '비활성'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button onClick={() => { setCurrentCoupon({ ...coupon, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified }); setIsEditing(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit2 size={16} /></button>
+                                                            <button onClick={() => handleDelete(coupon.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

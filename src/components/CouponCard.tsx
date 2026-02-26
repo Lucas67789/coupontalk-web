@@ -9,6 +9,19 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
 
+    // Parse packed JSON condition
+    let parsedConditionText = coupon.condition;
+    let parsedAffiliateUrl = coupon.affiliate_url || coupon.affiliateUrl || '';
+    try {
+        if (coupon.condition && coupon.condition.startsWith('{')) {
+            const p = JSON.parse(coupon.condition);
+            if (p.text !== undefined) {
+                parsedConditionText = p.text;
+                parsedAffiliateUrl = p.url;
+            }
+        }
+    } catch (e) { }
+
     const handleCopyAndRedirect = async () => {
         // Track the click silently in the background
         if (coupon.id) {
@@ -35,7 +48,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
 
         // 2. Open Affiliate link in new tab after slightly delay
         setTimeout(() => {
-            window.open(coupon.affiliateUrl || coupon.affiliate_url, '_blank');
+            window.open(parsedAffiliateUrl, '_blank');
             setCopied(false); // Reset after a while
         }, 1000);
     };
@@ -65,7 +78,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
                     <ul className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
                         <li className="flex items-start gap-2">
                             <CheckCircle2 size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-                            <span>조건: <strong>{coupon.condition}</strong></span>
+                            <span>조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
