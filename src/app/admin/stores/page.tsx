@@ -41,6 +41,7 @@ export default function AdminStores() {
             name: currentStore.name,
             description: currentStore.description,
             logo: currentStore.logo,
+            website_url: currentStore.website_url || null,
             rating: parseFloat(currentStore.rating) || 0,
             tags: tagsArray || [],
             events: currentStore.events || [],
@@ -106,6 +107,10 @@ export default function AdminStores() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
                                 <textarea required value={currentStore?.description || ''} onChange={e => setCurrentStore({ ...currentStore, description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" rows={3}></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">웹사이트 URL (제휴 링크 등)</label>
+                                <input type="text" value={currentStore?.website_url || ''} onChange={e => setCurrentStore({ ...currentStore, website_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">로고 URL (이미지 주소)</label>

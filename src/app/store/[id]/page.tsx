@@ -65,9 +65,11 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                         </div>
                     </div>
                     <p className="text-lg text-gray-600 mb-4">{store.description}</p>
-                    <a href="#" className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm hover:underline">
-                        {store.name} 바로가기 <ExternalLink size={14} />
-                    </a>
+                    {store.website_url && (
+                        <a href={store.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm hover:underline">
+                            {store.name} 바로가기 <ExternalLink size={14} />
+                        </a>
+                    )}
                 </div>
             </div>
 
