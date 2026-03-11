@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
@@ -22,10 +22,6 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     };
 }
 
-export async function generateStaticParams() {
-    const { data: stores } = await supabase.from('stores').select('id');
-    return stores || [];
-}
 
 export default async function StorePage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
