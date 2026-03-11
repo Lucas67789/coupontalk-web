@@ -3,6 +3,7 @@ import CouponCard from '@/components/CouponCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +50,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full mix-blend-multiply opacity-50 transform translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
 
                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border border-gray-100 flex items-center justify-center bg-white p-4 shadow-md flex-shrink-0 relative z-10">
-                    <img src={store.logo} alt={store.name} className="max-w-full max-h-full object-contain" />
+                    <SafeImage src={store.logo} alt={store.name} />
                 </div>
 
                 <div className="relative z-10">

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import SafeImage from '@/components/SafeImage';
 
 export default function AdminStores() {
     const [stores, setStores] = useState<any[]>([]);
@@ -155,7 +156,7 @@ export default function AdminStores() {
                                             <tr key={store.id} className="hover:bg-gray-50/50">
                                                 <td className="p-4">
                                                     <div className="w-10 h-10 rounded border bg-white flex items-center justify-center p-1">
-                                                        <img src={store.logo} alt={store.name} className="max-w-full max-h-full object-contain" />
+                                                        <SafeImage src={store.logo} alt={store.name} />
                                                     </div>
                                                 </td>
                                                 <td className="p-4 font-bold text-gray-900">{store.name}</td>

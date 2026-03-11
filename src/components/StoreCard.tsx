@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Store } from '@/data';
 import { Star, ChevronRight } from 'lucide-react';
+import SafeImage from './SafeImage';
 
 export default function StoreCard({ store }: { store: Store }) {
     const latestEventTitle = store.events?.length > 0 ? store.events[0].title : `${store.coupons?.length || 0}개의 할인코드`;
@@ -10,8 +11,8 @@ export default function StoreCard({ store }: { store: Store }) {
             <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-100 flex items-center justify-center bg-white p-2">
-                        {/* Using img for external logo URLs without next/image config for now */}
-                        <img src={store.logo} alt={store.name} className="max-w-full max-h-full object-contain" />
+                        {/* Using SafeImage to handle broken URLs */}
+                        <SafeImage src={store.logo} alt={store.name} />
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
                         <Star size={14} className="fill-yellow-500 text-yellow-500" />
