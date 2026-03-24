@@ -15,8 +15,11 @@ const getStoreTheme = (name: string) => {
         { accent: 'bg-indigo-500', badgeBg: 'bg-indigo-50', badgeText: 'text-indigo-700' },
     ];
     if (!name) return themes[0];
-    const index = name.charCodeAt(0) % themes.length;
-    return themes[index];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash += name.charCodeAt(i) * (i + 1);
+    }
+    return themes[hash % themes.length];
 };
 
 export default function CouponCard({ coupon, storeName, storeId }: { coupon: any, storeName: string, storeId?: string }) {
