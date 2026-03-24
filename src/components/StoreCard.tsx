@@ -1,22 +1,33 @@
 import Link from 'next/link';
 import { Store } from '@/data';
 import { Star, ChevronRight } from 'lucide-react';
-import SafeImage from './SafeImage';
 
-export default function StoreCard({ store }: { store: Store }) {
+const getGradientClass = (name: string) => {
+    const gradients = [
+        'from-blue-400 to-indigo-500',
+        'from-emerald-400 to-teal-500',
+        'from-orange-400 to-rose-500',
+        'from-purple-400 to-pink-500',
+        'from-cyan-400 to-blue-500'
+    ];
+    if (!name) return gradients[0];
+    const charCode = name.charCodeAt(0);
+    return gradients[charCode % gradients.length];
+};
+
+export default function StoreCard({ store }: { store: Store | any }) {
     const latestEventTitle = store.events?.length > 0 ? store.events[0].title : `${store.coupons?.length || 0}개의 할인코드`;
 
     return (
         <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
             <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-100 flex items-center justify-center bg-white p-2">
-                        {/* Using SafeImage to handle broken URLs */}
-                        <SafeImage src={store.logo} alt={store.name} />
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
+                        {store.name.charAt(0)}
                     </div>
-                    <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
+                    <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 flex-shrink-0 h-7 rounded text-sm font-medium">
                         <Star size={14} className="fill-yellow-500 text-yellow-500" />
-                        <span>{store.rating.toFixed(1)}</span>
+                        <span>{parseFloat(store.rating.toString()).toFixed(1)}</span>
                     </div>
                 </div>
 
