@@ -8,7 +8,13 @@ const getGradientClass = (name: string) => {
         'from-emerald-400 to-teal-500',
         'from-orange-400 to-rose-500',
         'from-purple-400 to-pink-500',
-        'from-cyan-400 to-blue-500'
+        'from-cyan-400 to-blue-500',
+        'from-rose-400 to-orange-500',
+        'from-indigo-400 to-purple-500',
+        'from-teal-400 to-emerald-500',
+        'from-pink-400 to-rose-500',
+        'from-amber-400 to-orange-500',
+        'from-violet-400 to-fuchsia-500'
     ];
     if (!name) return gradients[0];
     let hash = 5381;

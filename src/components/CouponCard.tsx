@@ -13,6 +13,12 @@ const getStoreTheme = (name: string) => {
         { accent: 'bg-purple-500', badgeBg: 'bg-purple-50', badgeText: 'text-purple-700' },
         { accent: 'bg-orange-500', badgeBg: 'bg-orange-50', badgeText: 'text-orange-700' },
         { accent: 'bg-indigo-500', badgeBg: 'bg-indigo-50', badgeText: 'text-indigo-700' },
+        { accent: 'bg-cyan-500', badgeBg: 'bg-cyan-50', badgeText: 'text-cyan-700' },
+        { accent: 'bg-teal-500', badgeBg: 'bg-teal-50', badgeText: 'text-teal-700' },
+        { accent: 'bg-pink-500', badgeBg: 'bg-pink-50', badgeText: 'text-pink-700' },
+        { accent: 'bg-amber-500', badgeBg: 'bg-amber-50', badgeText: 'text-amber-700' },
+        { accent: 'bg-violet-500', badgeBg: 'bg-violet-50', badgeText: 'text-violet-700' },
+        { accent: 'bg-fuchsia-500', badgeBg: 'bg-fuchsia-50', badgeText: 'text-fuchsia-700' },
     ];
     if (!name) return themes[0];
     let hash = 5381;
