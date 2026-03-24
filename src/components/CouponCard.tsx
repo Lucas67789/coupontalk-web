@@ -5,9 +5,24 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
+const getStoreTheme = (name: string) => {
+    const themes = [
+        { accent: 'bg-blue-500', badgeBg: 'bg-blue-50', badgeText: 'text-blue-700' },
+        { accent: 'bg-emerald-500', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700' },
+        { accent: 'bg-rose-500', badgeBg: 'bg-rose-50', badgeText: 'text-rose-700' },
+        { accent: 'bg-purple-500', badgeBg: 'bg-purple-50', badgeText: 'text-purple-700' },
+        { accent: 'bg-orange-500', badgeBg: 'bg-orange-50', badgeText: 'text-orange-700' },
+        { accent: 'bg-indigo-500', badgeBg: 'bg-indigo-50', badgeText: 'text-indigo-700' },
+    ];
+    if (!name) return themes[0];
+    const index = name.charCodeAt(0) % themes.length;
+    return themes[index];
+};
+
 export default function CouponCard({ coupon, storeName, storeId }: { coupon: any, storeName: string, storeId?: string }) {
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
+    const theme = getStoreTheme(storeName);
 
     // Parse packed JSON condition
     let parsedConditionText = coupon.condition;
@@ -60,17 +75,24 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
     const cardContent = (
         <>
             {/* Decorative top accent */}
-            <div className="absolute left-0 top-0 right-0 h-1 bg-blue-500"></div>
+            <div className={`absolute left-0 top-0 right-0 h-1 ${theme.accent}`}></div>
 
             <div className="flex-1 flex flex-col">
                 <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className={`${theme.badgeBg} ${theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider`}>
                             {coupon.discount}
                         </span>
-                        <span className="text-sm text-gray-500 font-medium">
-                            {storeName}
-                        </span>
+                        <div className="flex items-center gap-1.5 ml-1">
+                            {storeName && (
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${theme.accent}`}>
+                                    {storeName.charAt(0)}
+                                </div>
+                            )}
+                            <span className="text-[13px] text-gray-600 font-semibold tracking-tight">
+                                {storeName}
+                            </span>
+                        </div>
                     </div>
 
                     <h3 className="text-lg font-bold mb-3 text-gray-900 leading-tight line-clamp-2">
