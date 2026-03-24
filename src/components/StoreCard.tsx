@@ -11,11 +11,11 @@ const getGradientClass = (name: string) => {
         'from-cyan-400 to-blue-500'
     ];
     if (!name) return gradients[0];
-    let hash = 0;
+    let hash = 5381;
     for (let i = 0; i < name.length; i++) {
-        hash += name.charCodeAt(i) * (i + 1);
+        hash = ((hash << 5) + hash) + name.charCodeAt(i);
     }
-    return gradients[hash % gradients.length];
+    return gradients[Math.abs(hash) % gradients.length];
 };
 
 export default function StoreCard({ store }: { store: Store | any }) {
