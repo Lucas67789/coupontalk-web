@@ -13,12 +13,24 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const { data: store } = await supabase.from('stores').select('*').eq('id', params.id).single();
     if (!store) return { title: 'Not Found' };
 
+    const currentMonth = new Date().getMonth() + 1;
+    const title = `${store.name} 할인코드 ${currentMonth}월 쿠폰 총정리 | 쿠폰톡`;
+    const description = `2026년 ${store.name} 할인코드 및 프로모션 총정리. ${store.description} 검증된 최신 할인쿠폰을 확인하세요.`;
+
     return {
-        title: `${store.name} 할인코드 ${new Date().getMonth() + 1}월 쿠폰 총정리 | 쿠폰톡`,
-        description: `최대 할인율 적용! ${store.name} 할인코드 및 최신 이벤트 행사를 확인하세요. ${store.description}`,
+        title,
+        description,
+        alternates: {
+            canonical: `https://coupontalk.kr/store/${params.id}`,
+        },
         openGraph: {
-            title: `${store.name} 프로모션 코드 및 할인 정보`,
-            description: `최대 할인율 적용! ${store.name} 최신 할인코드 및 이벤트 행사를 매일 확인하세요.`,
+            title,
+            description,
+            url: `https://coupontalk.kr/store/${params.id}`,
+            type: 'article',
+            locale: 'ko_KR',
+            siteName: '쿠폰톡',
+            images: store.logo ? [{ url: store.logo, alt: store.name }] : undefined,
         }
     };
 }
@@ -55,7 +67,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900">{store.name}</h1>
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900">{store.name} 할인코드 {new Date().getMonth() + 1}월 총정리</h1>
                         <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
                             <Star size={16} className="fill-yellow-500 text-yellow-500" />
                             <span>{store.rating.toFixed(1)}</span>
@@ -94,9 +106,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </h2>
 
                 {store.coupons?.length > 0 ? (
-                    <div className="flex flex-col gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {store.coupons?.map((coupon: any) => (
-                            <CouponCard key={coupon.id} coupon={coupon} storeName={store.name} />
+                            <CouponCard key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} />
                         ))}
                     </div>
                 ) : (

@@ -5,6 +5,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://coupontalk.kr'; // 배포될 실제 도메인
     const { data: stores, error } = await supabase.from('stores').select('id');
     const { data: categories } = await supabase.from('categories').select('id');
+    const { data: coupons } = await supabase.from('coupons').select('id, store_id');
 
     if (error) {
         console.error("Sitemap fetch error:", error);
@@ -21,6 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/category/${cat.id}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
+
+    const couponUrls = (coupons || []).map((coupon) => ({
+        url: `${baseUrl}/store/${coupon.store_id}/coupon/${coupon.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
         priority: 0.7,
     }));
 
@@ -45,5 +53,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
         ...categoryUrls,
         ...storeUrls,
+        ...couponUrls,
     ];
 }

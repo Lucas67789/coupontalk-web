@@ -59,12 +59,15 @@ export default function AdminCoupons() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
+        const payload: any = {
             store_id: currentCoupon.store_id,
             title: currentCoupon.title,
             discount: currentCoupon.discount,
             code: currentCoupon.code,
             expiry: currentCoupon.expiry,
+            seo_title: currentCoupon.seo_title || null,
+            seo_description: currentCoupon.seo_description || null,
+            content_body: currentCoupon.content_body || null,
             condition: JSON.stringify({
                 text: currentCoupon.condition,
                 url: currentCoupon.affiliateUrl,
@@ -138,6 +141,12 @@ export default function AdminCoupons() {
                             <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
                         </div>
                         <form onSubmit={handleSave} className="flex flex-col gap-4">
+                            {/* SEO 가이드 안내 */}
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-800">
+                                <p className="font-bold mb-1">📌 네이버 SEO 가이드</p>
+                                <p>각 필드의 <span className="font-semibold">(괄호)</span> 안 설명은 네이버 검색엔진이 해당 값을 어떻게 활용하는지 나타냅니다. 키워드를 자연스럽게 포함해주세요.</p>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">적용 스토어</label>
@@ -149,13 +158,13 @@ export default function AdminCoupons() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">할인 내용 (예: 50% 할인)</label>
-                                    <input required type="text" value={currentCoupon?.discount || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, discount: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">할인 내용 <span className="text-blue-600">(배지 - 목록에서 강조 표시)</span></label>
+                                    <input required type="text" placeholder="예: 50% 할인, 7% 할인, $6 할인" value={currentCoupon?.discount || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, discount: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">쿠폰 제목/설명</label>
-                                <input required type="text" value={currentCoupon?.title || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, title: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">쿠폰 제목 <span className="text-blue-600">(H3 - 카드에 표시되는 짧은 제목)</span></label>
+                                <input required type="text" placeholder="예: 전 세계 숙소 7% 추가 할인" value={currentCoupon?.title || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, title: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -163,14 +172,14 @@ export default function AdminCoupons() {
                                     <input required type="text" value={currentCoupon?.code || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, code: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 font-mono" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">조건 (예: 신규 회원 전용)</label>
-                                    <input required type="text" value={currentCoupon?.condition || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, condition: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">적용 조건 <span className="text-blue-600">(본문 표시 - 할인 받을 수 있는 조건)</span></label>
+                                    <input required type="text" placeholder="예: 앱으로 첫 예약 시, 신규 회원 전용" value={currentCoupon?.condition || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, condition: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">유효기간 (예: 2024년 12월 31일 마감)</label>
-                                    <input required type="text" value={currentCoupon?.expiry || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, expiry: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">유효기간 <span className="text-blue-600">(기간 표시)</span></label>
+                                    <input required type="text" placeholder="예: 2026년 12월 31일 마감" value={currentCoupon?.expiry || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, expiry: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <input type="checkbox" id="is_verified" checked={currentCoupon?.is_verified ?? true} onChange={e => setCurrentCoupon({ ...currentCoupon, is_verified: e.target.checked })} className="w-5 h-5 text-blue-600 rounded" />
@@ -180,6 +189,42 @@ export default function AdminCoupons() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">어필리에이트 제휴 링크 URL (이 쿠폰 클릭시 이동할 주소)</label>
                                 <input required type="url" value={currentCoupon?.affiliateUrl || currentCoupon?.affiliate_url || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, affiliateUrl: e.target.value, affiliate_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                            </div>
+
+                            {/* SEO 전용 필드 */}
+                            <div className="border-t border-gray-200 pt-4 mt-2">
+                                <p className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                    🔍 SEO 전용 (네이버 검색 최적화)
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 제목 <span className="text-blue-600">(title 태그 + H1 + 검색결과 제목)</span></label>
+                                <input type="text" placeholder="예: 아고다 할인코드 3월 | 전 세계 숙소 7% 할인쿠폰" value={currentCoupon?.seo_title || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_title: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                <p className="text-xs text-gray-400 mt-1">비워두면 자동생성: &quot;스토어명 쿠폰제목 | 할인율 할인 N월 | 쿠폰톡&quot;</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 설명 <span className="text-blue-600">(meta description - 검색결과 설명문)</span></label>
+                                <textarea placeholder="예: 2026년 아고다 할인코드를 정리했습니다. 전 세계 숙소 7% 할인을 받으세요. 검증된 최신 할인쿠폰을 지금 바로 사용하세요." value={currentCoupon?.seo_description || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" rows={2} />
+                                <p className="text-xs text-gray-400 mt-1">150자 내외 권장. 비워두면 자동생성됩니다.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span></label>
+                                <textarea placeholder={`마크다운 형식으로 작성하세요.
+
+## 이 쿠폰 사용 방법
+1. 할인 링크를 클릭합니다
+2. 원하는 숙소를 검색합니다
+3. 결제 시 프로모션 코드를 입력합니다
+
+## 주의사항
+- 다른 할인과 중복 적용 불가
+- 특정 숙소에만 적용될 수 있음
+
+### 코드가 작동하지 않을 때
+- 전용 링크를 통해 접속했는지 확인
+- 유효기간이 만료되지 않았는지 점검`}
+                                    value={currentCoupon?.content_body || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, content_body: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 font-mono text-sm" rows={10} />
+                                <p className="text-xs text-gray-400 mt-1">## = H2 제목, ### = H3 제목, - = 목록, 1. = 번호 목록. 비워두면 상세페이지에 본문이 표시되지 않습니다.</p>
                             </div>
 
                             <div className="flex justify-end gap-3 mt-4">
@@ -233,7 +278,7 @@ export default function AdminCoupons() {
                                                     </td>
                                                     <td className="p-4 text-right">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <button onClick={() => { setCurrentCoupon({ ...coupon, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified }); setIsEditing(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit2 size={16} /></button>
+                                                            <button onClick={() => { setCurrentCoupon({ ...coupon, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified, seo_title: coupon.seo_title || '', seo_description: coupon.seo_description || '', content_body: coupon.content_body || '' }); setIsEditing(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit2 size={16} /></button>
                                                             <button onClick={() => handleDelete(coupon.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                                                         </div>
                                                     </td>

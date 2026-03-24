@@ -1,11 +1,11 @@
 "use client";
-import { Coupon } from '@/data';
 import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
-export default function CouponCard({ coupon, storeName }: { coupon: any, storeName: string }) {
+export default function CouponCard({ coupon, storeName, storeId }: { coupon: any, storeName: string, storeId?: string }) {
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
 
@@ -55,12 +55,14 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
 
     const isNoCode = coupon.code === 'NO_CODE_REQUIRED';
 
-    return (
-        <div className="card p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden">
-            {/* Decorative side accent */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+    const detailHref = storeId ? `/store/${storeId}/coupon/${coupon.id}` : undefined;
 
-            <div className="flex-1 flex flex-col justify-between">
+    const cardContent = (
+        <>
+            {/* Decorative top accent */}
+            <div className="absolute left-0 top-0 right-0 h-1 bg-blue-500"></div>
+
+            <div className="flex-1 flex flex-col">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
                         <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
@@ -71,7 +73,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
                         </span>
                     </div>
 
-                    <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-900 leading-tight">
+                    <h3 className="text-lg font-bold mb-3 text-gray-900 leading-tight line-clamp-2">
                         {coupon.title}
                     </h3>
 
@@ -88,7 +90,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
                 </div>
             </div>
 
-            <div className="flex flex-col justify-center items-center md:items-end gap-3 min-w-[200px] border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
                     <p className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">프로모션 코드</p>
@@ -98,7 +100,7 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
                 </div>
 
                 <button
-                    onClick={handleCopyAndRedirect}
+                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleCopyAndRedirect(); }}
                     className={`btn-primary w-full mt-2 justify-center py-3 text-base ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
                 >
                     {copied ? (
@@ -110,7 +112,16 @@ export default function CouponCard({ coupon, storeName }: { coupon: any, storeNa
                     )}
                 </button>
             </div>
+        </>
+    );
 
+    return detailHref ? (
+        <Link href={detailHref} className="card p-5 flex flex-col gap-4 relative overflow-hidden h-full hover:shadow-lg transition-shadow cursor-pointer block">
+            {cardContent}
+        </Link>
+    ) : (
+        <div className="card p-5 flex flex-col gap-4 relative overflow-hidden h-full">
+            {cardContent}
         </div>
     );
 }
