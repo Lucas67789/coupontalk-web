@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import * as LucideIcons from 'lucide-react';
-import StoreCard from '@/components/StoreCard';
+import CouponCard from '@/components/CouponCard';
 import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const { data: categories } = await supabase.from('categories').select('*');
-  const { data: stores } = await supabase.from('stores')
-    .select('*, coupons(*)')
-    .order('rating', { ascending: false })
-    .limit(3);
+  const { data: topCoupons } = await supabase.from('coupons')
+    .select('*, stores(name, id)')
+    .order('click_count', { ascending: false, nullsFirst: false })
+    .limit(5);
 
   return (
     <div className="container mx-auto">
@@ -101,9 +101,9 @@ export default async function Home() {
             전체 보기
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {stores?.map((store: any) => (
-            <StoreCard key={store.id} store={store} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {topCoupons?.map((coupon: any) => (
+            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
           ))}
         </div>
       </section>
