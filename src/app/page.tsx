@@ -96,7 +96,7 @@ export default async function Home() {
       {/* Popular Stores Section */}
       <section id="popular-stores" className="mb-16 scroll-mt-24">
         <div className="flex justify-between items-end mb-6">
-          <h2 className="text-2xl font-bold">지금 뜨는 인기 스토어🔥</h2>
+          <h2 className="text-2xl font-bold">할인율 TOP & 최저가 쿠폰 및 제품 리스트 🔥</h2>
           <Link href="/store" className="text-sm font-semibold text-blue-600 hover:underline">
             전체 보기
           </Link>
