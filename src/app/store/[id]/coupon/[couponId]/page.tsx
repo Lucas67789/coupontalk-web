@@ -59,6 +59,15 @@ function renderContentBody(content: string) {
                     {text}
                 </li>
             );
+        } else if (trimmed.match(/!\[(.*?)\]\((.*?)\)/)) {
+            const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
+            if (match) {
+                elements.push(
+                    <div key={key++} className="my-6">
+                        <img src={match[2]} alt={match[1]} className="rounded-xl border border-gray-100 max-w-full h-auto shadow-sm" />
+                    </div>
+                );
+            }
         } else {
             elements.push(
                 <p key={key++} className="text-gray-700 leading-relaxed">
@@ -115,7 +124,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     // Fetch coupon with store info
     const { data: coupon } = await supabase
         .from('coupons')
-        .select('*, stores(name, description, logo, rating, website_url, faqs)')
+        .select('*, stores(name, description, logo, rating, website_url, faqs, guide_content)')
         .eq('id', couponId)
         .single();
 
@@ -255,6 +264,20 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                                 </p>
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Guide Content */}
+            {store?.guide_content && (
+                <div className="px-6 md:px-10 pb-8">
+                    <div className="bg-blue-50/50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
+                        <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-blue-900 border-b border-blue-100/50 pb-4">
+                            💡 {storeName} 쿠폰코드 사용방법 가이드
+                        </h2>
+                        <div className="flex flex-col gap-2">
+                            {renderContentBody(store.guide_content)}
+                        </div>
                     </div>
                 </div>
             )}

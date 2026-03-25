@@ -42,6 +42,7 @@ export default function AdminStores() {
             description: currentStore.description,
             logo: currentStore.logo || '',
             website_url: currentStore.website_url || null,
+            guide_content: currentStore.guide_content || null,
             rating: parseFloat(currentStore.rating) || 0,
             tags: tagsArray || [],
             events: currentStore.events || [],
@@ -120,7 +121,11 @@ export default function AdminStores() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">카테고리 태그 (쉼표로 구분. 예: travel, fashion, tech)</label>
-                                <input required type="text" value={Array.isArray(currentStore?.tags) ? currentStore.tags.join(', ') : currentStore?.tags || ''} onChange={e => setCurrentStore({ ...currentStore, tags: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 bg-gray-50" />
+                                <input required type="text" value={Array.isArray(currentStore?.tags) ? currentStore.tags.join(', ') : currentStore?.tags || ''} onChange={e => setCurrentStore({ ...currentStore, tags: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">할인코드 적용 가이드 (마크다운 지원, 이미지 가능)</label>
+                                <textarea value={currentStore?.guide_content || ''} onChange={e => setCurrentStore({ ...currentStore, guide_content: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" rows={6} placeholder="💡 가이드 내용이나 이미지 마크다운(![설명](이미지주소))을 입력하세요..."></textarea>
                             </div>
                             <div className="flex justify-end gap-3 mt-4">
                                 <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">취소</button>
