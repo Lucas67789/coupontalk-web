@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
-    const { data: category } = await supabase.from('categories').select('*').eq('id', params.id).single();
+    const categoryId = decodeURIComponent(params.id);
+    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
     if (!category) return { title: 'Not Found' };
 
     return {
@@ -30,7 +31,8 @@ export async function generateStaticParams() {
 
 export default async function CategoryPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
-    const { data: category } = await supabase.from('categories').select('*').eq('id', params.id).single();
+    const categoryId = decodeURIComponent(params.id);
+    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
 
     if (!category) {
         notFound();

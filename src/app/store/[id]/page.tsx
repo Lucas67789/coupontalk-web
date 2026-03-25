@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
-    const { data: store } = await supabase.from('stores').select('*').eq('id', params.id).single();
+    const storeId = decodeURIComponent(params.id);
+    const { data: store } = await supabase.from('stores').select('*').eq('id', storeId).single();
     if (!store) return { title: 'Not Found' };
 
     const currentMonth = new Date().getMonth() + 1;
@@ -21,12 +22,12 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
         title,
         description,
         alternates: {
-            canonical: `https://coupontalk.kr/store/${params.id}`,
+            canonical: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}`,
         },
         openGraph: {
             title,
             description,
-            url: `https://coupontalk.kr/store/${params.id}`,
+            url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}`,
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
@@ -38,10 +39,11 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 
 export default async function StorePage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
+    const storeId = decodeURIComponent(params.id);
     const { data: store } = await supabase
         .from('stores')
         .select('*, coupons(*)')
-        .eq('id', params.id)
+        .eq('id', storeId)
         .single();
 
     if (!store) {

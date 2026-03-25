@@ -72,11 +72,13 @@ function renderContentBody(content: string) {
 
 export async function generateMetadata(props: { params: Promise<{ id: string; couponId: string }> }): Promise<Metadata> {
     const params = await props.params;
+    const storeId = decodeURIComponent(params.id);
+    const couponId = decodeURIComponent(params.couponId);
 
     const { data: coupon } = await supabase
         .from('coupons')
         .select('*, stores(name, description, logo)')
-        .eq('id', params.couponId)
+        .eq('id', couponId)
         .single();
 
     if (!coupon) return { title: 'Not Found' };
@@ -91,12 +93,12 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
         title,
         description,
         alternates: {
-            canonical: `https://coupontalk.kr/store/${params.id}/coupon/${params.couponId}`,
+            canonical: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
         },
         openGraph: {
             title,
             description,
-            url: `https://coupontalk.kr/store/${params.id}/coupon/${params.couponId}`,
+            url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
@@ -107,15 +109,17 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
 
 export default async function CouponDetailPage(props: { params: Promise<{ id: string; couponId: string }> }) {
     const params = await props.params;
+    const storeId = decodeURIComponent(params.id);
+    const couponId = decodeURIComponent(params.couponId);
 
     // Fetch coupon with store info
     const { data: coupon } = await supabase
         .from('coupons')
         .select('*, stores(name, description, logo, rating, website_url, faqs)')
-        .eq('id', params.couponId)
+        .eq('id', couponId)
         .single();
 
-    if (!coupon || coupon.store_id !== params.id) {
+    if (!coupon || coupon.store_id !== storeId) {
         notFound();
     }
 
@@ -128,8 +132,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const { data: relatedCoupons } = await supabase
         .from('coupons')
         .select('id, title, discount, code, store_id')
-        .eq('store_id', params.id)
-        .neq('id', params.couponId)
+        .eq('store_id', storeId)
+        .neq('id', couponId)
         .limit(4);
 
     // H1 title
@@ -150,7 +154,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         },
         mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `https://coupontalk.kr/store/${params.id}/coupon/${params.couponId}`,
+            '@id': `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
         },
     };
 
@@ -167,7 +171,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 <nav className="flex items-center gap-2 text-sm text-gray-500">
                     <Link href="/" className="hover:text-blue-600 transition-colors">홈</Link>
                     <ChevronRight size={14} />
-                    <Link href={`/store/${params.id}`} className="hover:text-blue-600 transition-colors">{storeName}</Link>
+                    <Link href={`/store/${encodeURIComponent(storeId)}`} className="hover:text-blue-600 transition-colors">{storeName}</Link>
                     <ChevronRight size={14} />
                     <span className="text-gray-800 font-medium truncate max-w-[200px]">{coupon.title}</span>
                 </nav>
@@ -180,7 +184,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <Link href={`/store/${params.id}`} className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+                        <Link href={`/store/${encodeURIComponent(storeId)}`} className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
                             {storeName}
                         </Link>
                         {store?.rating && (
@@ -289,7 +293,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             {/* Back to Store */}
             <div className="p-6 border-t text-center" style={{ borderColor: 'var(--border-color)' }}>
                 <Link
-                    href={`/store/${params.id}`}
+                    href={`/store/${encodeURIComponent(storeId)}`}
                     className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium"
                 >
                     <ArrowLeft size={16} />
