@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import SafeImage from '@/components/SafeImage';
 
 export default function AdminStores() {
     const [stores, setStores] = useState<any[]>([]);
@@ -41,7 +40,7 @@ export default function AdminStores() {
         const payload = {
             name: currentStore.name,
             description: currentStore.description,
-            logo: currentStore.logo,
+            logo: currentStore.logo || '',
             website_url: currentStore.website_url || null,
             rating: parseFloat(currentStore.rating) || 0,
             tags: tagsArray || [],
@@ -120,10 +119,6 @@ export default function AdminStores() {
                                 <input type="text" value={currentStore?.website_url || ''} onChange={e => setCurrentStore({ ...currentStore, website_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">로고 URL (이미지 주소)</label>
-                                <input required type="text" value={currentStore?.logo || ''} onChange={e => setCurrentStore({ ...currentStore, logo: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
-                            </div>
-                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">카테고리 태그 (쉼표로 구분. 예: travel, fashion, tech)</label>
                                 <input required type="text" value={Array.isArray(currentStore?.tags) ? currentStore.tags.join(', ') : currentStore?.tags || ''} onChange={e => setCurrentStore({ ...currentStore, tags: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 bg-gray-50" />
                             </div>
@@ -144,7 +139,6 @@ export default function AdminStores() {
                                 <table className="w-full text-left">
                                     <thead className="bg-gray-50 border-b border-gray-100 text-gray-600 font-medium text-sm">
                                         <tr>
-                                            <th className="p-4">로고</th>
                                             <th className="p-4">이름</th>
                                             <th className="p-4 hidden md:table-cell">별점</th>
                                             <th className="p-4 hidden md:table-cell">태그</th>
@@ -154,11 +148,6 @@ export default function AdminStores() {
                                     <tbody className="divide-y divide-gray-100">
                                         {stores.map(store => (
                                             <tr key={store.id} className="hover:bg-gray-50/50">
-                                                <td className="p-4">
-                                                    <div className="w-10 h-10 rounded border bg-white flex items-center justify-center p-1">
-                                                        <SafeImage src={store.logo} alt={store.name} />
-                                                    </div>
-                                                </td>
                                                 <td className="p-4 font-bold text-gray-900">{store.name}</td>
                                                 <td className="p-4 hidden md:table-cell text-gray-600">{store.rating}</td>
                                                 <td className="p-4 hidden md:table-cell text-sm text-gray-500">
