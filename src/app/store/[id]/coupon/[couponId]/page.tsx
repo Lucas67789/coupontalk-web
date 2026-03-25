@@ -26,7 +26,16 @@ function parseCondition(coupon: any) {
 
 // Simple markdown-like renderer for content_body
 function renderContentBody(content: string) {
-    const lines = content.split('\n');
+    // Normalize <img ... /> tags to standard ![Image](url) so they don't break across newlines
+    const normalizedContent = content.replace(/<img[^>]*>/gi, (match) => {
+        const srcMatch = match.match(/src=["'](.*?)["']/);
+        if (srcMatch) {
+            return `![Image](${srcMatch[1]})`;
+        }
+        return match;
+    });
+
+    const lines = normalizedContent.split('\n');
     const elements: React.ReactNode[] = [];
     let key = 0;
 
@@ -59,6 +68,9 @@ function renderContentBody(content: string) {
                     {text}
                 </li>
             );
+        } else if (trimmed === '/>' || trimmed === '>') {
+            // Ignore stray closing brackets from multiline html tags that couldn't be fully squashed
+            continue;
         } else if (trimmed.match(/!\[(.*?)\]\((.*?)\)/)) {
             const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
             if (match) {
