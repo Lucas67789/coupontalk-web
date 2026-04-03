@@ -312,16 +312,18 @@ export default function AdminCoupons() {
                                 <p className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">🔍 SEO 상세 설정</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 제목 <span className="text-xs text-gray-400 font-normal ml-2">비워두면 자동 생성됩니다</span></label>
-                                <input type="text" placeholder="예: [스토어명] 2026년 최신 할인코드 및 프로모션 총정리" value={currentCoupon?.seo_title || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_title: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 제목 <span className="text-blue-600">(title 태그 + H1 + 검색결과 제목)</span></label>
+                                <input type="text" placeholder="예: 아고다 할인코드 3월 | 전 세계 숙소 7% 할인쿠폰" value={currentCoupon?.seo_title || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_title: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                <p className="text-xs text-gray-400 mt-1">비워두면 자동생성: &quot;[스토어명] [쿠폰제목] | [할인율] 할인 [N]월 | 쿠폰톡&quot;</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 설명 (Meta Description)</label>
-                                <textarea placeholder="검색 결과 아래에 표시될 150자 내외의 요약문. 클릭을 유도할 수 있는 매력적인 문구로 작성하세요." value={currentCoupon?.seo_description || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 text-sm leading-relaxed" rows={2} />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 설명 <span className="text-blue-600">(meta description - 검색결과 설명문)</span></label>
+                                <textarea placeholder="예: 2026년 아고다 할인코드를 정리했습니다. 전 세계 숙소 7% 할인을 받으세요. 검증된 최신 할인쿠폰을 지금 바로 사용하세요." value={currentCoupon?.seo_description || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 text-sm leading-relaxed" rows={2} />
+                                <p className="text-xs text-gray-400 mt-1">150자 내외 권장. 비워두면 자동생성됩니다.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 상세 콘텐츠 (본문 텍스트 - 상위 노출의 핵심) <span className="text-xs text-blue-600 font-bold ml-2">마크다운 지원</span></label>
-                                <textarea placeholder={`## 파트너스 전용 추가 혜택 안내\n일반 가입자에게는 보이지 않는 특별한 혜택입니다...\n\n### 주의사항 및 사용 조건\n- 결제 단계에서 반드시 코드를 입력해야 합니다.\n- 일부 특가 상품에는 중복 적용되지 않을 수 있습니다.\n\n(참고: 가이드와 추천 이유는 최대한 길고 자세하게 적을수록 검색 노출에 유리합니다.)`} value={currentCoupon?.content_body || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, content_body: e.target.value })} className="w-full p-3 border rounded-xl bg-white focus:bg-gray-50 font-mono text-sm leading-relaxed" rows={12} />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span> <span className="text-xs text-blue-600 font-bold ml-2">마크다운 지원</span></label>
+                                <textarea placeholder={`## 이 쿠폰 사용 방법\n1. 할인 링크를 클릭합니다\n2. 원하는 숙소를 검색합니다\n3. 결제 시 프로모션 코드를 입력합니다\n\n(참고: 가이드와 추천 이유는 최대한 길고 자세하게 적을수록 검색 노출에 유리합니다.)`} value={currentCoupon?.content_body || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, content_body: e.target.value })} className="w-full p-3 border rounded-xl bg-white focus:bg-gray-50 font-mono text-sm leading-relaxed" rows={12} />
                             </div>
 
                             <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
