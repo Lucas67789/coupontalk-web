@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Plus, Edit2, Trash2, Save, X, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 20;
@@ -14,6 +14,7 @@ export default function AdminCoupons() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCoupon, setCurrentCoupon] = useState<any>(null);
+    const [uploading, setUploading] = useState(false);
     
     // Filters & Pagination State
     const [selectedStore, setSelectedStore] = useState<string>('all');
@@ -145,6 +146,34 @@ export default function AdminCoupons() {
         if (confirm("정말로 이 쿠폰을 삭제하시겠습니까?")) {
             await supabase.from('coupons').delete().eq('id', id);
             fetchCoupons();
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            if (!e.target.files || e.target.files.length === 0) return;
+            setUploading(true);
+            const file = e.target.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+            const imageUrl = data.publicUrl;
+            const imageMarkdown = `\n![이미지](${imageUrl})\n`;
+
+            setCurrentCoupon({ ...currentCoupon, content_body: (currentCoupon.content_body || '') + imageMarkdown });
+            
+        } catch (error) {
+            alert('이미지 업로드 실패: ' + (error as any).message + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -322,7 +351,14 @@ export default function AdminCoupons() {
                                 <p className="text-xs text-gray-400 mt-1">150자 내외 권장. 비워두면 자동생성됩니다.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span> <span className="text-xs text-blue-600 font-bold ml-2">마크다운 지원</span></label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span> <span className="text-xs text-blue-600 font-bold ml-2">마크다운 지원</span></label>
+                                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                                        {uploading ? '업로드 중...' : '📸 이미지 첨부'}
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                                    </label>
+                                </div>
                                 <textarea placeholder={`## 이 쿠폰 사용 방법\n1. 할인 링크를 클릭합니다\n2. 원하는 숙소를 검색합니다\n3. 결제 시 프로모션 코드를 입력합니다\n\n(참고: 가이드와 추천 이유는 최대한 길고 자세하게 적을수록 검색 노출에 유리합니다.)`} value={currentCoupon?.content_body || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, content_body: e.target.value })} className="w-full p-3 border rounded-xl bg-white focus:bg-gray-50 font-mono text-sm leading-relaxed" rows={12} />
                             </div>
 

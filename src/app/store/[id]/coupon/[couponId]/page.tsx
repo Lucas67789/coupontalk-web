@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { ArrowLeft, Star, Tag, Clock, CheckCircle2, ChevronRight } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import CouponDetailClient from '@/components/CouponDetailClient';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -22,73 +24,6 @@ function parseCondition(coupon: any) {
         }
     } catch (e) { }
     return { condText, affUrl };
-}
-
-// Simple markdown-like renderer for content_body
-function renderContentBody(content: string) {
-    // Normalize <img ... /> tags to standard ![Image](url) so they don't break across newlines
-    const normalizedContent = content.replace(/<img[^>]*>/gi, (match) => {
-        const srcMatch = match.match(/src=["'](.*?)["']/);
-        if (srcMatch) {
-            return `![Image](${srcMatch[1]})`;
-        }
-        return match;
-    });
-
-    const lines = normalizedContent.split('\n');
-    const elements: React.ReactNode[] = [];
-    let key = 0;
-
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) {
-            elements.push(<div key={key++} className="h-3" />);
-        } else if (trimmed.startsWith('### ')) {
-            elements.push(
-                <h3 key={key++} className="text-lg font-bold text-gray-800 mt-6 mb-2">
-                    {trimmed.slice(4)}
-                </h3>
-            );
-        } else if (trimmed.startsWith('## ')) {
-            elements.push(
-                <h2 key={key++} className="text-xl font-bold text-gray-900 mt-8 mb-3 pb-2 border-b border-gray-100">
-                    {trimmed.slice(3)}
-                </h2>
-            );
-        } else if (trimmed.startsWith('- ')) {
-            elements.push(
-                <li key={key++} className="ml-4 text-gray-700 leading-relaxed list-disc">
-                    {trimmed.slice(2)}
-                </li>
-            );
-        } else if (/^\d+\.\s/.test(trimmed)) {
-            const text = trimmed.replace(/^\d+\.\s/, '');
-            elements.push(
-                <li key={key++} className="ml-4 text-gray-700 leading-relaxed list-decimal">
-                    {text}
-                </li>
-            );
-        } else if (trimmed === '/>' || trimmed === '>') {
-            // Ignore stray closing brackets from multiline html tags that couldn't be fully squashed
-            continue;
-        } else if (trimmed.match(/!\[(.*?)\]\((.*?)\)/)) {
-            const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
-            if (match) {
-                elements.push(
-                    <div key={key++} className="my-6">
-                        <img src={match[2]} alt={match[1]} className="rounded-xl border border-gray-100 max-w-full h-auto shadow-sm" />
-                    </div>
-                );
-            }
-        } else {
-            elements.push(
-                <p key={key++} className="text-gray-700 leading-relaxed">
-                    {trimmed}
-                </p>
-            );
-        }
-    }
-    return elements;
 }
 
 export async function generateMetadata(props: { params: Promise<{ id: string; couponId: string }> }): Promise<Metadata> {
@@ -309,11 +244,12 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
             </div>
 
-            {/* Content Body (H2/H3 SEO content) */}
+            {/* Markdown Content Section */}
             {coupon.content_body && (
                 <div className="px-6 md:px-10 pb-8">
-                    <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
-                        {renderContentBody(coupon.content_body)}
+                    <TableOfContents content={coupon.content_body} />
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <MarkdownRenderer content={coupon.content_body} storeName={storeName} />
                     </div>
                 </div>
             )}
@@ -349,7 +285,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         </h2>
                         <p className="text-blue-800 mb-6 text-sm">할인 혜택을 처음 이용해보시는 분들도 아래 가이드에 따라 천천히 진행하시면 누구나 쉽게 최종 결제 단계에서 {coupon.discount} 할인을 확정받으실 수 있습니다.</p>
                         <div className="flex flex-col gap-2">
-                            {renderContentBody(store.guide_content)}
+                            <MarkdownRenderer content={store.guide_content} storeName={storeName} />
                         </div>
                     </div>
                 </div>

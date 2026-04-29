@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminStores() {
@@ -11,6 +11,7 @@ export default function AdminStores() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentStore, setCurrentStore] = useState<any>(null);
+    const [uploading, setUploading] = useState(false);
     const router = useRouter();
 
     const fetchStores = async () => {
@@ -75,6 +76,34 @@ export default function AdminStores() {
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            if (!e.target.files || e.target.files.length === 0) return;
+            setUploading(true);
+            const file = e.target.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+            const imageUrl = data.publicUrl;
+            const imageMarkdown = `\n![이미지](${imageUrl})\n`;
+
+            setCurrentStore({ ...currentStore, guide_content: (currentStore.guide_content || '') + imageMarkdown });
+            
+        } catch (error) {
+            alert('이미지 업로드 실패: ' + (error as any).message + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
             <AdminSidebar />
@@ -124,7 +153,14 @@ export default function AdminStores() {
                                 <input required type="text" value={Array.isArray(currentStore?.tags) ? currentStore.tags.join(', ') : currentStore?.tags || ''} onChange={e => setCurrentStore({ ...currentStore, tags: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">할인코드 적용 가이드 (마크다운 지원, 이미지 가능)</label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">할인코드 적용 가이드 (마크다운 지원, 이미지 가능)</label>
+                                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                                        {uploading ? '업로드 중...' : '📸 이미지 첨부'}
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                                    </label>
+                                </div>
                                 <textarea value={currentStore?.guide_content || ''} onChange={e => setCurrentStore({ ...currentStore, guide_content: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" rows={6} placeholder="💡 가이드 내용이나 이미지 마크다운(![설명](이미지주소))을 입력하세요..."></textarea>
                             </div>
                             <div className="flex justify-end gap-3 mt-4">

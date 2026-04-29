@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function SafeImage({ src, alt, className }: { src: string, alt: string, className?: string }) {
+export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
     const [error, setError] = useState(false);
 
     if (error || !src) {
@@ -20,6 +20,8 @@ export default function SafeImage({ src, alt, className }: { src: string, alt: s
             alt={alt} 
             className={`max-w-full max-h-full object-contain ${className || ''}`}
             onError={() => setError(true)} 
+            loading={lazyLoad ? "lazy" : undefined}
+            decoding={lazyLoad ? "async" : undefined}
         />
     );
 }

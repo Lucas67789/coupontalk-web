@@ -7,8 +7,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const { data: categories } = await supabase.from('categories').select('*');
+  const now = new Date().toISOString();
   const { data: topCoupons } = await supabase.from('coupons')
     .select('*, stores(name, id)')
+    .eq('status', 'published')
+    .lte('published_at', now)
     .order('click_count', { ascending: false, nullsFirst: false })
     .limit(5);
 

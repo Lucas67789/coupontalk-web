@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
+import CopyAttribution from "@/components/CopyAttribution";
 
 export const metadata: Metadata = {
   title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ToastProvider>
+          <CopyAttribution />
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1 pt-24 pb-12">

@@ -4,6 +4,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import TableOfContents from '@/components/TableOfContents';
+import { CheckCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -15,8 +18,9 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     if (!store) return { title: 'Not Found' };
 
     const currentMonth = new Date().getMonth() + 1;
-    const title = `${store.name} 할인코드 ${currentMonth}월 쿠폰 총정리 | 쿠폰톡`;
-    const description = `2026년 ${store.name} 할인코드 및 프로모션 총정리. ${store.description} 검증된 최신 할인쿠폰을 확인하세요.`;
+    const currentYear = new Date().getFullYear();
+    const title = `[${currentYear}년 ${currentMonth}월] ${store.name} 할인코드 및 카드 프로모션 총정리 | 쿠폰톡`;
+    const description = `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다. 검증된 최신 할인쿠폰과 카드 혜택을 확인하세요.`;
 
     return {
         title,
@@ -40,18 +44,77 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 export default async function StorePage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const storeId = decodeURIComponent(params.id);
+    const now = new Date().toISOString();
     const { data: store } = await supabase
         .from('stores')
-        .select('*, coupons(*)')
+        .select(`
+            *,
+            coupons(*)
+        `)
         .eq('id', storeId)
+        .eq('coupons.status', 'published')
+        .lte('coupons.published_at', now)
         .single();
 
     if (!store) {
         notFound();
     }
 
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const currentDate = new Date().getDate();
+
+    // JSON-LD structured data for Hub Page
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: `[${currentYear}년 ${currentMonth}월] ${store.name} 할인코드 및 카드 프로모션 총정리`,
+        description: `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다.`,
+        datePublished: store.created_at || now,
+        dateModified: now,
+        author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' },
+        publisher: {
+            '@type': 'Organization',
+            name: '쿠폰톡',
+            logo: { '@type': 'ImageObject', url: 'https://coupontalk.kr/og-image.png' }
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://coupontalk.kr/store/${encodeURIComponent(storeId)}`,
+        },
+    };
+
+    const breadcrumbLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: '홈', item: 'https://coupontalk.kr' },
+            { '@type': 'ListItem', position: 2, name: store.name, item: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}` }
+        ]
+    };
+
+    const faqLd = store?.faqs && store.faqs.length > 0 ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: store.faqs.map((faq: any) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: { '@type': 'Answer', text: faq.answer }
+        }))
+    } : null;
+
+    const schemaGraph = {
+        '@context': 'https://schema.org',
+        '@graph': [jsonLd, breadcrumbLd, ...(faqLd ? [faqLd] : [])]
+    };
+
     return (
         <div className="container mx-auto max-w-4xl border-x min-h-screen bg-white shadow-sm" style={{ borderColor: 'var(--border-color)' }}>
+            {/* JSON-LD Schema Graph */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaGraph) }}
+            />
             {/* Back Button */}
             <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors">
@@ -69,7 +132,12 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900">{store.name} 할인코드 {new Date().getMonth() + 1}월 총정리</h1>
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight">
+                            [{currentYear}년 {currentMonth}월] <br className="hidden md:block" />
+                            {store.name} 할인코드 및 카드 프로모션 총정리
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
                         <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
                             <Star size={16} className="fill-yellow-500 text-yellow-500" />
                             <span>{store.rating.toFixed(1)}</span>
@@ -84,11 +152,58 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             </div>
 
+            {/* Update History */}
+            <div className="px-6 md:px-10 py-4 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
+                <CheckCircle size={20} className="text-green-600" />
+                <p className="font-semibold text-sm">
+                    최신 업데이트: <span className="text-gray-900 font-bold">{currentYear}년 {currentMonth}월 {currentDate}일</span> 기준 쿠폰 및 프로모션 검증 완료
+                </p>
+            </div>
+
+            {/* Summary Table */}
+            {store.coupons?.length > 0 && (
+                <div className="p-6 md:p-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 할인코드 요약표</h2>
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-100 text-gray-800 font-bold border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 whitespace-nowrap">할인 혜택</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">할인코드</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">조건</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">유효기간</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {store.coupons.map((coupon: any) => {
+                                    let parsedCond = coupon.condition;
+                                    try {
+                                        if (coupon.condition && coupon.condition.startsWith('{')) {
+                                            parsedCond = JSON.parse(coupon.condition).text || parsedCond;
+                                        }
+                                    } catch(e) {}
+                                    return (
+                                        <tr key={coupon.id} className="bg-white hover:bg-gray-50 transition-colors">
+                                            <td className="px-4 py-3 font-semibold text-blue-700">{coupon.discount}</td>
+                                            <td className="px-4 py-3 font-mono bg-blue-50/50 text-blue-900 font-bold">
+                                                {coupon.code === 'NO_CODE_REQUIRED' ? '코드 불필요' : coupon.code}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600">{parsedCond}</td>
+                                            <td className="px-4 py-3 text-gray-500">{coupon.expiry}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
             {/* Events / Notices */}
             {store.events?.length > 0 && (
                 <div className="p-6 md:p-10 border-b bg-blue-50/50" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900">
-                        <CalendarDays size={20} className="text-blue-600" /> 이달의 프로모션 일정
+                        <CalendarDays size={20} className="text-blue-600" /> 이달의 카드 프로모션 및 이벤트
                     </h2>
                     <ul className="flex flex-col gap-3">
                         {store.events?.map((event: any, i: number) => (
@@ -119,6 +234,17 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     </div>
                 )}
             </div>
+
+            {/* Guide Content / Hub Articles */}
+            {store.guide_content && (
+                <div className="px-6 md:px-10 py-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 꿀팁</h2>
+                    <TableOfContents content={store.guide_content} />
+                    <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm">
+                        <MarkdownRenderer content={store.guide_content} storeName={store.name} />
+                    </div>
+                </div>
+            )}
 
             {/* FAQs */}
             {store.faqs?.length > 0 && (

@@ -5,7 +5,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://coupontalk.kr'; // 배포될 실제 도메인
     const { data: stores, error } = await supabase.from('stores').select('id');
     const { data: categories } = await supabase.from('categories').select('id');
-    const { data: coupons } = await supabase.from('coupons').select('id, store_id');
+    const now = new Date().toISOString();
+    const { data: coupons } = await supabase.from('coupons')
+        .select('id, store_id')
+        .eq('status', 'published')
+        .lte('published_at', now);
 
     if (error) {
         console.error("Sitemap fetch error:", error);

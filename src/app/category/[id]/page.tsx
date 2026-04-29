@@ -38,10 +38,16 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
         notFound();
     }
 
+    const now = new Date().toISOString();
     const { data: categoryStores } = await supabase
         .from('stores')
-        .select('*, coupons(*)')
-        .contains('tags', [category.id]);
+        .select(`
+            *,
+            coupons(*)
+        `)
+        .contains('tags', [category.id])
+        .eq('coupons.status', 'published')
+        .lte('coupons.published_at', now);
 
     const storesList = categoryStores || [];
     const IconComponent = (LucideIcons as any)[category.icon];
