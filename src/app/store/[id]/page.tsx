@@ -60,6 +60,29 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         notFound();
     }
 
+    if (store && store.coupons) {
+        store.coupons.sort((a: any, b: any) => {
+            const dateA = new Date(a.published_at || a.created_at || 0).getTime();
+            const dateB = new Date(b.published_at || b.created_at || 0).getTime();
+            return dateB - dateA;
+        });
+    }
+
+    const isCouponExpired = (expiry: string) => {
+        if (!expiry) return false;
+        const match = expiry.match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+        if (match) {
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1;
+            const day = parseInt(match[3], 10);
+            const expiryDate = new Date(year, month, day, 23, 59, 59);
+            return expiryDate.getTime() < new Date().getTime();
+        }
+        return false;
+    };
+
+    const tableCoupons = store?.coupons?.filter((c: any) => !isCouponExpired(c.expiry)) || [];
+
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     const currentDate = new Date().getDate();
@@ -161,7 +184,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </div>
 
             {/* Summary Table */}
-            {store.coupons?.length > 0 && (
+            {tableCoupons.length > 0 && (
                 <div className="p-6 md:p-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 할인코드 요약표</h2>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
@@ -175,7 +198,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {store.coupons.map((coupon: any) => {
+                                {tableCoupons.map((coupon: any) => {
                                     let parsedCond = coupon.condition;
                                     try {
                                         if (coupon.condition && coupon.condition.startsWith('{')) {
