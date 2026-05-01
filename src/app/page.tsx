@@ -8,7 +8,14 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const { data: categories } = await supabase.from('categories').select('*');
   const now = new Date().toISOString();
-  const { data: topCoupons } = await supabase.from('coupons')
+  const { data: newCoupons } = await supabase.from('coupons')
+    .select('*, stores(name, id)')
+    .eq('status', 'published')
+    .lte('published_at', now)
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(5);
+
+  const { data: popularCoupons } = await supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
@@ -96,16 +103,31 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Popular Stores Section */}
-      <section id="popular-stores" className="mb-16 scroll-mt-24">
+      {/* New Coupons Section */}
+      <section id="new-coupons" className="mb-16 scroll-mt-24">
         <div className="flex justify-between items-end mb-6">
-          <h2 className="text-2xl font-bold">할인율 TOP & 최저가 쿠폰 및 제품 리스트 🔥</h2>
+          <h2 className="text-2xl font-bold">새롭게 등록된 쿠폰 List 🆕</h2>
           <Link href="/store" className="text-sm font-semibold text-blue-600 hover:underline">
             전체 보기
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {topCoupons?.map((coupon: any) => (
+          {newCoupons?.map((coupon: any) => (
+            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
+          ))}
+        </div>
+      </section>
+
+      {/* Popular Coupons Section */}
+      <section id="popular-coupons" className="mb-16 scroll-mt-24">
+        <div className="flex justify-between items-end mb-6">
+          <h2 className="text-2xl font-bold">지금 많이 클릭된 할인쿠폰 List 🔥</h2>
+          <Link href="/store" className="text-sm font-semibold text-blue-600 hover:underline">
+            전체 보기
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {popularCoupons?.map((coupon: any) => (
             <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
           ))}
         </div>
