@@ -14,6 +14,15 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
         );
     }
 
+    if (src.trim().startsWith('<')) {
+        return (
+            <div 
+                className={`flex items-center justify-center w-full h-full [&>a]:flex [&>a]:items-center [&>a]:justify-center [&>a]:w-full [&>a]:h-full [&_img]:max-w-full [&_img]:max-h-full [&_img]:object-contain ${className || ''}`}
+                dangerouslySetInnerHTML={{ __html: src }} 
+            />
+        );
+    }
+
     return (
         <img 
             src={src} 

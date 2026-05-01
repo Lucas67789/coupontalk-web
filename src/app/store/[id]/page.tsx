@@ -22,6 +22,12 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const title = `[${currentYear}년 ${currentMonth}월] ${store.name} 할인코드 및 카드 프로모션 총정리 | 쿠폰톡`;
     const description = `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다. 검증된 최신 할인쿠폰과 카드 혜택을 확인하세요.`;
 
+    let ogImageUrl = store.logo;
+    if (ogImageUrl && ogImageUrl.trim().startsWith('<')) {
+        const match = ogImageUrl.match(/<img[^>]+src=["']([^"']+)["']/i);
+        ogImageUrl = match ? match[1] : undefined;
+    }
+
     return {
         title,
         description,
@@ -35,7 +41,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: store.logo ? [{ url: store.logo, alt: store.name }] : undefined,
+            images: ogImageUrl ? [{ url: ogImageUrl, alt: store.name }] : undefined,
         }
     };
 }
