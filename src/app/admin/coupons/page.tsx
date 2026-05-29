@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 20;
@@ -421,10 +421,14 @@ export default function AdminCoupons() {
                                                         <td className="p-4 text-right">
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button onClick={() => { 
+                                                                    setCurrentCoupon({ ...coupon, id: '', title: `${coupon.title} (복사본)`, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified, seo_title: coupon.seo_title || '', seo_description: coupon.seo_description || '', content_body: coupon.content_body || '' }); 
+                                                                    setIsEditing(true); 
+                                                                }} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="복사"><Copy size={16} /></button>
+                                                                <button onClick={() => { 
                                                                     setCurrentCoupon({ ...coupon, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified, seo_title: coupon.seo_title || '', seo_description: coupon.seo_description || '', content_body: coupon.content_body || '' }); 
                                                                     setIsEditing(true); 
-                                                                }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 size={16} /></button>
-                                                                <button onClick={() => handleDelete(coupon.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                                                                }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="수정"><Edit2 size={16} /></button>
+                                                                <button onClick={() => handleDelete(coupon.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="삭제"><Trash2 size={16} /></button>
                                                             </div>
                                                         </td>
                                                     </tr>
