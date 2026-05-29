@@ -24,6 +24,7 @@ export const metadata: Metadata = {
     locale: "ko_KR",
   },
   verification: {
+    google: "g9QTl1yQYsD86LfuafRj6fwnuNskyYoJbx2AJJx3-2s",
     other: {
       "naver-site-verification": ["7738e368040a4ed04066be27f8ce35cf568336f0"],
     },
