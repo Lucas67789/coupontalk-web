@@ -28,6 +28,23 @@ export const metadata: Metadata = {
       "naver-site-verification": ["7738e368040a4ed04066be27f8ce35cf568336f0"],
     },
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
+    description: "가장 최신의 검증된 할인코드 모음. 쿠팡, 알리 등 인기 쇼핑몰 프로모션 코드를 매일 업데이트합니다.",
+    images: ["https://coupontalk.kr/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
