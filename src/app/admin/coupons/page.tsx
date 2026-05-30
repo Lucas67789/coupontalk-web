@@ -421,7 +421,7 @@ export default function AdminCoupons() {
                                                         <td className="p-4 text-right">
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button onClick={() => { 
-                                                                    setCurrentCoupon({ ...coupon, id: '', title: `${coupon.title} (복사본)`, condition: p.cond, affiliateUrl: p.url, is_verified: p.verified, seo_title: coupon.seo_title || '', seo_description: coupon.seo_description || '', content_body: coupon.content_body || '' }); 
+                                                                    setCurrentCoupon({ ...coupon, id: '', title: `${coupon.title} (복사본)`, published_at: '', condition: p.cond, affiliateUrl: p.url, is_verified: p.verified, seo_title: coupon.seo_title || '', seo_description: coupon.seo_description || '', content_body: coupon.content_body || '' }); 
                                                                     setIsEditing(true); 
                                                                 }} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="복사"><Copy size={16} /></button>
                                                                 <button onClick={() => { 
