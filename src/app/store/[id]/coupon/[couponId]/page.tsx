@@ -91,14 +91,39 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const currentMonth = new Date().getMonth() + 1;
 
     // Fetch related coupons (same store, different coupon)
-    const { data: relatedCoupons } = await supabase
+    const { data: allRelatedCoupons } = await supabase
         .from('coupons')
-        .select('id, title, discount, code, store_id')
+        .select('id, title, discount, code, store_id, expiry, published_at')
         .eq('store_id', storeId)
         .eq('status', 'published')
         .lte('published_at', now)
         .neq('id', couponId)
-        .limit(4);
+        .order('published_at', { ascending: false });
+
+    const isCouponExpired = (expiry: string) => {
+        if (!expiry) return false;
+        const match = expiry.match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+        if (match) {
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1;
+            const day = parseInt(match[3], 10);
+            const expiryDate = new Date(year, month, day, 23, 59, 59);
+            return expiryDate.getTime() < new Date().getTime();
+        }
+        return false;
+    };
+
+    const validRelatedCoupons: any[] = [];
+    const expiredRelatedCoupons: any[] = [];
+    if (allRelatedCoupons) {
+        allRelatedCoupons.forEach((c: any) => {
+            if (isCouponExpired(c.expiry)) {
+                if (expiredRelatedCoupons.length < 8) expiredRelatedCoupons.push(c);
+            } else {
+                if (validRelatedCoupons.length < 8) validRelatedCoupons.push(c);
+            }
+        });
+    }
 
     // H1 title
     const h1Title = coupon.seo_title || `${storeName} ${coupon.title}`;
@@ -244,13 +269,13 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             </div>
 
             {/* Related Coupons (Moved to replace TOC) */}
-            {relatedCoupons && relatedCoupons.length > 0 && (
+            {validRelatedCoupons.length > 0 && (
                 <div className="px-6 md:px-10 pb-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
                         {storeName}의 다른 할인코드
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {relatedCoupons.map((rc: any) => (
+                        {validRelatedCoupons.map((rc: any) => (
                             <Link
                                 key={rc.id}
                                 href={`/store/${rc.store_id}/coupon/${rc.id}`}
@@ -316,6 +341,35 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         <div className="flex flex-col gap-2">
                             <MarkdownRenderer content={store.guide_content} storeName={storeName} />
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Expired Related Coupons */}
+            {expiredRelatedCoupons.length > 0 && (
+                <div className="px-6 md:px-10 pb-10">
+                    <h2 className="text-xl font-bold text-gray-400 mb-4 flex items-center gap-2">
+                        <Clock size={20} /> {storeName}의 이미 사용 만료된 쿠폰
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50 grayscale">
+                        {expiredRelatedCoupons.map((rc: any) => (
+                            <div
+                                key={rc.id}
+                                className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4"
+                            >
+                                <div className="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+                                    만료됨
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-500 text-sm truncate line-through">
+                                        {rc.title}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        사용기간 종료
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
