@@ -88,19 +88,21 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
 
             <div className="flex-1 flex flex-col">
                 <div>
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className={`${theme.badgeBg} ${theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider`}>
+                    <div className="flex items-center gap-2 mb-3 w-full min-w-0">
+                        <span className={`${theme.badgeBg} ${theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider truncate flex-1 min-w-0`}>
                             {coupon.discount}
                         </span>
-                        <div className="flex items-center gap-1.5 ml-1">
+                        <div className="flex items-center gap-1.5 ml-1 flex-shrink-0">
                             {storeName && (
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${theme.accent}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm flex-shrink-0 ${theme.accent}`}>
                                     {storeName.charAt(0)}
                                 </div>
                             )}
-                            <span className="text-[13px] text-gray-600 font-semibold tracking-tight">
-                                {storeName}
-                            </span>
+                            {storeName && (
+                                <span className="text-[13px] text-gray-600 font-semibold tracking-tight truncate max-w-[70px]">
+                                    {storeName}
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -111,7 +113,7 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
                     <ul className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
                         <li className="flex items-start gap-2">
                             <CheckCircle2 size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-                            <span>조건: <strong>{parsedConditionText}</strong></span>
+                            <span className="line-clamp-2">조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
@@ -132,7 +134,7 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
 
                 <button
                     onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleCopyAndRedirect(); }}
-                    className={`btn-primary w-full mt-2 justify-center py-3 text-base ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
+                    className={`btn-primary w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
                 >
                     {copied ? (
                         <>복사완료! 이동중...</>

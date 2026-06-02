@@ -115,7 +115,7 @@ export default async function Home() {
             전체 보기
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {newCoupons?.map((coupon: any) => (
             <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
           ))}
@@ -130,7 +130,7 @@ export default async function Home() {
             전체 보기
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {popularCoupons?.map((coupon: any) => (
             <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
           ))}
