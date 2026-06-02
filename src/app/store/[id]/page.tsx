@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import CouponCard from '@/components/CouponCard';
 import CouponListRow from '@/components/CouponListRow';
+import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle } from 'lucide-react';
@@ -56,24 +57,30 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         .from('stores')
         .select(`
             *,
-            coupons(*)
+            coupons(*),
+            products(*)
         `)
         .eq('id', storeId)
-        .eq('coupons.status', 'published')
-        .lte('coupons.published_at', now)
         .single();
 
     if (!store) {
         notFound();
     }
 
-    if (store && store.coupons) {
-        store.coupons.sort((a: any, b: any) => {
-            const dateA = new Date(a.published_at || a.created_at || 0).getTime();
-            const dateB = new Date(b.published_at || b.created_at || 0).getTime();
-            return dateB - dateA;
-        });
-    }
+    const publishedCoupons = store.coupons?.filter((c: any) => c.status === 'published' && (!c.published_at || new Date(c.published_at) <= new Date(now))) || [];
+    const publishedProducts = store.products?.filter((p: any) => p.status === 'published' && (!p.published_at || new Date(p.published_at) <= new Date(now))) || [];
+
+    publishedCoupons.sort((a: any, b: any) => {
+        const dateA = new Date(a.published_at || a.created_at || 0).getTime();
+        const dateB = new Date(b.published_at || b.created_at || 0).getTime();
+        return dateB - dateA;
+    });
+
+    publishedProducts.sort((a: any, b: any) => {
+        const dateA = new Date(a.published_at || a.created_at || 0).getTime();
+        const dateB = new Date(b.published_at || b.created_at || 0).getTime();
+        return dateB - dateA;
+    });
 
     const isCouponExpired = (expiry: string, title?: string) => {
         if (!expiry && !title) return false;
@@ -112,7 +119,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         return false;
     };
 
-    const tableCoupons = store?.coupons?.filter((c: any) => !isCouponExpired(c.expiry, c.title)) || [];
+    const tableCoupons = publishedCoupons.filter((c: any) => !isCouponExpired(c.expiry, c.title));
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
@@ -293,23 +300,42 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             )}
 
             {/* Coupons List */}
-            <div className="p-6 md:p-10 bg-gray-50/50">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    💰 사용 가능한 할인코드 <span className="text-blue-600">({store.coupons?.length || 0})</span>
-                </h2>
+            {/* Coupons List */}
+            {publishedCoupons.length > 0 && (
+                <div className="p-6 md:p-10 bg-gray-50/50">
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        💰 사용 가능한 할인코드 <span className="text-blue-600">({publishedCoupons.length})</span>
+                    </h2>
 
-                {store.coupons?.length > 0 ? (
                     <div className="flex flex-col gap-1 md:gap-2">
-                        {store.coupons?.map((coupon: any) => (
+                        {publishedCoupons.map((coupon: any) => (
                             <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} />
                         ))}
                     </div>
-                ) : (
-                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
-                        <p className="text-gray-500">현재 사용 가능한 할인코드가 없습니다.</p>
+                </div>
+            )}
+
+            {/* Products List */}
+            {publishedProducts.length > 0 && (
+                <div className="p-6 md:p-10 bg-white">
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                        {publishedProducts.map((product: any) => (
+                            <ProductCard key={product.id} product={product} storeName={store.name} />
+                        ))}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {publishedCoupons.length === 0 && publishedProducts.length === 0 && (
+                <div className="p-6 md:p-10 bg-gray-50/50">
+                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+                        <p className="text-gray-500">현재 등록된 할인코드 및 상품이 없습니다.</p>
+                    </div>
+                </div>
+            )}
 
             {/* Guide Content / Hub Articles */}
             {store.guide_content && (
