@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, Home, Key, Store, Ticket } from 'lucide-react';
+import { LogOut, Home, Key, Store, Ticket, Package } from 'lucide-react';
 
 export default function AdminSidebar() {
     const router = useRouter();
@@ -18,6 +18,7 @@ export default function AdminSidebar() {
         { name: '대시보드 홈', href: '/admin', icon: Home },
         { name: '스토어 관리', href: '/admin/stores', icon: Store },
         { name: '쿠폰 관리', href: '/admin/coupons', icon: Ticket },
+        { name: '상품 관리', href: '/admin/products', icon: Package },
     ];
 
     return (
