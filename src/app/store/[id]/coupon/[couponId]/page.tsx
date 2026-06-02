@@ -269,7 +269,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 {/* Hero Image Extracted from Markdown */}
                 {mainImage && (
                     <div className="mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm relative w-full">
-                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto object-cover max-h-[450px]" />
+                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto" />
                     </div>
                 )}
 
