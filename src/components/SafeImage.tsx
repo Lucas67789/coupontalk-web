@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react';
 
 export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
     const [error, setError] = useState(false);
+    const [isZoomed, setIsZoomed] = useState(false);
+
+    useEffect(() => {
+        if (isZoomed) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isZoomed]);
 
     if (error || !src) {
         const initialStr = alt ? alt.substring(0, 2) : '?';
@@ -22,19 +34,6 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
             />
         );
     }
-
-    const [isZoomed, setIsZoomed] = useState(false);
-
-    useEffect(() => {
-        if (isZoomed) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isZoomed]);
 
     return (
         <>
