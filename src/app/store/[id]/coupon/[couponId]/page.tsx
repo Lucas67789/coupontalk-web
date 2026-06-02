@@ -152,6 +152,21 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     // H1 title
     const h1Title = coupon.seo_title || `${storeName} ${coupon.title}`;
 
+    // Extract Hero Image from markdown
+    let mainImage = null;
+    let mainImageAlt = h1Title;
+    let remainingContent = coupon.content_body || '';
+    
+    // Look for the first image in markdown (e.g. ![alt text](url))
+    const imgRegex = /!\[(.*?)\]\((.*?)\)/;
+    const imgMatch = remainingContent.match(imgRegex);
+    if (imgMatch) {
+        if (imgMatch[1]) mainImageAlt = imgMatch[1];
+        mainImage = imgMatch[2];
+        // Remove only the first matched image from the content
+        remainingContent = remainingContent.replace(imgMatch[0], '').trim();
+    }
+
     // JSON-LD structured data
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -251,6 +266,13 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     {h1Title}
                 </h1>
 
+                {/* Hero Image Extracted from Markdown */}
+                {mainImage && (
+                    <div className="mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm relative w-full">
+                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto object-cover max-h-[450px]" />
+                    </div>
+                )}
+
                 {/* Coupon CTA Section */}
                 <div className="mb-10">
                     <CouponDetailClient
@@ -326,10 +348,10 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             )}
 
             {/* Markdown Content Section */}
-            {coupon.content_body && (
+            {remainingContent && (
                 <div className="px-6 md:px-10 pb-8">
                     <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
-                        <MarkdownRenderer content={coupon.content_body} storeName={storeName} />
+                        <MarkdownRenderer content={remainingContent} storeName={storeName} />
                     </div>
                 </div>
             )}
