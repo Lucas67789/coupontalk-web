@@ -5,7 +5,6 @@ import { ArrowLeft, Star, Tag, Clock, CheckCircle2, ChevronRight } from 'lucide-
 import SafeImage from '@/components/SafeImage';
 import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -244,10 +243,40 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
             </div>
 
+            {/* Related Coupons (Moved to replace TOC) */}
+            {relatedCoupons && relatedCoupons.length > 0 && (
+                <div className="px-6 md:px-10 pb-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                        {storeName}의 다른 할인코드
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {relatedCoupons.map((rc: any) => (
+                            <Link
+                                key={rc.id}
+                                href={`/store/${rc.store_id}/coupon/${rc.id}`}
+                                className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-blue-200 transition-all group"
+                            >
+                                <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+                                    {rc.discount}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">
+                                        {rc.title}
+                                    </p>
+                                    <p className="text-xs text-gray-400 font-mono mt-1">
+                                        {rc.code === 'NO_CODE_REQUIRED' ? '코드 필요없음' : rc.code}
+                                    </p>
+                                </div>
+                                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Markdown Content Section */}
             {coupon.content_body && (
                 <div className="px-6 md:px-10 pb-8">
-                    <TableOfContents content={coupon.content_body} />
                     <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
                         <MarkdownRenderer content={coupon.content_body} storeName={storeName} />
                     </div>
@@ -291,36 +320,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
             )}
 
-            {/* Related Coupons */}
-            {relatedCoupons && relatedCoupons.length > 0 && (
-                <div className="px-6 md:px-10 pb-10 border-t pt-8" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                        {storeName}의 다른 할인코드
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {relatedCoupons.map((rc: any) => (
-                            <Link
-                                key={rc.id}
-                                href={`/store/${rc.store_id}/coupon/${rc.id}`}
-                                className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-blue-200 transition-all group"
-                            >
-                                <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
-                                    {rc.discount}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">
-                                        {rc.title}
-                                    </p>
-                                    <p className="text-xs text-gray-400 font-mono mt-1">
-                                        {rc.code === 'NO_CODE_REQUIRED' ? '코드 필요없음' : rc.code}
-                                    </p>
-                                </div>
-                                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/* Related Coupons originally here, now moved up */}
 
             {/* Back to Store */}
             <div className="p-6 border-t text-center" style={{ borderColor: 'var(--border-color)' }}>
