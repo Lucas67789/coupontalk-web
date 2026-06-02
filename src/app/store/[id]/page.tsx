@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import CouponCard from '@/components/CouponCard';
+import CouponListRow from '@/components/CouponListRow';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle } from 'lucide-react';
@@ -252,9 +253,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </h2>
 
                 {store.coupons?.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex flex-col gap-1 md:gap-2">
                         {store.coupons?.map((coupon: any) => (
-                            <CouponCard key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} />
+                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} />
                         ))}
                     </div>
                 ) : (
