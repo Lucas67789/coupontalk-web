@@ -274,25 +274,27 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
                         {storeName}의 다른 할인코드
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-3">
                         {validRelatedCoupons.map((rc: any) => (
                             <Link
                                 key={rc.id}
                                 href={`/store/${rc.store_id}/coupon/${rc.id}`}
-                                className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-blue-200 transition-all group"
+                                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white border border-gray-100 rounded-xl p-4 md:p-5 hover:shadow-md hover:border-blue-300 transition-all group"
                             >
-                                <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+                                <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold flex-shrink-0 w-full sm:w-auto text-center sm:text-left border border-blue-100/50">
                                     {rc.discount}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">
+                                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <p className="font-semibold text-gray-900 text-base group-hover:text-blue-600 transition-colors line-clamp-2 sm:line-clamp-1">
                                         {rc.title}
                                     </p>
-                                    <p className="text-xs text-gray-400 font-mono mt-1">
-                                        {rc.code === 'NO_CODE_REQUIRED' ? '코드 필요없음' : rc.code}
-                                    </p>
+                                    <div className="flex items-center gap-2 justify-between sm:justify-end">
+                                        <p className="text-sm text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                                            {rc.code === 'NO_CODE_REQUIRED' ? '코드 불필요' : rc.code}
+                                        </p>
+                                        <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                                    </div>
                                 </div>
-                                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
                             </Link>
                         ))}
                     </div>
@@ -351,20 +353,20 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     <h2 className="text-xl font-bold text-gray-400 mb-4 flex items-center gap-2">
                         <Clock size={20} /> {storeName}의 이미 사용 만료된 쿠폰
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50 grayscale">
+                    <div className="flex flex-col gap-3 opacity-50 grayscale">
                         {expiredRelatedCoupons.map((rc: any) => (
                             <div
                                 key={rc.id}
-                                className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4"
+                                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4 md:p-5"
                             >
-                                <div className="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+                                <div className="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-bold flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
                                     만료됨
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-500 text-sm truncate line-through">
+                                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <p className="font-semibold text-gray-500 text-base line-through line-clamp-2 sm:line-clamp-1">
                                         {rc.title}
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-1">
+                                    <p className="text-sm text-gray-400 bg-gray-100 px-2 py-1 rounded border border-gray-200">
                                         사용기간 종료
                                     </p>
                                 </div>
