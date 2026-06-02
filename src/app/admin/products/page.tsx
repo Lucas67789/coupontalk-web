@@ -108,6 +108,7 @@ export default function AdminProducts() {
             original_price: currentProduct.original_price || null,
             discount_badge: currentProduct.discount_badge || null,
             affiliate_url: currentProduct.affiliate_url,
+            description: currentProduct.description || null,
             status: currentProduct.status || 'draft',
             published_at: pubDate || new Date().toISOString(),
         };
@@ -313,6 +314,11 @@ export default function AdminProducts() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">어필리에이트 제휴 링크 URL</label>
                                 <input required type="url" value={currentProduct?.affiliate_url || ''} onChange={e => setCurrentProduct({ ...currentProduct, affiliate_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">상품 리뷰 / 간단 설명 <span className="text-gray-400">(선택)</span></label>
+                                <textarea placeholder="예: 한달 사용해보니 정말 가볍고 좋아요. 직접 써보고 강력 추천합니다!" value={currentProduct?.description || ''} onChange={e => setCurrentProduct({ ...currentProduct, description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 text-sm leading-relaxed" rows={3} />
                             </div>
 
                             <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
