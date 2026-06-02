@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import * as LucideIcons from 'lucide-react';
 import CouponCard from '@/components/CouponCard';
+import StickySidebar from '@/components/StickySidebar';
 import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -23,9 +24,12 @@ export default async function Home() {
     .limit(5);
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto px-4 lg:px-0">
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Main Content Area */}
+        <div className="flex-1 w-full min-w-0">
 
-      {/* Hero Section */}
+          {/* Hero Section */}
       <section className="mb-16 mt-8 animate-fade-in flex flex-col md:flex-row gap-8 items-center glass rounded-3xl p-8 md:p-12 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2"></div>
@@ -153,8 +157,16 @@ export default async function Home() {
             <p className="text-blue-100 text-sm mt-2">모든 쿠폰 코드를 회원가입 없이 제공합니다.</p>
           </div>
         </div>
-      </section>
+        </section>
 
+        </div> {/* End Main Content Area */}
+
+        {/* Sidebar Area */}
+        <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+          <StickySidebar />
+        </div>
+
+      </div>
     </div>
   );
 }
