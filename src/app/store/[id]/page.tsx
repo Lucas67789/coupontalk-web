@@ -157,9 +157,31 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         }))
     } : null;
 
+    const itemListLd = tableCoupons.length > 0 ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: tableCoupons.map((coupon: any, index: number) => {
+            let imageUrl = store?.logo || 'https://coupontalk.kr/og-image.png';
+            if (coupon.content_body) {
+                const imgMatch = coupon.content_body.match(/!\[.*?\]\((.*?)\)/);
+                if (imgMatch && imgMatch[1]) {
+                    imageUrl = imgMatch[1];
+                }
+            }
+            return {
+                '@type': 'ListItem',
+                position: index + 1,
+                name: coupon.title,
+                url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`,
+                image: imageUrl,
+                description: coupon.discount || coupon.seo_description || '할인코드 및 프로모션'
+            };
+        })
+    } : null;
+
     const schemaGraph = {
         '@context': 'https://schema.org',
-        '@graph': [jsonLd, breadcrumbLd, ...(faqLd ? [faqLd] : [])]
+        '@graph': [jsonLd, breadcrumbLd, ...(faqLd ? [faqLd] : []), ...(itemListLd ? [itemListLd] : [])]
     };
 
     return (
