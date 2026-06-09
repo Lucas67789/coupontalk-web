@@ -7,7 +7,7 @@ import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 // Parse packed JSON condition
 function parseCondition(coupon: any) {
@@ -73,13 +73,31 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
     // Fetch coupon with store info (and ensure it is public)
     const now = new Date().toISOString();
-    const { data: coupon } = await supabase
+    const couponPromise = supabase
         .from('coupons')
         .select('*, stores(name, description, logo, rating, website_url, faqs, guide_content)')
         .eq('id', couponId)
         .eq('status', 'published')
         .lte('published_at', now)
         .single();
+
+    // Fetch related coupons (same store, different coupon)
+    const relatedCouponsPromise = supabase
+        .from('coupons')
+        .select('id, title, discount, code, store_id, expiry, published_at')
+        .eq('store_id', storeId)
+        .eq('status', 'published')
+        .lte('published_at', now)
+        .neq('id', couponId)
+        .order('published_at', { ascending: false });
+
+    const [
+        { data: coupon },
+        { data: allRelatedCoupons }
+    ] = await Promise.all([
+        couponPromise,
+        relatedCouponsPromise
+    ]);
 
     if (!coupon || coupon.store_id !== storeId) {
         notFound();
@@ -89,16 +107,6 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const store = coupon.stores;
     const storeName = store?.name || '';
     const currentMonth = new Date().getMonth() + 1;
-
-    // Fetch related coupons (same store, different coupon)
-    const { data: allRelatedCoupons } = await supabase
-        .from('coupons')
-        .select('id, title, discount, code, store_id, expiry, published_at')
-        .eq('store_id', storeId)
-        .eq('status', 'published')
-        .lte('published_at', now)
-        .neq('id', couponId)
-        .order('published_at', { ascending: false });
 
     const isCouponExpired = (expiry: string, title?: string) => {
         if (!expiry && !title) return false;

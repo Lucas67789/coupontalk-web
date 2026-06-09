@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
     const [error, setError] = useState(false);
@@ -37,15 +38,18 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
 
     return (
         <>
-            <img 
-                src={src} 
-                alt={alt} 
-                className={`max-w-full max-h-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity ${className || ''}`}
-                onError={() => setError(true)} 
-                onClick={() => setIsZoomed(true)}
-                loading={lazyLoad ? "lazy" : undefined}
-                decoding={lazyLoad ? "async" : undefined}
-            />
+            <div className={`relative w-full h-full flex items-center justify-center ${className || ''}`}>
+                <Image 
+                    src={src} 
+                    alt={alt} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
+                    onError={() => setError(true)} 
+                    onClick={() => setIsZoomed(true)}
+                    priority={!lazyLoad}
+                />
+            </div>
             {isZoomed && (
                 <div 
                     className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md cursor-zoom-out"

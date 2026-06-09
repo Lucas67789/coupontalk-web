@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
@@ -32,22 +32,30 @@ export async function generateStaticParams() {
 export default async function CategoryPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const categoryId = decodeURIComponent(params.id);
-    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
-
-    if (!category) {
-        notFound();
-    }
-
     const now = new Date().toISOString();
-    const { data: categoryStores } = await supabase
+
+    const categoryPromise = supabase.from('categories').select('*').eq('id', categoryId).single();
+    const categoryStoresPromise = supabase
         .from('stores')
         .select(`
             *,
             coupons(*)
         `)
-        .contains('tags', [category.id])
+        .contains('tags', [categoryId])
         .eq('coupons.status', 'published')
         .lte('coupons.published_at', now);
+
+    const [
+        { data: category },
+        { data: categoryStores }
+    ] = await Promise.all([
+        categoryPromise,
+        categoryStoresPromise
+    ]);
+
+    if (!category) {
+        notFound();
+    }
 
     const storesList = categoryStores || [];
     const IconComponent = (LucideIcons as any)[category.icon];

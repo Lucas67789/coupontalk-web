@@ -4,24 +4,36 @@ import CouponCard from '@/components/CouponCard';
 import StickySidebar from '@/components/StickySidebar';
 import { supabase } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function Home() {
-  const { data: categories } = await supabase.from('categories').select('*');
   const now = new Date().toISOString();
-  const { data: newCoupons } = await supabase.from('coupons')
+
+  const categoriesPromise = supabase.from('categories').select('*');
+  
+  const newCouponsPromise = supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(5);
 
-  const { data: popularCoupons } = await supabase.from('coupons')
+  const popularCouponsPromise = supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
     .order('click_count', { ascending: false, nullsFirst: false })
     .limit(5);
+
+  const [
+    { data: categories },
+    { data: newCoupons },
+    { data: popularCoupons }
+  ] = await Promise.all([
+    categoriesPromise,
+    newCouponsPromise,
+    popularCouponsPromise
+  ]);
 
   return (
     <div className="container mx-auto px-4 lg:px-0">
