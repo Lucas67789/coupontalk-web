@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -154,14 +155,13 @@ export default function AdminStores() {
                             </div>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">할인코드 적용 가이드 (마크다운 지원, 이미지 가능)</label>
-                                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
-                                        {uploading ? '업로드 중...' : '📸 이미지 첨부'}
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-700">할인코드 적용 가이드 (에디터 지원)</label>
                                 </div>
-                                <textarea value={currentStore?.guide_content || ''} onChange={e => setCurrentStore({ ...currentStore, guide_content: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" rows={6} placeholder="💡 가이드 내용이나 이미지 마크다운(![설명](이미지주소))을 입력하세요..."></textarea>
+                                <RichTextEditor 
+                                    value={currentStore?.guide_content || ''} 
+                                    onChange={(val) => setCurrentStore({ ...currentStore, guide_content: val })} 
+                                    placeholder="가이드 내용 입력..."
+                                />
                             </div>
                             <div className="flex justify-end gap-3 mt-4">
                                 <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">취소</button>

@@ -293,14 +293,14 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 {/* Automated SEO Content Block (Naver Keyword Targeting) */}
                 <div className="prose prose-blue max-w-none mb-8">
                     <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                        <strong>{currentMonth}월 최신 검증된 {storeName} 할인코드</strong>를 찾고 계신가요? 
+                        <strong>{currentMonth}월 최신 검증된 {storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요? 
                         본 페이지에서는 <strong className="text-blue-700">{coupon.title}</strong> 프로모션 혜택을 통해 {storeName}에서 결제 시 
                         <span className="bg-blue-50 px-1 mx-1 font-bold text-blue-800">{coupon.discount}</span> 할인을 적용받을 수 있는 공식적이고 안전한 방법을 자세히 안내해 드립니다.
                     </p>
                     <p className="text-gray-600 leading-relaxed mb-4">
                         해당 프로모션은 <strong>{condText ? condText : '스토어 전 가입자 대상'}</strong>으로 진행되며, 
-                        유효기간은 <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다. 
-                        수많은 정보 속에서 헤매지 마시고, 쿠폰톡이 매일 직접 테스트하여 신뢰성을 담보하는 본 추가 할인코드를 사용하여 가장 저렴하게 쇼핑을 즐겨보세요!
+                        {coupon.code === 'NO_CODE_REQUIRED' ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다. 
+                        수많은 정보 속에서 헤매지 마시고, 쿠폰톡이 매일 직접 테스트하여 신뢰성을 담보하는 본 추가 {coupon.code === 'NO_CODE_REQUIRED' ? '할인 링크' : '할인코드'}를 사용하여 가장 저렴하게 쇼핑을 즐겨보세요!
                     </p>
                     {coupon.is_verified && (
                         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3 my-6">
@@ -318,7 +318,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             {validRelatedCoupons.length > 0 && (
                 <div className="px-6 md:px-10 pb-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
-                        {storeName}의 다른 할인코드
+                        {storeName}의 다른 {coupon.code === 'NO_CODE_REQUIRED' ? '혜택' : '할인코드'}
                     </h2>
                     <div className="flex flex-col gap-3">
                         {validRelatedCoupons.map((rc: any) => (
@@ -383,7 +383,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 <div className="px-6 md:px-10 pb-10">
                     <div className="bg-blue-50/50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
                         <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900 border-b border-blue-100/50 pb-4">
-                            💡 초보자를 위한 {storeName} 쿠폰코드 사용법
+                            💡 초보자를 위한 {storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택 이용 방법' : '쿠폰코드 사용법'}
                         </h2>
                         <p className="text-blue-800 mb-6 text-sm">할인 혜택을 처음 이용해보시는 분들도 아래 가이드에 따라 천천히 진행하시면 누구나 쉽게 최종 결제 단계에서 {coupon.discount} 할인을 확정받으실 수 있습니다.</p>
                         <div className="flex flex-col gap-2">
@@ -397,7 +397,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             {expiredRelatedCoupons.length > 0 && (
                 <div className="px-6 md:px-10 pb-10">
                     <h2 className="text-xl font-bold text-gray-400 mb-4 flex items-center gap-2">
-                        <Clock size={20} /> {storeName}의 이미 사용 만료된 쿠폰
+                        <Clock size={20} /> {storeName}의 이미 종료된 혜택
                     </h2>
                     <div className="flex flex-col gap-3 opacity-50 grayscale">
                         {expiredRelatedCoupons.map((rc: any) => (
@@ -431,7 +431,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium"
                 >
                     <ArrowLeft size={16} />
-                    {storeName}의 모든 할인코드 보기
+                    {storeName}의 모든 혜택 보기
                 </Link>
             </div>
         </div>

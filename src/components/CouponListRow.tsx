@@ -36,7 +36,7 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo }:
                 showToast(`'${coupon.code}' 복사 완료! 결제창에서 입력하세요.`);
             });
         } else {
-            showToast(`${storeName} 할인 페이지로 이동합니다.`);
+            showToast(`${storeName} 특가 페이지로 이동합니다.`);
         }
         
         setTimeout(() => {
@@ -61,7 +61,7 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo }:
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
                         {coupon.discount}
                     </span>
-                    <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-1 rounded-full">유효기간: {coupon.expiry}</span>
+                    <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-1 rounded-full">{isNoCode ? '진행 기간' : '유효기간'}: {coupon.expiry}</span>
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">
                     {coupon.title}
@@ -85,7 +85,7 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo }:
                     {copied ? (
                         '복사완료!'
                     ) : isNoCode ? (
-                        <>할인 받기 <ExternalLink size={18} /></>
+                        <>특가 보러가기 <ExternalLink size={18} /></>
                     ) : (
                         <>쿠폰 복사하기 <Copy size={18} /></>
                     )}

@@ -59,12 +59,14 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
             {/* Coupon Code Display */}
-            <div className="text-center mb-6">
-                <p className="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wider">프로모션 코드</p>
-                <div className={`border-2 border-dashed py-4 px-6 rounded-xl font-mono text-2xl text-center tracking-wider bg-gray-50 ${isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-blue-300'}`}>
-                    {isNoCode ? '코드 필요없음' : coupon.code}
+            {!isNoCode && (
+                <div className="text-center mb-6">
+                    <p className="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wider">프로모션 코드</p>
+                    <div className="border-2 border-dashed border-blue-300 py-4 px-6 rounded-xl font-mono text-2xl text-center tracking-wider bg-gray-50 text-gray-800">
+                        {coupon.code}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* CTA Button */}
             <button
@@ -74,7 +76,7 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
                 {copied ? (
                     <>복사완료! 이동중...</>
                 ) : isNoCode ? (
-                    <>할인 받기 <ExternalLink size={20} /></>
+                    <>특가 바로가기 <ExternalLink size={20} /></>
                 ) : (
                     <>코드 복사하고 할인 받기 <Copy size={20} /></>
                 )}
@@ -87,11 +89,11 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
                     <p className="text-lg font-bold text-blue-800">{coupon.discount}</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 font-medium mb-1">조건</p>
+                    <p className="text-xs text-gray-500 font-medium mb-1">{isNoCode ? '적용 대상' : '조건'}</p>
                     <p className="text-sm font-semibold text-gray-700">{coupon.condition}</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 font-medium mb-1">유효기간</p>
+                    <p className="text-xs text-gray-500 font-medium mb-1">{isNoCode ? '진행 기간' : '유효기간'}</p>
                     <p className="text-sm font-semibold text-gray-700">{coupon.expiry}</p>
                 </div>
             </div>

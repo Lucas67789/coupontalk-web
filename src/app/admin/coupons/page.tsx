@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -352,14 +353,12 @@ export default function AdminCoupons() {
                             </div>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span> <span className="text-xs text-blue-600 font-bold ml-2">마크다운 지원</span></label>
-                                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
-                                        {uploading ? '업로드 중...' : '📸 이미지 첨부'}
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-700">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span></label>
                                 </div>
-                                <textarea placeholder={`## 이 쿠폰 사용 방법\n1. 할인 링크를 클릭합니다\n2. 원하는 숙소를 검색합니다\n3. 결제 시 프로모션 코드를 입력합니다\n\n(참고: 가이드와 추천 이유는 최대한 길고 자세하게 적을수록 검색 노출에 유리합니다.)`} value={currentCoupon?.content_body || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, content_body: e.target.value })} className="w-full p-3 border rounded-xl bg-white focus:bg-gray-50 font-mono text-sm leading-relaxed" rows={12} />
+                                <RichTextEditor 
+                                    value={currentCoupon?.content_body || ''} 
+                                    onChange={(val) => setCurrentCoupon({ ...currentCoupon, content_body: val })} 
+                                />
                             </div>
 
                             <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
