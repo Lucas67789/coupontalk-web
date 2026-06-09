@@ -7,7 +7,7 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
     if (!content) return null;
 
     // Check if the content appears to be purely HTML (like from ReactQuill)
-    const isHtml = /<[a-z][\s\S]*>/i.test(content);
+    const isHtml = /^\s*<(p|h[1-6]|ul|ol|blockquote|div)[\s>]/i.test(content);
 
     if (isHtml) {
         // If it contains HTML, render using dangerouslySetInnerHTML but with Tailwind Typography styles
