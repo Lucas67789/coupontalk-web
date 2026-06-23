@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { clearAllCache } from '@/app/actions/cacheActions';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
@@ -140,12 +141,14 @@ export default function AdminCoupons() {
 
         setIsEditing(false);
         setCurrentCoupon(null);
+        await clearAllCache();
         fetchCoupons();
     };
 
     const handleDelete = async (id: string) => {
         if (confirm("정말로 이 쿠폰을 삭제하시겠습니까?")) {
             await supabase.from('coupons').delete().eq('id', id);
+            await clearAllCache();
             fetchCoupons();
         }
     };

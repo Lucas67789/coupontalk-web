@@ -7,7 +7,7 @@ import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 2592000;
 
 // Parse packed JSON condition
 function parseCondition(coupon: any) {

@@ -4,7 +4,7 @@ import CouponCard from '@/components/CouponCard';
 import StickySidebar from '@/components/StickySidebar';
 import { supabase } from '@/lib/supabase';
 
-export const revalidate = 60;
+export const revalidate = 2592000;
 
 export default async function Home() {
   const now = new Date().toISOString();

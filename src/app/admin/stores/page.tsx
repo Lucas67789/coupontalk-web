@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { clearAllCache } from '@/app/actions/cacheActions';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
@@ -67,12 +68,14 @@ export default function AdminStores() {
 
         setIsEditing(false);
         setCurrentStore(null);
+        await clearAllCache();
         fetchStores();
     };
 
     const handleDelete = async (id: string) => {
         if (confirm("정말로 이 스토어를 삭제하시겠습니까? 관련 쿠폰도 영향을 받을 수 있습니다.")) {
             await supabase.from('stores').delete().eq('id', id);
+            await clearAllCache();
             fetchStores();
         }
     };
