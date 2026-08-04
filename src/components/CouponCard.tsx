@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
+import React, { useState, useMemo } from 'react';
 import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
-import React, { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -77,14 +77,14 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
             navigator.clipboard.writeText(coupon.code)
                 .then(() => {
                     setCopied(true);
-                    showToast(`'${coupon.code}' 蹂듭궗 ?꾨즺! 寃곗젣李쎌뿉???낅젰?섏꽭??`);
+                    showToast(`'${coupon.code}' 복사 완료! 결제창에서 입력하세요.`);
                 })
                 .catch(err => {
-                    console.error("蹂듭궗?ㅽ뙣", err);
-                    showToast("肄붾뱶 蹂듭궗???ㅽ뙣?덉뒿?덈떎. ?섎룞?쇰줈 蹂듭궗?댁＜?몄슂.");
+                    console.error("복사실패", err);
+                    showToast("코드 복사에 실패했습니다. 수동으로 복사해주세요.");
                 });
         } else {
-            showToast(`${storeName} ?좎씤 ?섏씠吏濡??대룞?⑸땲??`);
+            showToast(`${storeName} 할인 페이지로 이동합니다.`);
         }
 
         // 2. Open Affiliate link in new tab after slightly delay
@@ -130,11 +130,11 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
                     <ul className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
                         <li className="flex items-start gap-2">
                             <CheckCircle2 size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="line-clamp-2">議곌굔: <strong>{parsedConditionText}</strong></span>
+                            <span className="line-clamp-2">조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
-                            <span>?좏슚湲곌컙: {formattedExpiry}</span>
+                            <span>유효기간: {formattedExpiry}</span>
                         </li>
                     </ul>
                 </div>
@@ -143,9 +143,9 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
             <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
-                    <p className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">?꾨줈紐⑥뀡 肄붾뱶</p>
+                    <p className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">프로모션 코드</p>
                     <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono text-lg text-center tracking-wider bg-gray-50 w-full ${isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
-                        {isNoCode ? '肄붾뱶 ?꾩슂?놁쓬' : coupon.code}
+                        {isNoCode ? '코드 필요없음' : coupon.code}
                     </div>
                 </div>
 
@@ -154,11 +154,11 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
                     className={`btn-primary w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
                 >
                     {copied ? (
-                        <>蹂듭궗?꾨즺! ?대룞以?..</>
+                        <>복사완료! 이동중...</>
                     ) : isNoCode ? (
-                        <>?좎씤 諛쏄린 <ExternalLink size={18} /></>
+                        <>할인 받기 <ExternalLink size={18} /></>
                     ) : (
-                        <>肄붾뱶 蹂듭궗?섍린 <Copy size={18} /></>
+                        <>코드 복사하기 <Copy size={18} /></>
                     )}
                 </button>
             </div>
