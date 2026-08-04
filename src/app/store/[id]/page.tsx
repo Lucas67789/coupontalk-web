@@ -321,7 +321,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                         🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
                         {publishedProducts.map((product: any) => (
                             <ProductCard key={product.id} product={product} storeName={store.name} />
                         ))}
@@ -369,6 +369,20 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             )}
 
+
+            {/* Sticky Bottom CTA */}
+            {store.website_url && (
+                <div className="fixed bottom-0 left-0 w-full z-50 p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 flex justify-center shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+                    <a 
+                        href={store.website_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="w-full max-w-4xl py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg text-center transition-colors flex items-center justify-center gap-2 shadow-lg hover:-translate-y-1"
+                    >
+                        {store.name} 특가 보러가기 <ExternalLink size={20} />
+                    </a>
+                </div>
+            )}
         </div>
     );
 }
