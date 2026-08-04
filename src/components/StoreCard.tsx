@@ -36,7 +36,7 @@ export default function StoreCard({ store }: { store: Store | any }) {
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 flex-shrink-0 h-7 rounded text-sm font-medium">
                         <Star size={14} className="fill-yellow-500 text-yellow-500" />
-                        <span>{parseFloat(store.rating.toString()).toFixed(1)}</span>
+                        <span>{parseFloat(store.rating || 5).toFixed(1)}</span>
                     </div>
                 </div>
 

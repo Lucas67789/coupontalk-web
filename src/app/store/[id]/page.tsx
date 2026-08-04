@@ -223,7 +223,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     <div className="flex items-center gap-2 mb-4">
                         <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
                             <Star size={16} className="fill-yellow-500 text-yellow-500" />
-                            <span>{store.rating.toFixed(1)}</span>
+                            <span>{parseFloat(store.rating || 5).toFixed(1)}</span>
                         </div>
                     </div>
                     <p className="text-lg text-gray-600 mb-4">{store.description}</p>
