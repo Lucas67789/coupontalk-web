@@ -48,15 +48,23 @@ export default function ProductCard({ product, storeName }: { product: any, stor
                     </div>
                 )}
                 
-                <div className="flex items-end gap-3 mt-2">
-                    <div className="text-2xl font-black text-gray-900">
-                        {product.price}
+                <div className="flex flex-col mt-2">
+                    <div className="text-sm font-bold text-blue-600 mb-1">
+                        최대 할인 적용 예상가
                     </div>
-                    {product.original_price && (
-                        <div className="text-base text-gray-400 line-through font-medium mb-0.5">
-                            {product.original_price}
+                    <div className="flex items-end gap-3">
+                        <div className="text-2xl font-black text-gray-900">
+                            {product.price}
                         </div>
-                    )}
+                        {product.original_price && (
+                            <div className="text-base text-gray-400 line-through font-medium mb-0.5">
+                                {product.original_price}
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-gray-500 mt-3 leading-relaxed bg-gray-50 p-2 sm:p-3 rounded-lg border border-gray-100">
+                        ※ 최종 구매가는 선택 옵션 및 카드사 혜택 등 추가 할인이 적용될 수 있으며, 정확한 최종 구매 가격은 <strong>{storeName} 공식 사이트</strong>에서 확인 가능합니다.
+                    </p>
                 </div>
             </div>
 
