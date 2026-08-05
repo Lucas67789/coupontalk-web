@@ -27,7 +27,22 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo }:
         e.stopPropagation();
         
         if (coupon.id) {
-            try { await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id }); } catch (err) {}
+            try {
+                let sessionId = localStorage.getItem('ct_session_id');
+                await fetch('/api/track/click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(sessionId ? { 'x-session-id': sessionId } : {})
+                    },
+                    body: JSON.stringify({
+                        type: isNoCode ? 'affiliate_click' : 'code_copy',
+                        coupon_id: coupon.id,
+                        target_url: parsedAffiliateUrl
+                    })
+                });
+                await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id }); 
+            } catch (err) {}
         }
         
         if (coupon.code !== 'NO_CODE_REQUIRED') {

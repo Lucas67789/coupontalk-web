@@ -7,8 +7,23 @@ import { useState } from 'react';
 export default function ProductCard({ product, storeName }: { product: any, storeName: string }) {
     const [clicked, setClicked] = useState(false);
 
-    const handleRedirect = () => {
+    const handleRedirect = async () => {
         setClicked(true);
+        try {
+            let sessionId = localStorage.getItem('ct_session_id');
+            await fetch('/api/track/click', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(sessionId ? { 'x-session-id': sessionId } : {})
+                },
+                body: JSON.stringify({
+                    type: 'product_click',
+                    product_id: product.id,
+                    target_url: product.affiliate_url
+                })
+            });
+        } catch (err) {}
         window.open(product.affiliate_url, '_blank', 'noopener,noreferrer');
         setTimeout(() => setClicked(false), 2000);
     };

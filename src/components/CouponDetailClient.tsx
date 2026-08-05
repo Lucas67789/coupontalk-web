@@ -29,6 +29,22 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
         // Track click
         if (coupon.id) {
             try {
+                // Call new tracking API
+                let sessionId = localStorage.getItem('ct_session_id');
+                await fetch('/api/track/click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(sessionId ? { 'x-session-id': sessionId } : {})
+                    },
+                    body: JSON.stringify({
+                        type: isNoCode ? 'affiliate_click' : 'code_copy',
+                        coupon_id: coupon.id,
+                        target_url: affiliateUrl
+                    })
+                });
+                
+                // Legacy RPC for click_count fallback
                 await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id });
             } catch (err) {
                 console.error('Failed to register click', err);

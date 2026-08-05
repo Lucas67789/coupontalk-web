@@ -15,10 +15,10 @@ export default function AdminSidebar() {
     };
 
     const navItems = [
-        { name: '대시보드 홈', href: '/admin', icon: Home },
-        { name: '스토어 관리', href: '/admin/stores', icon: Store },
-        { name: '쿠폰 관리', href: '/admin/coupons', icon: Ticket },
-        { name: '상품 관리', href: '/admin/products', icon: Package },
+        { name: '종합 대시보드', href: '/admin', icon: Home },
+        { name: '호텔 리스트 관리', href: '/admin/stores', icon: Store },
+        { name: '할인코드 관리', href: '/admin/coupons', icon: Ticket },
+        { name: '명소/상품 관리', href: '/admin/products', icon: Package },
     ];
 
     return (
@@ -46,6 +46,11 @@ export default function AdminSidebar() {
                         </Link>
                     )
                 })}
+                <div className="h-px bg-slate-800 my-2"></div>
+                <Link href="/" target="_blank" className="px-4 py-3 rounded-xl font-medium flex items-center gap-3 transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <Home size={18} />
+                    메인 페이지로
+                </Link>
             </nav>
             <div className="p-4 border-t border-slate-800">
                 <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors">

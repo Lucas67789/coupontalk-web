@@ -67,6 +67,19 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
         // Track the click silently in the background
         if (coupon.id) {
             try {
+                let sessionId = localStorage.getItem('ct_session_id');
+                await fetch('/api/track/click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(sessionId ? { 'x-session-id': sessionId } : {})
+                    },
+                    body: JSON.stringify({
+                        type: isNoCode ? 'affiliate_click' : 'code_copy',
+                        coupon_id: coupon.id,
+                        target_url: parsedAffiliateUrl
+                    })
+                });
                 await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id });
             } catch (err) {
                 console.error('Failed to register click', err);

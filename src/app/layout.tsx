@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
 import CopyAttribution from "@/components/CopyAttribution";
+import PageViewTracker from "@/components/PageViewTracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://coupontalk.kr"),
@@ -57,6 +58,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ToastProvider>
+          <PageViewTracker />
           <CopyAttribution />
           <div className="min-h-screen flex flex-col">
             <Navbar />
