@@ -116,18 +116,34 @@ export default function AdminDashboard() {
             clicks.filter(c => c.coupon_id).forEach(c => {
                 couponClickMap.set(c.coupon_id, (couponClickMap.get(c.coupon_id) || 0) + 1);
             });
-            // Fallback to old click_count if no new analytics data
-            let { data: topC } = await supabase.from('coupons').select('id, title, discount, stores(name), click_count').order('click_count', { ascending: false }).limit(10);
             
-            if (topC) {
-                // merge with analytics clicks
-                const mergedTopC = topC.map(c => ({
-                    id: c.id,
-                    title: c.title,
-                    subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as any)?.name} · ${c.discount}`,
-                    val1: (couponClickMap.get(c.id) || 0) + (c.click_count || 0)
-                })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
-                setTopCoupons(mergedTopC);
+            if (period === 'all') {
+                let { data: topC } = await supabase.from('coupons').select('id, title, discount, stores(name), click_count').order('click_count', { ascending: false }).limit(10);
+                if (topC) {
+                    const mergedTopC = topC.map(c => ({
+                        id: c.id,
+                        title: c.title,
+                        subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as any)?.name} · ${c.discount}`,
+                        val1: (couponClickMap.get(c.id) || 0) + (c.click_count || 0)
+                    })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
+                    setTopCoupons(mergedTopC);
+                }
+            } else {
+                const clickedCouponIds = Array.from(couponClickMap.keys());
+                if (clickedCouponIds.length > 0) {
+                    let { data: activeC } = await supabase.from('coupons').select('id, title, discount, stores(name)').in('id', clickedCouponIds);
+                    if (activeC) {
+                        const mergedTopC = activeC.map(c => ({
+                            id: c.id,
+                            title: c.title,
+                            subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as any)?.name} · ${c.discount}`,
+                            val1: couponClickMap.get(c.id) || 0
+                        })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
+                        setTopCoupons(mergedTopC);
+                    }
+                } else {
+                    setTopCoupons([]);
+                }
             }
 
             // Aggregate store views
@@ -141,15 +157,33 @@ export default function AdminDashboard() {
                 storeClickMap.set(c.store_id, (storeClickMap.get(c.store_id) || 0) + 1);
             });
 
-            const { data: allStores } = await supabase.from('stores').select('id, name');
-            if (allStores) {
-                const topS = allStores.map(s => ({
-                    id: s.id,
-                    title: s.name,
-                    val1: storeViewMap.get(s.id) || 0,
-                    val2: storeClickMap.get(s.id) || 0,
-                })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
-                setTopStores(topS);
+            if (period === 'all') {
+                const { data: allStores } = await supabase.from('stores').select('id, name');
+                if (allStores) {
+                    const topS = allStores.map(s => ({
+                        id: s.id,
+                        title: s.name,
+                        val1: storeViewMap.get(s.id) || 0,
+                        val2: storeClickMap.get(s.id) || 0,
+                    })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
+                    setTopStores(topS);
+                }
+            } else {
+                const activeStoreIds = Array.from(new Set([...storeViewMap.keys(), ...storeClickMap.keys()]));
+                if (activeStoreIds.length > 0) {
+                    const { data: activeStores } = await supabase.from('stores').select('id, name').in('id', activeStoreIds);
+                    if (activeStores) {
+                        const topS = activeStores.map(s => ({
+                            id: s.id,
+                            title: s.name,
+                            val1: storeViewMap.get(s.id) || 0,
+                            val2: storeClickMap.get(s.id) || 0,
+                        })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
+                        setTopStores(topS);
+                    }
+                } else {
+                    setTopStores([]);
+                }
             }
             
         } catch (err) {
