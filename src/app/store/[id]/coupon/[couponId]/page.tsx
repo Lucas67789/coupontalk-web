@@ -44,8 +44,25 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     const storeName = coupon.stores?.name || '';
     const currentMonth = new Date().getMonth() + 1;
 
-    const title = coupon.seo_title || `${storeName} ${coupon.title} | ${coupon.discount} 할인 ${currentMonth}월 | 쿠폰톡`;
-    const description = coupon.seo_description || `${storeName} ${coupon.title}. ${coupon.discount} 할인을 받으세요. 검증된 할인코드를 지금 바로 사용하세요.`;
+    // Smart title generation to prevent keyword stuffing (e.g. "슈마커 슈마커")
+    let defaultTitlePart1 = coupon.title;
+    if (storeName && !defaultTitlePart1.includes(storeName)) {
+        defaultTitlePart1 = `${storeName} ${defaultTitlePart1}`;
+    }
+    
+    let defaultTitlePart2 = coupon.discount || '';
+    if (defaultTitlePart2 && !defaultTitlePart2.includes('할인')) {
+        defaultTitlePart2 = `${defaultTitlePart2} 할인`;
+    }
+
+    const title = coupon.seo_title || `${defaultTitlePart1} | ${defaultTitlePart2} ${currentMonth}월 | 쿠폰톡`;
+    
+    // Smart description generation
+    let defaultDescPart1 = coupon.title;
+    if (storeName && !defaultDescPart1.includes(storeName)) {
+        defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
+    }
+    const description = coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택을 받으세요. 검증된 할인코드를 지금 바로 사용하세요.`;
 
     return {
         title,
