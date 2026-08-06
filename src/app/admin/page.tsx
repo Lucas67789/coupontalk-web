@@ -8,6 +8,7 @@ import StatCard from '@/components/admin/StatCard';
 import SectionStatCard from '@/components/admin/SectionStatCard';
 import TopRankingTable from '@/components/admin/TopRankingTable';
 import PeriodFilter from '@/components/admin/PeriodFilter';
+import RecentActivityFeed from '@/components/admin/RecentActivityFeed';
 import { BarChart3, Users, Eye, MousePointerClick, Copy, Percent, Store, Ticket, Package, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/components/ToastProvider';
 
@@ -36,6 +37,7 @@ export default function AdminDashboard() {
 
     const [topCoupons, setTopCoupons] = useState<any[]>([]);
     const [topStores, setTopStores] = useState<any[]>([]);
+    const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
     const router = useRouter();
 
@@ -184,6 +186,47 @@ export default function AdminDashboard() {
                 } else {
                     setTopStores([]);
                 }
+            }
+
+            // Fetch recent click details for the feed
+            const { data: recentClicksData } = await supabase
+                .from('click_events')
+                .select('id, type, created_at, coupon_id, product_id, store_id')
+                .order('created_at', { ascending: false })
+                .limit(30);
+
+            if (recentClicksData) {
+                const couponIds = Array.from(new Set(recentClicksData.filter(c => c.coupon_id).map(c => c.coupon_id)));
+                const storeIds = Array.from(new Set(recentClicksData.filter(c => c.store_id).map(c => c.store_id)));
+                const productIds = Array.from(new Set(recentClicksData.filter(c => c.product_id).map(c => c.product_id)));
+
+                const [couponsRes, storesRes, productsRes] = await Promise.all([
+                    couponIds.length > 0 ? supabase.from('coupons').select('id, title').in('id', couponIds) : Promise.resolve({ data: [] }),
+                    storeIds.length > 0 ? supabase.from('stores').select('id, name').in('id', storeIds) : Promise.resolve({ data: [] }),
+                    productIds.length > 0 ? supabase.from('products').select('id, title').in('id', productIds) : Promise.resolve({ data: [] })
+                ]);
+
+                const couponMap = new Map((couponsRes.data || []).map(c => [c.id, c.title]));
+                const storeMap = new Map((storesRes.data || []).map(s => [s.id, s.name]));
+                const productMap = new Map((productsRes.data || []).map(p => [p.id, p.title]));
+
+                const activities = recentClicksData.map(c => {
+                    let targetTitle = '알 수 없음';
+                    if (c.coupon_id && couponMap.has(c.coupon_id)) targetTitle = couponMap.get(c.coupon_id);
+                    else if (c.product_id && productMap.has(c.product_id)) targetTitle = productMap.get(c.product_id);
+                    else if (c.store_id && storeMap.has(c.store_id)) targetTitle = storeMap.get(c.store_id); // Fallback for pure store clicks
+                    
+                    let storeName = c.store_id && storeMap.has(c.store_id) ? storeMap.get(c.store_id) : undefined;
+
+                    return {
+                        id: c.id,
+                        type: c.type,
+                        targetTitle,
+                        storeName,
+                        createdAt: c.created_at
+                    };
+                });
+                setRecentActivities(activities);
             }
             
         } catch (err) {
@@ -340,21 +383,26 @@ export default function AdminDashboard() {
                     />
                 </div>
 
-                {/* 3. Top Rankings */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-12">
-                    <TopRankingTable 
-                        title={<><Ticket className="text-rose-500" /> 쿠폰 클릭 TOP 10</>}
-                        items={topCoupons}
-                        col1Label="클릭"
-                        viewAllHref="/admin/coupons"
-                    />
-                    <TopRankingTable 
-                        title={<><Store className="text-blue-500" /> 스토어 조회수 TOP 10</>}
-                        items={topStores}
-                        col1Label="조회"
-                        col2Label="클릭"
-                        viewAllHref="/admin/stores"
-                    />
+                {/* 3. Top Rankings and Recent Activity */}
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 pb-12">
+                    <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <TopRankingTable 
+                            title={<><Ticket className="text-rose-500" /> 쿠폰 클릭 TOP 10</>}
+                            items={topCoupons}
+                            col1Label="클릭"
+                            viewAllHref="/admin/coupons"
+                        />
+                        <TopRankingTable 
+                            title={<><Store className="text-blue-500" /> 스토어 조회수 TOP 10</>}
+                            items={topStores}
+                            col1Label="조회"
+                            col2Label="클릭"
+                            viewAllHref="/admin/stores"
+                        />
+                    </div>
+                    <div className="xl:col-span-1">
+                        <RecentActivityFeed items={recentActivities} />
+                    </div>
                 </div>
                 
             </main>
