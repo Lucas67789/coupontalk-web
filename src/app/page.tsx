@@ -3,6 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import CouponCard from '@/components/CouponCard';
 import StickySidebar from '@/components/StickySidebar';
 import { supabase } from '@/lib/supabase';
+import { isCouponExpired } from '@/lib/utils';
 
 export const revalidate = 2592000;
 
@@ -129,7 +130,7 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {newCoupons?.map((coupon: any) => (
-            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
+            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} isExpired={isCouponExpired(coupon.expiry, coupon.title)} />
           ))}
         </div>
       </section>
@@ -144,7 +145,7 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {popularCoupons?.map((coupon: any) => (
-            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} />
+            <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} isExpired={isCouponExpired(coupon.expiry, coupon.title)} />
           ))}
         </div>
       </section>

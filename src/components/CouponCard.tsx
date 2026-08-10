@@ -28,7 +28,7 @@ const getStoreTheme = (name: string) => {
     return themes[Math.abs(hash) % themes.length];
 };
 
-export default function CouponCard({ coupon, storeName, storeId }: { coupon: any, storeName: string, storeId?: string }) {
+export default function CouponCard({ coupon, storeName, storeId, isExpired }: { coupon: any, storeName: string, storeId?: string, isExpired?: boolean }) {
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
     const theme = getStoreTheme(storeName);
@@ -114,17 +114,22 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
     const cardContent = (
         <>
             {/* Decorative top accent */}
-            <div className={`absolute left-0 top-0 right-0 h-1 ${theme.accent}`}></div>
+            <div className={`absolute left-0 top-0 right-0 h-1 ${isExpired ? 'bg-gray-300' : theme.accent}`}></div>
 
             <div className="flex-1 flex flex-col">
                 <div>
                     <div className="flex items-center gap-2 mb-3 w-full min-w-0">
-                        <span className={`${theme.badgeBg} ${theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider truncate flex-1 min-w-0`}>
+                        {isExpired && (
+                            <span className="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider flex-shrink-0">
+                                만료
+                            </span>
+                        )}
+                        <span className={`${isExpired ? 'bg-gray-100 text-gray-500' : theme.badgeBg + ' ' + theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider truncate flex-1 min-w-0`}>
                             {coupon.discount}
                         </span>
                         <div className="flex items-center gap-1.5 ml-1 flex-shrink-0">
                             {storeName && (
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm flex-shrink-0 ${theme.accent}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm flex-shrink-0 ${isExpired ? 'bg-gray-400' : theme.accent}`}>
                                     {storeName.charAt(0)}
                                 </div>
                             )}
@@ -136,18 +141,18 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
                         </div>
                     </div>
 
-                    <h3 className="text-lg font-bold mb-3 text-gray-900 leading-tight line-clamp-2">
+                    <h3 className={`text-lg font-bold mb-3 leading-tight line-clamp-2 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900'}`}>
                         {coupon.title}
                     </h3>
 
-                    <ul className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
+                    <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
                         <li className="flex items-start gap-2">
-                            <CheckCircle2 size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 size={16} className={`${isExpired ? 'text-gray-400' : 'text-green-500'} flex-shrink-0 mt-0.5`} />
                             <span className="line-clamp-2">조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
-                            <span>유효기간: {formattedExpiry}</span>
+                            <span className={isExpired ? 'line-through' : ''}>유효기간: {formattedExpiry}</span>
                         </li>
                     </ul>
                 </div>
@@ -156,18 +161,26 @@ export default function CouponCard({ coupon, storeName, storeId }: { coupon: any
             <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
-                    <p className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">프로모션 코드</p>
-                    <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono text-lg text-center tracking-wider bg-gray-50 w-full ${isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
+                    <p className={`text-xs font-medium mb-1 uppercase tracking-wider ${isExpired ? 'text-gray-300' : 'text-gray-400'}`}>프로모션 코드</p>
+                    <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono text-lg text-center tracking-wider bg-gray-50 w-full ${isExpired ? 'text-gray-400 border-gray-200' : isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
                         {isNoCode ? '코드 필요없음' : coupon.code}
                     </div>
                 </div>
 
                 <button
                     onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleCopyAndRedirect(); }}
-                    className={`btn-primary w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
+                    className={`w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap rounded-xl font-bold transition-colors flex items-center gap-2 ${
+                        copied 
+                        ? 'bg-green-600 hover:bg-green-700 text-white shadow-none' 
+                        : isExpired
+                        ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                    }`}
                 >
                     {copied ? (
                         <>복사완료! 이동중...</>
+                    ) : isExpired ? (
+                        <>만료된 혜택 보기 <ExternalLink size={18} /></>
                     ) : isNoCode ? (
                         <>할인 받기 <ExternalLink size={18} /></>
                     ) : (
