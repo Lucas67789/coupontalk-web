@@ -383,6 +383,7 @@ export default function AdminCoupons() {
                                         <thead className="bg-gray-50 border-b border-gray-100 text-gray-600 font-medium text-sm">
                                             <tr>
                                                 <th className="p-4 w-28">상태</th>
+                                                <th className="p-4 hidden lg:table-cell w-32">등록일</th>
                                                 <th className="p-4">단축스토어</th>
                                                 <th className="p-4">쿠폰 제목</th>
                                                 <th className="p-4 hidden md:table-cell">할인/조건</th>
@@ -410,6 +411,9 @@ export default function AdminCoupons() {
                                                             ) : (
                                                                 <span className="px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">발행중(Live)</span>
                                                             )}
+                                                        </td>
+                                                        <td className="p-4 hidden lg:table-cell text-sm text-gray-500 whitespace-nowrap">
+                                                            {coupon.created_at ? new Date(coupon.created_at).toLocaleDateString() : '-'}
                                                         </td>
                                                         <td className="p-4 font-bold text-gray-700 text-sm whitespace-nowrap">{coupon.stores?.name || '알수없음'}</td>
                                                         <td className="p-4">
