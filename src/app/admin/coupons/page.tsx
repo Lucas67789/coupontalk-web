@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { clearAllCache } from '@/app/actions/cacheActions';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import RichTextEditor from '@/components/admin/RichTextEditor';
+import TiptapEditor from '@/components/admin/TiptapEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -358,9 +358,11 @@ export default function AdminCoupons() {
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium text-gray-700">📌 상세 콘텐츠 <span className="text-blue-600">(H2/H3 본문 - 네이버가 가장 중시하는 정보성 텍스트)</span></label>
                                 </div>
-                                <RichTextEditor 
-                                    value={currentCoupon?.content_body || ''} 
+                                <TiptapEditor 
+                                    key={currentCoupon?.id || 'new'}
+                                    initialContent={currentCoupon?.content_body || ''} 
                                     onChange={(val) => setCurrentCoupon({ ...currentCoupon, content_body: val })} 
+                                    draftKey={`coupon_draft_${currentCoupon?.id || 'new'}`}
                                 />
                             </div>
 
