@@ -23,7 +23,7 @@ function ImagePairView({ node, updateAttributes, deleteNode, selected }: any) {
     try {
       const fileExt = file.name.split(".").pop() || "png";
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `post-images/${fileName}`;
+      const filePath = `editor_images/${fileName}`;
 
       const { error } = await supabase.storage
         .from("images")
