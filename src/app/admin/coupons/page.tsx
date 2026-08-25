@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 import { clearAllCache } from '@/app/actions/cacheActions';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import TiptapEditor from '@/components/admin/TiptapEditor';
@@ -49,7 +49,7 @@ export default function AdminCoupons() {
     // Load Stores once
     useEffect(() => {
         const fetchStores = async () => {
-            const { data } = await supabase.from('stores').select('id, name');
+            const { data } = await fetchAllRows(supabase.from('stores').select('id, name'));
             if (data) setStores(data);
         };
         fetchStores();

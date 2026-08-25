@@ -1,11 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 
 export async function GET() {
     const baseUrl = 'https://coupontalk.kr';
 
     // Fetch categories and stores
-    const { data: categories } = await supabase.from('categories').select('*');
-    const { data: stores } = await supabase.from('stores').select('*').order('created_at', { ascending: false });
+    const { data: categories } = await fetchAllRows(supabase.from('categories').select('*'));
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('*').order('created_at', { ascending: false }));
 
     // Build RSS items
     let itemsXml = '';

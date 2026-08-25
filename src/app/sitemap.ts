@@ -1,19 +1,15 @@
 import { MetadataRoute } from 'next';
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://coupontalk.kr'; // 배포될 실제 도메인
-    const { data: stores, error } = await supabase.from('stores').select('id');
-    const { data: categories } = await supabase.from('categories').select('id');
+    const baseUrl = 'https://coupontalk.kr'; // 배포된 실제 도메인
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id'));
+    const { data: categories } = await fetchAllRows(supabase.from('categories').select('id'));
     const now = new Date().toISOString();
-    const { data: coupons } = await supabase.from('coupons')
+    const { data: coupons } = await fetchAllRows(supabase.from('coupons')
         .select('id, store_id')
         .eq('status', 'published')
-        .lte('published_at', now);
-
-    if (error) {
-        console.error("Sitemap fetch error:", error);
-    }
+        .lte('published_at', now));
 
     const storeUrls = (stores || []).map((store) => ({
         url: `${baseUrl}/store/${store.id}`,

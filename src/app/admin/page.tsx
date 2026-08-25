@@ -10,6 +10,7 @@ import TopRankingTable from '@/components/admin/TopRankingTable';
 import PeriodFilter from '@/components/admin/PeriodFilter';
 import RecentActivityFeed from '@/components/admin/RecentActivityFeed';
 import { BarChart3, Users, Eye, MousePointerClick, Copy, Percent, Store, Ticket, Package, LayoutGrid } from 'lucide-react';
+import { clearAllCache } from '@/app/actions/cacheActions';
 import { useToast } from '@/components/ToastProvider';
 
 export default function AdminDashboard() {
@@ -65,27 +66,39 @@ export default function AdminDashboard() {
             const { count: allCoupons } = await supabase.from('coupons').select('*', { count: 'exact', head: true });
             
             // --- 2. Analytics Tables (page_views, click_events) ---
-            // Note: Since we are querying everything for demo purposes and we might not have a huge db yet, 
-            // we will fetch aggregate data. In a production app with huge data, RPC functions should be used.
+            // Note: Supabase has a default limit of 1000 rows per request. We need to paginate to get all data.
             
             // Page Views
-            const { data: viewsData, error: viewsError } = await supabase
-                .from('page_views')
-                .select('path, session_id, store_id')
-                .gte('created_at', timeFilter);
+            let views: any[] = [];
+            let fromViews = 0;
+            while (true) {
+                const { data, error } = await supabase
+                    .from('page_views')
+                    .select('path, session_id, store_id')
+                    .gte('created_at', timeFilter)
+                    .range(fromViews, fromViews + 999);
+                if (data) views = views.concat(data);
+                if (error || !data || data.length < 1000) break;
+                fromViews += 1000;
+            }
                 
-            const views = viewsData || [];
             const mainViews = views.filter(v => v.path === '/').length;
             const totalViews = views.length;
             const uniqueSessions = new Set(views.map(v => v.session_id)).size;
             
             // Click Events
-            const { data: clicksData, error: clicksError } = await supabase
-                .from('click_events')
-                .select('type, store_id, coupon_id')
-                .gte('created_at', timeFilter);
-                
-            const clicks = clicksData || [];
+            let clicks: any[] = [];
+            let fromClicks = 0;
+            while (true) {
+                const { data, error } = await supabase
+                    .from('click_events')
+                    .select('type, store_id, coupon_id')
+                    .gte('created_at', timeFilter)
+                    .range(fromClicks, fromClicks + 999);
+                if (data) clicks = clicks.concat(data);
+                if (error || !data || data.length < 1000) break;
+                fromClicks += 1000;
+            }
             const totalClicks = clicks.length;
             const codeCopies = clicks.filter(c => c.type === 'code_copy').length;
             const conversionRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
@@ -251,14 +264,10 @@ export default function AdminDashboard() {
 
     const handleClearCache = async () => {
         try {
-            const res = await fetch('/api/revalidate?path=/');
-            if (res.ok) {
-                showToast("프론트엔드 캐시가 초기화되었습니다.");
-            } else {
-                showToast("캐시 초기화 실패");
-            }
+            await clearAllCache();
+            showToast("프론트엔드 캐시가 초기화되었습니다.");
         } catch (e) {
-            showToast("캐시 초기화 중 오류가 발생했습니다.");
+            showToast("캐시 초기화 중 오류가 발생했습니다. (권한 없음)");
         }
     };
 

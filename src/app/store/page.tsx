@@ -1,11 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 import StoreList from '@/components/StoreList';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AllStoresPage() {
     // Note: We need to pull tags and description to allow search matching
-    const { data: stores } = await supabase.from('stores').select('*, coupons(*)');
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('*, coupons(*)'));
 
     return (
         <div className="container mx-auto">

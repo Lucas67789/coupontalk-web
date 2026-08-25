@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 import { clearAllCache } from '@/app/actions/cacheActions';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -18,7 +18,7 @@ export default function AdminStores() {
 
     const fetchStores = async () => {
         setLoading(true);
-        const { data } = await supabase.from('stores').select('*').order('created_at', { ascending: false });
+        const { data } = await fetchAllRows(supabase.from('stores').select('*').order('created_at', { ascending: false }));
         setStores(data || []);
         setLoading(false);
     };

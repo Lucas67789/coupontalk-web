@@ -4,6 +4,12 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const path = searchParams.get('path');
+    const secret = searchParams.get('secret');
+
+    // Security check: Only allow revalidation if the secret token matches
+    if (secret !== process.env.REVALIDATE_SECRET) {
+        return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    }
 
     if (path) {
         revalidatePath(path, 'page');
