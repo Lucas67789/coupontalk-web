@@ -264,7 +264,8 @@ export default function AdminDashboard() {
 
     const handleClearCache = async () => {
         try {
-            await clearAllCache();
+            const { data: { session } } = await supabase.auth.getSession();
+            await clearAllCache(session?.access_token);
             showToast("프론트엔드 캐시가 초기화되었습니다.");
         } catch (e) {
             showToast("캐시 초기화 중 오류가 발생했습니다. (권한 없음)");

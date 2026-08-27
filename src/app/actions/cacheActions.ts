@@ -2,28 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 
-export async function clearAllCache() {
-  const cookieStore = await cookies();
+export async function clearAllCache(access_token?: string) {
+  if (!access_token) {
+    throw new Error("Unauthorized");
+  }
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          cookie: cookieStore.toString(),
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error } = await supabase.auth.getUser(access_token);
   
-  if (!session) {
+  if (error || !user) {
     throw new Error("Unauthorized");
   }
 
