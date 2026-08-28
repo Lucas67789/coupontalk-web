@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import SafeImage from '@/components/SafeImage';
 
 export function MarkdownRenderer({ content, storeName }: { content: string, storeName?: string }) {
@@ -20,10 +21,11 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
     }
 
     // Otherwise, parse as Markdown + HTML hybrid using react-markdown
-    // We provide custom components to match our previous styling
+    // remarkGfm enables GitHub Flavored Markdown: tables, strikethrough, task lists, etc.
     return (
         <div className="prose prose-blue max-w-none">
             <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
                     h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 mt-8 mb-3 pb-2 border-b border-gray-100 scroll-mt-24" {...props} />,
@@ -32,6 +34,16 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
                     ul: ({ node, ...props }) => <ul className="list-disc ml-4 my-2 text-gray-700" {...props} />,
                     ol: ({ node, ...props }) => <ol className="list-decimal ml-4 my-2 text-gray-700" {...props} />,
                     li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                    table: ({ node, ...props }) => (
+                        <div className="overflow-x-auto my-4">
+                            <table className="min-w-full border border-gray-200 rounded-lg text-sm" {...props} />
+                        </div>
+                    ),
+                    thead: ({ node, ...props }) => <thead className="bg-gray-50" {...props} />,
+                    tbody: ({ node, ...props }) => <tbody className="divide-y divide-gray-100" {...props} />,
+                    tr: ({ node, ...props }) => <tr className="hover:bg-gray-50 transition-colors" {...props} />,
+                    th: ({ node, ...props }) => <th className="px-4 py-2 text-left font-semibold text-gray-700 border-b border-gray-200" {...props} />,
+                    td: ({ node, ...props }) => <td className="px-4 py-2 text-gray-600" {...props} />,
                     img: ({ node, src, alt, ...props }) => {
                         let finalAlt = alt;
                         if (!finalAlt || finalAlt === 'Image') {
