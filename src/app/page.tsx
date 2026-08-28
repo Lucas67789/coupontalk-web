@@ -17,24 +17,28 @@ export default async function Home() {
     .eq('status', 'published')
     .lte('published_at', now)
     .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(5);
+    .limit(15);
 
   const popularCouponsPromise = supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
     .order('click_count', { ascending: false, nullsFirst: false })
-    .limit(5);
+    .limit(15);
 
   const [
     { data: categories },
-    { data: newCoupons },
-    { data: popularCoupons }
+    { data: rawNewCoupons },
+    { data: rawPopularCoupons }
   ] = await Promise.all([
     categoriesPromise,
     newCouponsPromise,
     popularCouponsPromise
   ]);
+
+  // Filter out expired coupons from homepage lists
+  const newCoupons = (rawNewCoupons || []).filter((c: any) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
+  const popularCoupons = (rawPopularCoupons || []).filter((c: any) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
 
   return (
     <div className="container mx-auto px-4 lg:px-0">
