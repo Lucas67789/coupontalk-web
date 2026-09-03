@@ -57,6 +57,23 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "쿠폰톡",
+          "url": "https://coupontalk.kr",
+          "logo": "https://coupontalk.kr/og-image.png",
+          "sameAs": [
+            "https://blog.naver.com",
+            "https://pf.kakao.com"
+          ]
+        })
+      }}
+    />
         <ToastProvider>
           <PageViewTracker />
           <CopyAttribution />
