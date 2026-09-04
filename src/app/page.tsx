@@ -8,6 +8,9 @@ import { isCouponExpired } from '@/lib/utils';
 export const revalidate = 2592000;
 
 export default async function Home() {
+  // 참고: 검색(SearchAction)은 이 페이지에서 직접 필터링하지 않고,
+  // 실제로 검색 로직이 구현되어 있는 /store 페이지(StoreList 컴포넌트)로 위임합니다.
+  // (예전에 여기서 searchParams.q를 받아 처리하려 했지만 사용되는 곳이 없어 죽은 코드였음 - 제거)
   const now = new Date().toISOString();
 
   const categoriesPromise = supabase.from('categories').select('*');
@@ -42,6 +45,23 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 lg:px-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: '쿠폰톡',
+            url: 'https://coupontalk.kr/',
+            potentialAction: {
+              '@type': 'SearchAction',
+              // /store 페이지의 실제 검색(StoreList 컴포넌트)으로 연결 - 실제로 필터링이 동작하는 URL이어야 함
+              target: 'https://coupontalk.kr/store?q={search_term_string}',
+              'query-input': 'required name=search_term_string',
+            },
+          }),
+        }}
+      />
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Main Content Area */}
         <div className="flex-1 w-full min-w-0">

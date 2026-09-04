@@ -4,8 +4,10 @@ import { useState } from 'react';
 import StoreCard from '@/components/StoreCard';
 import { Search } from 'lucide-react';
 
-export default function StoreList({ initialStores }: { initialStores: any[] }) {
-    const [searchQuery, setSearchQuery] = useState("");
+export default function StoreList({ initialStores, initialQuery = "" }: { initialStores: any[]; initialQuery?: string }) {
+    // 홈 화면의 SearchAction(구글/네이버 사이트링크 검색창) 또는 ?q= 링크로 들어왔을 때
+    // 초기 검색어로 반영되도록 함
+    const [searchQuery, setSearchQuery] = useState(initialQuery);
 
     // Filter stores based on search query matching name, description, or tags
     const filteredStores = initialStores.filter(store => {

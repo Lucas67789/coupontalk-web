@@ -66,11 +66,8 @@ export default function RootLayout({
           "@type": "Organization",
           "name": "쿠폰톡",
           "url": "https://coupontalk.kr",
-          "logo": "https://coupontalk.kr/og-image.png",
-          "sameAs": [
-            "https://blog.naver.com",
-            "https://pf.kakao.com"
-          ]
+          "logo": "https://coupontalk.kr/og-image.png"
+          // sameAs: 실제 운영 중인 쿠폰톡 채널(블로그/카카오채널 등)이 생기면 여기에 추가
         })
       }}
     />
