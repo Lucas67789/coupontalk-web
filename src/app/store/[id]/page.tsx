@@ -243,7 +243,17 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                                         <tr key={coupon.id} className="bg-white hover:bg-gray-50 transition-colors">
                                             <td className="px-4 py-3 font-semibold text-blue-700">{coupon.discount}</td>
                                             <td className="px-4 py-3 font-mono bg-blue-50/50 text-blue-900 font-bold">
-                                                {coupon.code === 'NO_CODE_REQUIRED' || !coupon.code ? '결제 시 자동적용' : coupon.code}
+                                                {coupon.code === 'NO_CODE_REQUIRED' || !coupon.code ? (
+    '결제 시 자동적용'
+) : (
+    <div className="flex flex-col gap-1">
+        {coupon.code.split(/\r?\n/).map((codeStr: string, idx: number) => (
+            <span key={idx} className="bg-blue-100 text-blue-900 px-2 py-1 rounded font-bold whitespace-nowrap text-xs md:text-sm inline-block w-fit">
+                {codeStr}
+            </span>
+        ))}
+    </div>
+)}
                                             </td>
                                             <td className="px-4 py-3 text-gray-600">{parsedCond}</td>
                                             <td className="px-4 py-3 text-gray-500">{displayExpiry}</td>
