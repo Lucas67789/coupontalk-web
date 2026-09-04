@@ -184,8 +184,8 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
                 <div className="relative z-10">
                     <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-2">
-                        [${currentYear}년 ${currentMonth}월] <br className="hidden md:block" />
-                        ${store.name} 할인코드 총정리
+                        [{currentYear}년 {currentMonth}월] <br className="hidden md:block" />
+                        {store.name} 할인코드 총정리
                     </h1>
                     <div className="flex items-center gap-2 mb-4">
                         <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
@@ -196,7 +196,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     <p className="text-lg text-gray-600 mb-4">{store.description}</p>
                     {store.website_url && (
                         <a href={store.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm hover:underline">
-                            ${store.name} 바로가기 <ExternalLink size={14} />
+                            {store.name} 바로가기 <ExternalLink size={14} />
                         </a>
                     )}
                 </div>
@@ -205,7 +205,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             <div className="px-6 md:px-10 py-4 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
                 <CheckCircle size={20} className="text-green-600" />
                 <p className="font-semibold text-sm">
-                    최신 업데이트: <span className="text-gray-900 font-bold">${currentYear}년 ${currentMonth}월 ${currentDate}일</span> 기준 검증 완료
+                    최신 업데이트: <span className="text-gray-900 font-bold">{currentYear}년 {currentMonth}월 {currentDate}일</span> 기준 검증 완료
                 </p>
             </div>
 
@@ -215,7 +215,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
             {tableCoupons.length > 0 && (
                 <div className="p-6 md:p-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-xl font-bold mb-4 text-gray-900">📋 ${currentMonth}월 ${store.name} 혜택 요약표</h2>
+                    <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 혜택 요약표</h2>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-100 text-gray-800 font-bold border-b border-gray-200">
@@ -256,12 +256,28 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             )}
 
+            {store.events?.length > 0 && (
+                <div className="p-6 md:p-10 border-b bg-blue-50/50" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900">
+                        <CalendarDays size={20} className="text-blue-600" /> 이달의 카드 프로모션 및 이벤트
+                    </h2>
+                    <ul className="flex flex-col gap-3">
+                        {store.events?.map((event: any, i: number) => (
+                            <li key={i} className="flex gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                                <span className="font-bold text-gray-900">{event.title}</span>
+                                <span className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-700 rounded-full">{event.date}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
             {tableCoupons.length > 0 && (
                 <div className="p-6 md:p-10 bg-gray-50/50 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                         💰 사용 가능한 할인코드 <span className="text-blue-600">({tableCoupons.filter((c: any) => !c.isExpired).length})</span>
                     </h2>
-                    <div className="flex flex-col gap-1 md:gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {tableCoupons.map((coupon: any) => (
                             <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
                         ))}
@@ -269,26 +285,47 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             )}
 
+            {publishedProducts.length > 0 && (
+                <div className="p-6 md:p-10 bg-white border-b" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
+                    </h2>
+                    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
+                        {publishedProducts.map((product: any) => (
+                            <ProductCard key={product.id} product={product} storeName={store.name} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {publishedCoupons.length === 0 && publishedProducts.length === 0 && (
+                <div className="p-6 md:p-10 bg-gray-50/50">
+                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+                        <p className="text-gray-500">현재 등록된 할인코드 및 상품이 없습니다.</p>
+                    </div>
+                </div>
+            )}
+
             {/* 우선순위 3: 콘텐츠 대폭 확장 (4단계 적용 가이드, 결제수단별 혜택, 예약 꿀팁, 브랜드 안내) */}
             <div className="p-6 md:p-10 bg-white border-b" style={{ borderColor: 'var(--border-color)' }}>
-                
+
                 {/* 1. 결제수단 혜택 가이드 */}
                 <h2 className="text-2xl font-bold flex items-center gap-2 mb-6 text-gray-900">
-                    <CreditCard size={24} className="text-blue-600" /> ${store.name} 결제수단 혜택 비교
+                    <CreditCard size={24} className="text-blue-600" /> {store.name} 결제수단 혜택 비교
                 </h2>
                 <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-10 text-gray-700 leading-relaxed">
-                    ${store.name}에서는 신용카드, 카카오페이, 네이버페이, 토스페이 등 다양한 결제 수단을 지원합니다. 각 카드사나 간편결제사에서 진행하는 매월 게릴라 프로모션(청구할인, 캐시백 등)을 적용하면 가장 저렴하게 예약할 수 있습니다. 상단의 할인코드 요약표를 참고하여 중복 적용이 가능한 가장 혜택이 큰 결제 수단을 선택해 보세요!
+                    {store.name}에서는 신용카드, 카카오페이, 네이버페이, 토스페이 등 다양한 결제 수단을 지원합니다. 각 카드사나 간편결제사에서 진행하는 매월 게릴라 프로모션(청구할인, 캐시백 등)을 적용하면 가장 저렴하게 예약할 수 있습니다. 상단의 할인코드 요약표를 참고하여 중복 적용이 가능한 가장 혜택이 큰 결제 수단을 선택해 보세요!
                 </div>
 
                 {/* 2. 4단계 적용 가이드 */}
                 <h2 className="text-2xl font-bold flex items-center gap-2 mb-6 text-gray-900">
-                    <CheckCircle size={24} className="text-blue-600" /> ${store.name} 할인코드 적용 4단계
+                    <CheckCircle size={24} className="text-blue-600" /> {store.name} 할인코드 적용 4단계
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
                         <div className="text-sm font-bold text-blue-600 mb-1">STEP 1</div>
                         <h3 className="font-bold text-gray-900 mb-2">마음에 드는 상품 선택하기</h3>
-                        <p className="text-gray-600 text-sm">${store.name} 홈페이지에 접속하여 구매 또는 예약하고자 하는 상품을 찾아 장바구니에 담습니다.</p>
+                        <p className="text-gray-600 text-sm">{store.name} 홈페이지에 접속하여 구매 또는 예약하고자 하는 상품을 찾아 장바구니에 담습니다.</p>
                     </div>
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
                         <div className="text-sm font-bold text-blue-600 mb-1">STEP 2</div>
@@ -323,7 +360,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {/* FAQs */}
             <div className="p-6 md:p-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <HelpCircle size={24} className="text-blue-600" /> ${store.name} 자주 묻는 질문 (FAQ)
+                    <HelpCircle size={24} className="text-blue-600" /> {store.name} 자주 묻는 질문 (FAQ)
                 </h2>
                 <div className="flex flex-col gap-4">
                     {faqs.map((faq: any, i: number) => (
@@ -343,6 +380,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {store.guide_content && (
                 <div className="px-6 md:px-10 py-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 팁</h2>
+                    <TableOfContents content={store.guide_content} />
                     <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm">
                         <MarkdownRenderer content={store.guide_content} storeName={store.name} />
                     </div>
@@ -358,7 +396,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                         rel="noopener noreferrer"
                         className="w-full max-w-4xl py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg text-center transition-colors flex items-center justify-center gap-2 shadow-lg hover:-translate-y-1"
                     >
-                        ${store.name} 특가 보러가기 <ExternalLink size={20} />
+                        {store.name} 특가 보러가기 <ExternalLink size={20} />
                     </a>
                 </div>
             )}
