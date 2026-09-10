@@ -108,7 +108,14 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         { question: `결제수단별 혜택과 중복 할인이 되나요?`, answer: `대부분의 경우 전용 결제수단(네이버페이, 토스페이, 특정 카드사 등) 혜택과 일반 할인코드는 중복 적용되지 않으므로, 둘 중 혜택이 더 큰 것을 선택하시는 것이 좋습니다.` },
         { question: `${store.name} 예약 취소 시 쿠폰은 어떻게 되나요?`, answer: `사용하신 쿠폰의 규정에 따라 다릅니다. 일반적인 할인코드는 취소 시 복구되어 재사용이 가능하지만, 선착순 쿠폰이나 프로모션 기간이 종료된 경우에는 복구되지 않을 수 있으니 주의 바랍니다.` }
     ];
-    const faqs = (store.faqs && store.faqs.length > 0) ? store.faqs : defaultFaqs;
+    let parsedFaqs = defaultFaqs;
+    if (store.faqs) {
+        try {
+            const raw = typeof store.faqs === 'string' ? JSON.parse(store.faqs) : store.faqs;
+            if (Array.isArray(raw) && raw.length > 0) parsedFaqs = raw;
+        } catch { /* use defaultFaqs */ }
+    }
+    const faqs = parsedFaqs;
 
     const jsonLd = {
         '@context': 'https://schema.org',
