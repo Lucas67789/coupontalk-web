@@ -197,9 +197,28 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         }))
     } : null;
 
+    // 만료일(expiry)이 실제 날짜 형식일 때만 validThrough로 사용 (형식이 안 맞으면 생략)
+    let validThroughIso: string | undefined;
+    if (coupon.expiry && /^\d{4}[.\-]\d{1,2}[.\-]\d{1,2}/.test(coupon.expiry)) {
+        const parsed = new Date(coupon.expiry.replace(/\./g, '-'));
+        if (!isNaN(parsed.getTime())) validThroughIso = parsed.toISOString();
+    }
+
+    const offerLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Offer',
+        name: coupon.title,
+        url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
+        priceCurrency: 'KRW',
+        price: '0',
+        availability: 'https://schema.org/InStock',
+        ...(validThroughIso ? { validThrough: validThroughIso } : {}),
+        seller: { '@type': 'Organization', name: storeName },
+    };
+
     const schemaGraph = {
         '@context': 'https://schema.org',
-        '@graph': [jsonLd, breadcrumbLd, ...(faqLd ? [faqLd] : [])]
+        '@graph': [jsonLd, breadcrumbLd, offerLd, ...(faqLd ? [faqLd] : [])]
     };
 
     return (

@@ -17,6 +17,9 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     return {
         title: `${category.name} 할인코드 및 프로모션 | 쿠폰톡`,
         description: `검증된 ${category.name} 관련 할인코드와 쿠폰을 확인하세요. ${category.description}`,
+        alternates: {
+            canonical: `https://coupontalk.kr/category/${encodeURIComponent(categoryId)}`,
+        },
         openGraph: {
             title: `${category.name} 최신 할인 정보`,
             description: `검증된 ${category.name} 관련 할인코드와 쿠폰을 확인하세요.`,
@@ -60,8 +63,32 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
     const storesList = categoryStores || [];
     const IconComponent = (LucideIcons as any)[category.icon];
 
+    const breadcrumbLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: '홈', item: 'https://coupontalk.kr' },
+            { '@type': 'ListItem', position: 2, name: category.name, item: `https://coupontalk.kr/category/${encodeURIComponent(categoryId)}` },
+        ],
+    };
+
+    const itemListLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: storesList.map((store: any, index: number) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: store.name,
+            url: `https://coupontalk.kr/store/${encodeURIComponent(store.id)}`,
+        })),
+    };
+
     return (
         <div className="container mx-auto">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': [breadcrumbLd, itemListLd] }) }}
+            />
 
             {/* Breadcrumb / Back button */}
             <div className="mb-6">
