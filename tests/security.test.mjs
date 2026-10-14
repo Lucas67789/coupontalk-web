@@ -9,6 +9,14 @@ import { contentImages } from '../src/lib/content-images.ts';
 test('content images support Markdown and HTML, deduplicate and reject unsafe URLs', () => {
     assert.deepEqual(contentImages('![coupon](https://example.com/a.jpg) <img src="https://example.com/b.jpg?a=1&amp;b=2"> ![same](https://example.com/a.jpg) <img src="javascript:alert(1)"> <img src="https://user:pass@example.com/c.jpg">'), ['https://example.com/a.jpg', 'https://example.com/b.jpg?a=1&b=2']);
     assert.deepEqual(contentImages(null), []);
+    const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://owned.supabase.co';
+    try {
+        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/thumbnails/a.jpg)'), ['https://coupontalk.kr/coupon-images/thumbnails/a.jpg']);
+    } finally {
+        if (previous === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+        else process.env.NEXT_PUBLIC_SUPABASE_URL = previous;
+    }
 });
 
 test('FAQ arrays and legacy JSON strings render without accepting malformed entries', () => {
