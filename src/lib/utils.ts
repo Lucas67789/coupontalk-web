@@ -2,7 +2,7 @@
 export function couponExpiryTime(expiry?: string | null): number | null {
     if (!expiry) return null;
     // Booking deadlines end the offer; a later stay date does not extend it.
-    const bookingSection = expiry.split(/\s*[/|]\s*|[,，]|(?:숙박|투숙|체크인)/)[0];
+    const bookingSection = expiry.split(/\s+\/\s*|\/\s+|[|,，]|\/?(?:숙박|투숙|체크인)/)[0];
     const beforeBooking = bookingSection.split('예약')[0];
     const deadline = expiry.includes('예약')
         ? (/\d{4}[.\-/년]/.test(beforeBooking) ? beforeBooking : bookingSection)

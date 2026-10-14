@@ -43,4 +43,6 @@ test('expiry follows Korea midnight, precise time and range end', () => {
     }
     assert.equal(isCouponExpired('2026년 10월 내 예약 / 2027년 3월 투숙', '', Date.parse('2026-10-31T14:59:59Z')), false);
     assert.equal(isCouponExpired('2026년 10월 내 예약 / 2027년 3월 투숙', '', Date.parse('2026-10-31T15:00:00Z')), true);
+    assert.equal(isCouponExpired('예약:2026/09/30 / 숙박:2027/03/31', '', Date.parse('2026-10-14T00:00:00Z')), true);
+    assert.equal(isCouponExpired('2026/10/31 예약 / 2027/03/31 투숙', '', Date.parse('2026-10-14T00:00:00Z')), false);
 });
