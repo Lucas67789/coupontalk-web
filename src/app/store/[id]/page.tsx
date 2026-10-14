@@ -1,5 +1,6 @@
 import type { CouponRow, ProductRow, Faq } from '@/lib/models';
 import { parseFaqs } from '@/lib/faq';
+import { contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
@@ -30,17 +31,18 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     // 우선순위 4: 메타 디스크립션 동적 키워드 보강
     const { data: topCoupons } = await supabase
         .from('coupons')
-        .select('code, discount, title, expiry')
+        .select('code, discount, title, expiry, content_body')
         .eq('store_id', storeId)
         .eq('status', 'published')
         .lte('published_at', new Date().toISOString())
         .order('published_at', { ascending: false });
 
-    const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title)).slice(0, 2);
+    const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title));
+    const previewImages = [...new Set(activeCoupons.flatMap(c => contentImages(c.content_body)))].slice(0, 8);
 
     let description = `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드와 프로모션의 적용 조건, 유효기간, 사용 방법을 확인하세요.`;
     if (activeCoupons.length > 0) {
-        const dynamicHints = activeCoupons.map(c => {
+        const dynamicHints = activeCoupons.slice(0, 2).map(c => {
             const isNoCode = !c.code || c.code === 'NO_CODE_REQUIRED' || c.code === '없음';
             return isNoCode ? c.title : `${c.code}(${c.discount})`;
         }).join(', ');
@@ -56,6 +58,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     return {
         title,
         description,
+        robots: { index: true, follow: true, 'max-image-preview': 'large' },
         alternates: {
             canonical: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}`,
         },
@@ -66,7 +69,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: ogImageUrl ? [{ url: ogImageUrl, alt: store.name }] : undefined,
+            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 할인 혜택` })) : ogImageUrl ? [{ url: ogImageUrl, alt: store.name }] : undefined,
         }
     };
 }
@@ -101,6 +104,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     })).sort((a: CouponRow, b: CouponRow) => (a.isExpired === b.isExpired ? 0 : a.isExpired ? 1 : -1));
 
     const activeCoupons = tableCoupons.filter((c: CouponRow) => !c.isExpired);
+    const offerImages = [...new Set<string>(activeCoupons.flatMap((c: CouponRow) => contentImages(c.content_body)))];
     const expiredCoupons = tableCoupons.filter((c: CouponRow) => c.isExpired);
     const isAgoda = storeId === 'agoda';
     const websiteUrl = safeAffiliateUrl(store.website_url);
@@ -132,6 +136,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         description: `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다.`,
         datePublished: store.created_at || now,
         dateModified: dateModified,
+        image: offerImages.length ? offerImages : undefined,
         author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' },
         publisher: { '@type': 'Organization', name: '쿠폰톡', logo: { '@type': 'ImageObject', url: 'https://coupontalk.kr/og-image.png' } },
         mainEntityOfPage: { '@type': 'WebPage', '@id': `https://coupontalk.kr/store/${encodeURIComponent(storeId)}` }
@@ -161,11 +166,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         itemListElement: activeCoupons.map((coupon: CouponRow, index: number) => {
-            let imageUrl = store?.logo || 'https://coupontalk.kr/og-image.png';
-            if (coupon.content_body) {
-                const imgMatch = coupon.content_body.match(/!\[.*?\]\((.*?)\)/);
-                if (imgMatch && imgMatch[1]) imageUrl = imgMatch[1];
-            }
+            const imageUrl = contentImages(coupon.content_body)[0] || safeAffiliateUrl(store.logo) || undefined;
             return {
                 '@type': 'ListItem',
                 position: index + 1,

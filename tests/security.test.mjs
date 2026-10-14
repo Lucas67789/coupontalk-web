@@ -4,6 +4,12 @@ import { sanitizeContent, jsonLd } from '../src/lib/content-safety.ts';
 import { safeAffiliateUrl, hasCouponCode } from '../src/lib/affiliate.ts';
 import { isCouponExpired } from '../src/lib/utils.ts';
 import { parseFaqs } from '../src/lib/faq.ts';
+import { contentImages } from '../src/lib/content-images.ts';
+
+test('content images support Markdown and HTML, deduplicate and reject unsafe URLs', () => {
+    assert.deepEqual(contentImages('![coupon](https://example.com/a.jpg) <img src="https://example.com/b.jpg?a=1&amp;b=2"> ![same](https://example.com/a.jpg) <img src="javascript:alert(1)"> <img src="https://user:pass@example.com/c.jpg">'), ['https://example.com/a.jpg', 'https://example.com/b.jpg?a=1&b=2']);
+    assert.deepEqual(contentImages(null), []);
+});
 
 test('FAQ arrays and legacy JSON strings render without accepting malformed entries', () => {
     const faqs = [{ question: '사용 방법?', answer: '결제 화면에 입력' }];

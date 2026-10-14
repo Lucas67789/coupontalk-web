@@ -1,5 +1,6 @@
 import type { CouponRow, Faq } from '@/lib/models';
 import { parseFaqs } from '@/lib/faq';
+import { contentImages } from '@/lib/content-images';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { isCouponExpired, couponExpiryTime } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -73,6 +74,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     return {
         title,
         description,
+        robots: { index: true, follow: true, 'max-image-preview': 'large' },
         alternates: {
             canonical: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
         },
@@ -83,7 +85,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: coupon.stores?.logo ? [{ url: coupon.stores.logo, alt: storeName }] : undefined,
+            images: contentImages(coupon.content_body).map(url => ({ url, alt: coupon.title })),
             publishedTime: new Date(coupon.published_at || coupon.created_at).toISOString(),
         },
     };

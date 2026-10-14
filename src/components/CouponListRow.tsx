@@ -5,6 +5,8 @@ import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
 import Link from 'next/link';
+import Image from 'next/image';
+import { contentImages } from '@/lib/content-images';
 
 export default function CouponListRow({ coupon, storeName, storeId, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
     const { showToast } = useToast();
@@ -28,10 +30,14 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     };
 
     const isNoCode = !hasCouponCode(coupon.code);
+    const thumbnail = contentImages(coupon.content_body)[0];
     const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
 
     return (
         <article className={`flex min-w-0 flex-col bg-white border rounded-xl p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
+            {thumbnail && <Link href={detailHref} className="relative mb-4 block aspect-[4/3] overflow-hidden rounded-lg bg-slate-50">
+                <Image src={thumbnail} alt={coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
+            </Link>}
             
             {/* Top: Badges */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
