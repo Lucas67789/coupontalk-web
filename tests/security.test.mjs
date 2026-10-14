@@ -4,15 +4,20 @@ import { sanitizeContent, jsonLd } from '../src/lib/content-safety.ts';
 import { safeAffiliateUrl, hasCouponCode } from '../src/lib/affiliate.ts';
 import { isCouponExpired } from '../src/lib/utils.ts';
 import { parseFaqs } from '../src/lib/faq.ts';
-import { contentImages } from '../src/lib/content-images.ts';
+import { contentImages, publicContentImages, couponImages } from '../src/lib/content-images.ts';
 
 test('content images support Markdown and HTML, deduplicate and reject unsafe URLs', () => {
     assert.deepEqual(contentImages('![coupon](https://example.com/a.jpg) <img src="https://example.com/b.jpg?a=1&amp;b=2"> ![same](https://example.com/a.jpg) <img src="javascript:alert(1)"> <img src="https://user:pass@example.com/c.jpg">'), ['https://example.com/a.jpg', 'https://example.com/b.jpg?a=1&b=2']);
     assert.deepEqual(contentImages(null), []);
+    assert.deepEqual(contentImages('![상품](/images/product.jpg)'), ['https://coupontalk.kr/images/product.jpg']);
+    assert.deepEqual(contentImages('<img src="//unknown.example/a.jpg">'), []);
     const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://owned.supabase.co';
     try {
         assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/thumbnails/a.jpg)'), ['https://coupontalk.kr/coupon-images/thumbnails/a.jpg']);
+        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/a.svg)'), ['https://coupontalk.kr/coupon-images/a.svg.png']);
+        assert.equal(publicContentImages('<img src="https://owned.supabase.co/storage/v1/object/public/images/a.svg">'), '<img src="https://coupontalk.kr/coupon-images/a.svg.png">');
+        assert.deepEqual(couponImages(''), ['https://coupontalk.kr/og-image.png']);
     } finally {
         if (previous === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
         else process.env.NEXT_PUBLIC_SUPABASE_URL = previous;

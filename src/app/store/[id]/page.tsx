@@ -1,6 +1,6 @@
 import type { CouponRow, ProductRow, Faq } from '@/lib/models';
-import { parseFaqs } from '@/lib/faq';
-import { contentImages } from '@/lib/content-images';
+import { defaultStoreFaqs } from '@/lib/faq';
+import { couponImages as contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
@@ -10,8 +10,9 @@ import CouponListRow from '@/components/CouponListRow';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Star, ExternalLink, CalendarDays, HelpCircle, CheckCircle, CreditCard, AlertTriangle } from 'lucide-react';
-import SafeImage from '@/components/SafeImage';
+import { ArrowLeft, ExternalLink, CalendarDays, HelpCircle, CheckCircle } from 'lucide-react';
+import StoreGuide from '@/components/StoreGuide';
+import Image from 'next/image';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
@@ -49,11 +50,6 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
         description = `${store.name} ${currentMonth}월 할인코드와 결제 혜택: ${dynamicHints}. 대상 조건과 예약 마감일, 사용 방법을 비교하세요.`;
     }
 
-    let ogImageUrl = store.logo;
-    if (ogImageUrl && ogImageUrl.trim().startsWith('<')) {
-        const match = ogImageUrl.match(/<img[^>]+src=["']([^"']+)["']/i);
-        ogImageUrl = match ? match[1] : undefined;
-    }
 
     return {
         title,
@@ -69,7 +65,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 할인 혜택` })) : ogImageUrl ? [{ url: ogImageUrl, alt: store.name }] : undefined,
+            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 할인 혜택` })) : [{ url: 'https://coupontalk.kr/og-image.png', alt: '쿠폰톡 할인 혜택 안내' }],
         }
     };
 }
@@ -120,14 +116,8 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const dateModified = updateTimes.length ? new Date(Math.max(...updateTimes)).toISOString() : undefined;
 
     // 우선순위 3: 동적 FAQ 생성 로직 (DB에 없으면 기본 템플릿 사용)
-    const defaultFaqs = [
-        { question: `${store.name} 할인코드는 어떻게 적용하나요?`, answer: `원하시는 상품을 장바구니에 담은 후, 결제 단계의 [프로모션/할인코드 입력] 란에 쿠폰톡에서 복사하신 코드를 붙여넣으시면 즉시 할인 금액이 반영됩니다.` },
-        { question: `${store.name} 쿠폰이 적용되지 않을 때는 어떻게 하나요?`, answer: `쿠폰 유효기간이 만료되었거나, 타 이벤트와 중복 적용이 불가능한 상품일 수 있습니다. 또한 영문 대소문자나 띄어쓰기 오타가 없는지 다시 한번 확인해 주세요.` },
-        { question: `결제수단별 혜택과 중복 할인이 되나요?`, answer: `대부분의 경우 전용 결제수단(네이버페이, 토스페이, 특정 카드사 등) 혜택과 일반 할인코드는 중복 적용되지 않으므로, 둘 중 혜택이 더 큰 것을 선택하시는 것이 좋습니다.` },
-        { question: `${store.name} 예약 취소 시 쿠폰은 어떻게 되나요?`, answer: `사용하신 쿠폰의 규정에 따라 다릅니다. 일반적인 할인코드는 취소 시 복구되어 재사용이 가능하지만, 선착순 쿠폰이나 프로모션 기간이 종료된 경우에는 복구되지 않을 수 있으니 주의 바랍니다.` }
-    ];
-    const parsedFaqs = parseFaqs(store.faqs);
-    const faqs = isAgoda ? agodaFaqs : parsedFaqs.length ? parsedFaqs : defaultFaqs;
+    const defaultFaqs = defaultStoreFaqs(store.name);
+    const faqs = isAgoda ? agodaFaqs : defaultFaqs;
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -136,7 +126,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         description: `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다.`,
         datePublished: store.created_at || now,
         dateModified: dateModified,
-        image: offerImages.length ? offerImages : undefined,
+        image: offerImages.length ? offerImages : ['https://coupontalk.kr/og-image.png'],
         author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' },
         publisher: { '@type': 'Organization', name: '쿠폰톡', logo: { '@type': 'ImageObject', url: 'https://coupontalk.kr/og-image.png' } },
         mainEntityOfPage: { '@type': 'WebPage', '@id': `https://coupontalk.kr/store/${encodeURIComponent(storeId)}` }
@@ -193,37 +183,16 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </Link>
             </div>
 
-            {isAgoda ? <header className="p-6 md:p-10 border-b border-gray-200">
-                <p className="text-sm font-semibold text-blue-700 mb-3">호텔 예약 혜택 · {currentYear}년 {currentMonth}월</p>
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">아고다 할인코드</h1>
-                <p className="mt-4 max-w-2xl text-gray-600 leading-7">국내·해외 숙소 할인코드부터 신규 고객, 네이버페이·토스페이 결제 혜택까지. 예약 조건을 비교하고 내 여행에 맞는 쿠폰을 확인하세요.</p>
-                <nav aria-label="아고다 페이지 목차" className="mt-6 flex flex-wrap gap-2">
+            <header className="p-6 md:p-10 border-b border-gray-200">
+                {activeCoupons.length === 0 && <Image src="/og-image.png" alt="쿠폰톡 할인 혜택 안내" width={600} height={315} className="mb-5 rounded-xl w-full max-w-sm h-auto" />}
+                <p className="text-sm font-semibold text-blue-700 mb-3">{store.name} 프로모션 · {currentYear}년 {currentMonth}월</p>
+                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{store.name} 할인코드</h1>
+                {!isAgoda && store.description && !/\d{1,2}월 최신 할인 정보를 제공합니다/.test(store.description) && <p className="mt-3 text-gray-600">{store.description}</p>}
+                <p className="mt-4 max-w-2xl text-gray-600 leading-7">{isAgoda ? "국내·해외 숙소 할인코드부터 신규 고객, 네이버페이·토스페이 결제 혜택까지. 예약 조건을 비교하고 내 여행에 맞는 쿠폰을 확인하세요." : `${store.name} 할인코드와 프로모션의 대상 조건·유효기간·사용 방법을 비교하세요. 상품별 상세 정보와 모델명은 각 혜택에서 확인할 수 있습니다.`}</p>
+                <nav aria-label={`${store.name} 페이지 목차`} className="mt-6 flex flex-wrap gap-2">
                     {[["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]].map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
-            </header> : <div className="p-6 md:p-10 border-b flex flex-col md:flex-row gap-8 items-start md:items-center relative overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full mix-blend-multiply opacity-50 transform translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border border-gray-100 flex items-center justify-center bg-white p-4 shadow-md flex-shrink-0 relative z-10">
-                    <SafeImage src={store.logo} alt={store.name} />
-                </div>
-                <div className="relative z-10">
-                    <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-2">
-                        [{currentYear}년 {currentMonth}월] <br className="hidden md:block" />
-                        {store.name} 할인코드 총정리
-                    </h1>
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-sm font-medium">
-                            <Star size={16} className="fill-yellow-500 text-yellow-500" />
-                            <span>{parseFloat(store.rating || 5).toFixed(1)}</span>
-                        </div>
-                    </div>
-                    <p className="text-lg text-gray-600 mb-4">{store.description}</p>
-                    {websiteUrl && (
-                        <a href={websiteUrl} target="_blank" rel="sponsored noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm hover:underline">
-                            {store.name} 바로가기 <ExternalLink size={14} />
-                        </a>
-                    )}
-                </div>
-            </div>}
+            </header>
 
             <div className="px-6 md:px-10 py-4 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
                 <CheckCircle size={20} className="text-green-600" />
@@ -239,7 +208,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {activeCoupons.length > 0 && (
                 <div className="p-6 md:p-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 혜택 요약표</h2>
-                    <p className="text-sm text-gray-600 leading-6 mb-4">예약 마감일이 지나지 않은 혜택입니다. 대상 고객·숙소와 실제 적용 여부는 각 프로모션 조건을 확인하세요.</p>
+                    <p className="text-sm text-gray-600 leading-6 mb-4">등록된 사용·예약 마감일이 지나지 않은 혜택입니다. 대상 고객·상품과 실제 적용 여부는 각 프로모션 조건을 확인하세요.</p>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-100 text-gray-800 font-bold border-b border-gray-200">
@@ -306,7 +275,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             )}
 
-            {tableCoupons.length > 0 && (
+            {(
                 <div id="coupons" className="p-6 md:p-10 bg-gray-50/50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                         할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
@@ -342,55 +311,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             )}
 
             {/* 우선순위 3: 콘텐츠 대폭 확장 (4단계 적용 가이드, 결제수단별 혜택, 예약 꿀팁, 브랜드 안내) */}
-            {isAgoda ? <AgodaGuide /> : <div className="p-6 md:p-10 bg-white border-b" style={{ borderColor: 'var(--border-color)' }}>
-
-                {/* 1. 결제수단 혜택 가이드 */}
-                <h2 className="text-2xl font-bold flex items-center gap-2 mb-6 text-gray-900">
-                    <CreditCard size={24} className="text-blue-600" /> {store.name} 결제수단 혜택 비교
-                </h2>
-                <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-10 text-gray-700 leading-relaxed">
-                    {store.name}에서는 신용카드, 카카오페이, 네이버페이, 토스페이 등 다양한 결제 수단을 지원합니다. 각 카드사나 간편결제사에서 진행하는 매월 게릴라 프로모션(청구할인, 캐시백 등)을 적용하면 가장 저렴하게 예약할 수 있습니다. 상단의 할인코드 요약표를 참고하여 중복 적용이 가능한 가장 혜택이 큰 결제 수단을 선택해 보세요!
-                </div>
-
-                {/* 2. 4단계 적용 가이드 */}
-                <h2 className="text-2xl font-bold flex items-center gap-2 mb-6 text-gray-900">
-                    <CheckCircle size={24} className="text-blue-600" /> {store.name} 할인코드 적용 4단계
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <div className="text-sm font-bold text-blue-600 mb-1">STEP 1</div>
-                        <h3 className="font-bold text-gray-900 mb-2">마음에 드는 상품 선택하기</h3>
-                        <p className="text-gray-600 text-sm">{store.name} 홈페이지에 접속하여 구매 또는 예약하고자 하는 상품을 찾아 장바구니에 담습니다.</p>
-                    </div>
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <div className="text-sm font-bold text-blue-600 mb-1">STEP 2</div>
-                        <h3 className="font-bold text-gray-900 mb-2">할인코드 꼼꼼히 복사하기</h3>
-                        <p className="text-gray-600 text-sm">쿠폰톡에서 제공하는 가장 조건이 좋은 쿠폰 코드를 확인 후 클립보드에 복사해 둡니다.</p>
-                    </div>
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <div className="text-sm font-bold text-blue-600 mb-1">STEP 3</div>
-                        <h3 className="font-bold text-gray-900 mb-2">결제 페이지에서 코드 입력</h3>
-                        <p className="text-gray-600 text-sm">최종 결제 전 [쿠폰/할인코드 입력] 란에 복사해둔 코드를 붙여넣기 한 후 &apos;적용&apos; 버튼을 누릅니다.</p>
-                    </div>
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <div className="text-sm font-bold text-blue-600 mb-1">STEP 4</div>
-                        <h3 className="font-bold text-gray-900 mb-2">할인 차감 내역 최종 확인</h3>
-                        <p className="text-gray-600 text-sm">기본가에서 할인된 금액이 정상적으로 크게 차감되었는지 우측의 최종 결제 금액을 확인합니다.</p>
-                    </div>
-                </div>
-
-                {/* 3. 예약 꿀팁 및 주의사항 */}
-                <h2 className="text-2xl font-bold flex items-center gap-2 mb-6 text-gray-900">
-                    <AlertTriangle size={24} className="text-orange-500" /> 놓치기 쉬운 결제 꿀팁 & 주의사항
-                </h2>
-                <ul className="list-disc list-inside space-y-3 text-gray-600 mb-8 px-2">
-                    <li>해외 결제 플랫폼의 경우 DCC(원화결제 수수료)를 방지하기 위해 <strong>결제 통화를 현지 통화나 달러($)로 변경</strong>하는 것이 유리할 수 있습니다.</li>
-                    <li>모바일 앱 전용 프로모션 코드는 PC 웹브라우저에서 적용되지 않으니 디바이스를 확인해 주세요.</li>
-                    <li>선착순 한정 수량 쿠폰은 예고 없이 조기 마감될 수 있으므로, <strong>발급 즉시 사용하는 것</strong>을 권장합니다.</li>
-                    <li>상품 자체 특가(프로모션 상품)와 일반 할인코드는 중복 적용이 불가능한 경우가 많습니다.</li>
-                </ul>
-
-            </div>}
+            {isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={store.tags?.includes("travel")} />}
 
             {/* FAQs */}
             <div id="faq" className="p-6 md:p-10 border-t scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>

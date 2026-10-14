@@ -6,7 +6,7 @@ import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
 import Link from 'next/link';
 import Image from 'next/image';
-import { contentImages } from '@/lib/content-images';
+import { couponImages as contentImages } from '@/lib/content-images';
 
 export default function CouponListRow({ coupon, storeName, storeId, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
     const { showToast } = useToast();

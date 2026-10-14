@@ -4,10 +4,11 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import { sanitizeContent } from '@/lib/content-safety';
-import SafeImage from '@/components/SafeImage';
+import { publicContentImages } from '@/lib/content-images';
 
 export function MarkdownRenderer({ content, storeName }: { content: string, storeName?: string }) {
     if (!content) return null;
+    content = publicContentImages(content);
 
     // Check if the content appears to be purely HTML (like from ReactQuill)
     const isHtml = /^\s*<(p|h[1-6]|ul|ol|blockquote|div)[\s>]/i.test(content);
@@ -63,11 +64,11 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
                         }
                         return (
                             <div className="my-6">
-                                <SafeImage 
+                                <img
                                     src={String(src || '')} 
                                     alt={finalAlt} 
                                     className="rounded-xl border border-gray-100 max-w-full h-auto shadow-sm" 
-                                    lazyLoad={true}
+                                    loading="lazy"
                                 />
                             </div>
                         );

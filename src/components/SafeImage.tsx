@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { sanitizeContent } from '@/lib/content-safety';
+import { publicContentImages } from '@/lib/content-images';
 
 export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
+    src = publicContentImages(src || '');
     const [error, setError] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
 

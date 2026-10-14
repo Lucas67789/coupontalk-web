@@ -6,6 +6,8 @@ import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
 import Link from 'next/link';
+import Image from 'next/image';
+import { couponImages } from '@/lib/content-images';
 
 const getStoreTheme = (name: string) => {
     const themes = [
@@ -66,6 +68,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     } catch (e) { }
 
     const handleCopyAndRedirect = async () => {
+        if (isExpired) return;
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
@@ -75,6 +78,9 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
 
     const cardContent = (
         <>
+            <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-50">
+                <Image src={couponImages(coupon.content_body)[0]} alt={coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
+            </div>
             {/* Decorative top accent */}
             <div className={`absolute left-0 top-0 right-0 h-1 ${isExpired ? 'bg-gray-300' : theme.accent}`}></div>
 
@@ -103,8 +109,8 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                         </div>
                     </div>
 
-                    <h3 className={`text-lg font-bold mb-3 leading-tight line-clamp-2 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900'}`}>
-                        {coupon.title}
+                    <h3 className={`text-lg font-bold mb-3 leading-tight ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900'}`}>
+                        {detailHref ? <Link href={detailHref} className="hover:underline">{coupon.title}</Link> : coupon.title}
                     </h3>
 
                     <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -130,6 +136,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
 
                 <button
+                    disabled={isExpired}
                     onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleCopyAndRedirect(); }}
                     className={`w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap rounded-xl font-bold transition-colors flex items-center gap-2 ${
                         copied 
@@ -153,11 +160,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
         </>
     );
 
-    return detailHref ? (
-        <Link href={detailHref} className="card p-5 flex flex-col gap-4 relative overflow-hidden h-full hover:shadow-lg transition-shadow cursor-pointer block">
-            {cardContent}
-        </Link>
-    ) : (
+    return (
         <div className="card p-5 flex flex-col gap-4 relative overflow-hidden h-full">
             {cardContent}
         </div>

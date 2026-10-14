@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { supabase, fetchAllRows } from '@/lib/supabase';
-import { contentImages } from '@/lib/content-images';
+import { couponImages as contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';

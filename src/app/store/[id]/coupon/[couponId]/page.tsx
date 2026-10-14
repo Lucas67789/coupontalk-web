@@ -1,6 +1,6 @@
 import type { CouponRow, Faq } from '@/lib/models';
-import { parseFaqs } from '@/lib/faq';
-import { contentImages } from '@/lib/content-images';
+import { defaultStoreFaqs } from '@/lib/faq';
+import { couponImages as contentImages, publicContentImages } from '@/lib/content-images';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { isCouponExpired, couponExpiryTime } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -10,6 +10,9 @@ import { ArrowLeft, Star, Tag, Clock, CheckCircle2, ChevronRight } from 'lucide-
 import SafeImage from '@/components/SafeImage';
 import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { hasCouponCode } from '@/lib/affiliate';
+import { agodaFaqs } from '@/components/AgodaGuide';
+import StoreGuide from '@/components/StoreGuide';
 import type { Metadata } from 'next';
 
 type RelatedCoupon = Pick<CouponRow, 'id' | 'title' | 'discount' | 'code' | 'store_id' | 'expiry' | 'published_at'>;
@@ -69,7 +72,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     if (storeName && !defaultDescPart1.includes(storeName)) {
         defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
     }
-    const description = coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택을 받으세요. 검증된 할인코드를 지금 바로 사용하세요.`;
+    const description = coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
 
     return {
         title,
@@ -100,7 +103,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const now = new Date().toISOString();
     const couponPromise = supabase
         .from('coupons')
-        .select('*, stores(name, description, logo, rating, website_url, faqs, guide_content)')
+        .select('*, stores(name, description, logo, rating, website_url, faqs, guide_content, tags)')
         .eq('id', couponId)
         .eq('status', 'published')
         .lte('published_at', now)
@@ -130,7 +133,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
     const { condText, affUrl } = parseCondition(coupon);
     const store = { ...coupon.stores };
-    store.faqs = parseFaqs(store.faqs);
+    store.faqs = storeId === 'agoda' ? agodaFaqs : defaultStoreFaqs(store.name);
     const storeName = store?.name || '';
 
     const expired = isCouponExpired(coupon.expiry, coupon.title);
@@ -148,12 +151,12 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     }
 
     // H1 title
-    const h1Title = coupon.seo_title || `${storeName} ${coupon.title}`;
+    const h1Title = coupon.seo_title || (coupon.title.includes(storeName) ? coupon.title : `${storeName} ${coupon.title}`);
 
     // Extract Hero Image from markdown
-    let mainImage = null;
+    let mainImage: string | null = contentImages(coupon.content_body)[0];
     let mainImageAlt = h1Title;
-    let remainingContent = coupon.content_body || '';
+    let remainingContent = publicContentImages(coupon.content_body || '');
 
     // Look for the first image in markdown (e.g. ![alt text](url))
     const imgRegex = /!\[(.*?)\]\((.*?)\)/;
@@ -170,6 +173,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         '@context': 'https://schema.org',
         '@type': 'Article',
         headline: h1Title,
+        image: contentImages(coupon.content_body),
         description: coupon.seo_description || `${storeName} ${coupon.title} - ${coupon.discount} 할인`,
         datePublished: new Date(coupon.published_at || coupon.created_at).toISOString(),
         dateModified: new Date(coupon.updated_at || coupon.published_at || coupon.created_at).toISOString(),
@@ -239,7 +243,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
             {/* Breadcrumb */}
             <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
-                <nav className="flex items-center gap-2 text-sm text-gray-500">
+                <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500 [&>a]:shrink-0 [&>svg]:shrink-0">
                     <Link href="/" className="hover:text-blue-600 transition-colors">홈</Link>
                     <ChevronRight size={14} />
                     <Link href={`/store/${encodeURIComponent(storeId)}`} className="hover:text-blue-600 transition-colors">{storeName}</Link>
@@ -315,14 +319,14 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 {/* Promotion guidance */}
                 {!expired && <div className="prose prose-blue max-w-none mb-8">
                     <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                        <strong>{storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요?
+                        <strong>{storeName} {!hasCouponCode(coupon.code) ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요?
                         본 페이지에서는 <strong className="text-blue-700">{coupon.title}</strong> 프로모션 혜택을 통해 {storeName}에서 결제 시
-                        <span className="bg-blue-50 px-1 mx-1 font-bold text-blue-800">{coupon.discount}</span> 할인을 적용받을 수 있는 공식적이고 안전한 방법을 자세히 안내해 드립니다.
+                        <span className="bg-blue-50 px-1 mx-1 font-bold text-blue-800">{coupon.discount}</span> 할인을 적용받을 수 있는 조건과 이용 방법을 안내합니다.
                     </p>
                     <p className="text-gray-600 leading-relaxed mb-4">
-                        해당 프로모션은 <strong>{condText ? condText : '스토어 전 가입자 대상'}</strong>으로 진행되며,
-                        {coupon.code === 'NO_CODE_REQUIRED' ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다.
-                        수많은 정보 속에서 헤매지 마시고, 본 {coupon.code === 'NO_CODE_REQUIRED' ? '할인 링크' : '할인코드'}를 사용하여 가장 저렴하게 쇼핑을 즐겨보세요!
+                        해당 프로모션은 <strong>{condText ? condText : '상세 프로모션 페이지에서 대상 확인'}</strong>으로 진행되며,
+                        {!hasCouponCode(coupon.code) ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다.
+                        결제 전에 해당 {!hasCouponCode(coupon.code) ? '할인 링크' : '할인코드'}의 할인액과 최종 결제 금액을 확인하세요.
                     </p>
                     {!expired && coupon.is_verified && (
                         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3 my-6">
@@ -340,7 +344,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             {validRelatedCoupons.length > 0 && (
                 <div className="px-6 md:px-10 pb-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
-                        {storeName}의 다른 {coupon.code === 'NO_CODE_REQUIRED' ? '혜택' : '할인코드'}
+                        {storeName}의 다른 {!hasCouponCode(coupon.code) ? '혜택' : '할인코드'}
                     </h2>
                     <div className="flex flex-col gap-3">
                         {validRelatedCoupons.map((rc: RelatedCoupon) => (
@@ -378,6 +382,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
             )}
 
+            <StoreGuide name={storeName} travel={store.tags?.includes("travel")} />
+
             {/* Store FAQs */}
             {store?.faqs && store.faqs.length > 0 && (
                 <div className="px-6 md:px-10 pb-8">
@@ -405,9 +411,9 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 <div className="px-6 md:px-10 pb-10">
                     <div className="bg-blue-50/50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
                         <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900 border-b border-blue-100/50 pb-4">
-                            💡 초보자를 위한 {storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택 이용 방법' : '쿠폰코드 사용법'}
+                            💡 초보자를 위한 {storeName} {!hasCouponCode(coupon.code) ? '할인 혜택 이용 방법' : '쿠폰코드 사용법'}
                         </h2>
-                        <p className="text-blue-800 mb-6 text-sm">할인 혜택을 처음 이용해보시는 분들도 아래 가이드에 따라 천천히 진행하시면 누구나 쉽게 최종 결제 단계에서 {coupon.discount} 할인을 확정받으실 수 있습니다.</p>
+                        <p className="text-blue-800 mb-6 text-sm">아래 안내와 해당 프로모션의 조건을 확인하고, 결제 전에 할인 내역을 확인하세요.</p>
                         <div className="flex flex-col gap-2">
                             <MarkdownRenderer content={store.guide_content} storeName={storeName} />
                         </div>
