@@ -1,4 +1,4 @@
-export const metadata = { title: '개인정보 처리 안내 | 쿠폰톡', robots: { index: false } };
+export const metadata = { title: '개인정보처리방침 | 쿠폰톡', description: '쿠폰톡의 개인정보 처리 및 이용자 권리 안내입니다.', alternates: { canonical: 'https://coupontalk.kr/privacy' }, robots: { index: false, follow: true } };
 export default function PrivacyPage() {
     const email = process.env.CONTACT_EMAIL;
     const operator = process.env.OPERATOR_NAME;

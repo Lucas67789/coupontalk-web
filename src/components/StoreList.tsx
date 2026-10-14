@@ -4,21 +4,17 @@ import type { StoreSummary } from '@/lib/models';
 import { useState } from 'react';
 import StoreCard from '@/components/StoreCard';
 import { Search } from 'lucide-react';
+import Link from 'next/link';
+import { matchesSearch, type SearchOffer } from '@/lib/search';
 
-export default function StoreList({ initialStores, initialQuery = "" }: { initialStores: StoreSummary[]; initialQuery?: string }) {
+export default function StoreList({ initialStores, initialQuery = "", offers = [] }: { initialStores: StoreSummary[]; initialQuery?: string; offers?: SearchOffer[] }) {
     // 홈 화면의 SearchAction(구글/네이버 사이트링크 검색창) 또는 ?q= 링크로 들어왔을 때
     // 초기 검색어로 반영되도록 함
     const [searchQuery, setSearchQuery] = useState(initialQuery);
 
     // Filter stores based on search query matching name, description, or tags
-    const filteredStores = initialStores.filter(store => {
-        const query = searchQuery.toLowerCase();
-        const matchName = store.name.toLowerCase().includes(query);
-        const matchDesc = store.description?.toLowerCase().includes(query);
-        const matchTags = store.tags?.some((tag: string) => tag.toLowerCase().includes(query));
-
-        return matchName || matchDesc || matchTags;
-    });
+    const matchingOffers = searchQuery.trim() ? offers.filter(offer => matchesSearch(`${offer.storeName} ${offer.title} ${offer.discount} ${offer.keywords}`, searchQuery)) : [];
+    const filteredStores = initialStores.filter(store => matchesSearch(`${store.name} ${store.description} ${store.tags?.join(' ')}`, searchQuery) || matchingOffers.some(offer => offer.storeId === store.id));
 
     return (
         <div className="relative isolate px-6 lg:px-8">
@@ -27,15 +23,15 @@ export default function StoreList({ initialStores, initialQuery = "" }: { initia
                 <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-300 to-blue-500 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
             </div>
 
-            <div className="text-center py-16 mb-8 animate-fade-in">
+            <div className="text-center py-8 mb-6">
                 <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-bold tracking-wider mb-6">
                     수시로 추가되는 혜택
                 </span>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-                    전체 스토어 <span className="text-blue-600">목록</span>
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
+                    브랜드·상품 <span className="text-blue-600">할인 검색</span>
                 </h1>
-                <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-                    쿠폰톡이 제공하는 모든 오픈 혜택과 시크릿 링크를 한눈에 둘러보세요.
+                <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
+                    브랜드 이름이나 정확한 모델번호로 관련 쿠폰과 상품을 찾아보세요.
                 </p>
 
                 <div className="max-w-md mx-auto relative group">
@@ -44,7 +40,8 @@ export default function StoreList({ initialStores, initialQuery = "" }: { initia
                     </div>
                     <input
                         type="text"
-                        placeholder="스토어 이름이나 카테고리를 검색해 보세요..."
+                        aria-label="브랜드, 상품명, 모델번호 검색"
+                        placeholder="브랜드, 상품명, 모델번호 검색"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-12 pr-4 py-4 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
@@ -52,6 +49,11 @@ export default function StoreList({ initialStores, initialQuery = "" }: { initia
                 </div>
             </div>
 
+            {searchQuery.trim() && <section className="mb-8" aria-live="polite">
+                <h2 className="text-xl font-bold mb-4">관련 쿠폰·상품 {matchingOffers.length}개</h2>
+                <div className="grid gap-3">{matchingOffers.map(offer => <Link key={offer.id} href={offer.href} className="rounded-xl border border-gray-200 bg-white p-5 hover:border-blue-500"><p className="text-sm text-blue-700 mb-1">{offer.storeName} · {offer.discount}</p><h3 className="font-bold">{offer.title}</h3></Link>)}</div>
+                {!matchingOffers.length && <p className="text-gray-600">일치하는 활성 쿠폰·상품이 없습니다. 모델번호나 브랜드명으로 다시 검색해 주세요.</p>}
+            </section>}
             {filteredStores.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
                     {filteredStores.map((store: StoreSummary) => (

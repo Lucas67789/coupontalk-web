@@ -1,3 +1,4 @@
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 
 export async function GET() {
@@ -5,7 +6,7 @@ export async function GET() {
 
     // Fetch categories and stores
     const { data: categories } = await fetchAllRows(supabase.from('categories').select('*'));
-    const { data: stores } = await fetchAllRows(supabase.from('stores').select('*').order('created_at', { ascending: false }));
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('*').not('id', 'in', ALIAS_STORE_FILTER).order('created_at', { ascending: false }));
 
     // Build RSS items
     let itemsXml = '';
@@ -49,7 +50,7 @@ export async function GET() {
     <channel>
         <title>쿠폰톡(coupontalk)</title>
         <link>${baseUrl}</link>
-        <description>가장 최신의 검증된 할인코드 모음. 쿠팡, 알리익스프레스, 아고다 등 인기 쇼핑몰 할인 쿠폰 및 프로모션 코드를 매일 업데이트합니다.</description>
+        <description>브랜드별 할인코드와 적용 조건 모음. 쿠팡, 알리익스프레스, 아고다 등 인기 쇼핑몰 할인 쿠폰 및 프로모션 코드를 조건과 유효기간을 함께 안내합니다.</description>
         <language>ko-kr</language>
         <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
         <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml" />

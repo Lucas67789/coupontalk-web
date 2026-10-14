@@ -10,10 +10,10 @@ import PageViewTracker from "@/components/PageViewTracker";
 export const metadata: Metadata = {
   metadataBase: new URL("https://coupontalk.kr"),
   title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
-  description: "가장 최신의 검증된 할인코드 모음. 쿠팡, 알리익스프레스, 아고다 등 인기 쇼핑몰 할인 쿠폰 및 프로모션 코드를 매일 업데이트합니다.",
+  description: "브랜드별 할인코드와 적용 조건 모음. 쿠팡, 알리익스프레스, 아고다 등 인기 쇼핑몰 할인 쿠폰 및 프로모션 코드를 조건과 유효기간을 함께 안내합니다.",
   openGraph: {
     title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
-    description: "가장 최신의 검증된 할인코드만 모았습니다. 쿠팡, 알리 등 인기 스토어의 할인 혜택을 확인하세요.",
+    description: "브랜드별 할인코드와 적용 조건을 모았습니다. 쿠팡, 알리 등 인기 스토어의 할인 혜택을 확인하세요.",
     images: [
       {
         url: "https://coupontalk.kr/og-image.png",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "쿠폰톡(coupontalk) - 최신 할인코드 & 쿠폰 총정리",
-    description: "가장 최신의 검증된 할인코드 모음. 쿠팡, 알리 등 인기 쇼핑몰 프로모션 코드를 매일 업데이트합니다.",
+    description: "브랜드별 할인코드와 적용 조건 모음. 쿠팡, 알리 등 인기 쇼핑몰 프로모션 코드를 조건과 유효기간을 함께 안내합니다.",
     images: ["https://coupontalk.kr/og-image.png"],
   },
   robots: {

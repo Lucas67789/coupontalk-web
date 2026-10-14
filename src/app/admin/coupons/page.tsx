@@ -1,4 +1,7 @@
 "use client";
+import { bookingDeadlineFromContent, couponExpiryTime } from '@/lib/utils';
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
+
 import type { CouponRow, StoreRow } from '@/lib/models';
 
 import { useEffect, useState } from 'react';
@@ -50,7 +53,7 @@ export default function AdminCoupons() {
     // Load Stores once
     useEffect(() => {
         const fetchStores = async () => {
-            const { data } = await fetchAllRows(supabase.from('stores').select('id, name'));
+            const { data } = await fetchAllRows(supabase.from('stores').select('id, name').not('id', 'in', ALIAS_STORE_FILTER));
             if (data) setStores(data);
         };
         fetchStores();
@@ -108,6 +111,11 @@ export default function AdminCoupons() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const bookingDeadline = bookingDeadlineFromContent(currentCoupon.content_body || '');
+        if (bookingDeadline && (couponExpiryTime(currentCoupon.expiry) ?? Infinity) > (couponExpiryTime(bookingDeadline) ?? Infinity)) {
+            alert(`본문의 예약 마감일(${bookingDeadline})보다 만료일이 늦습니다. 만료일에는 예약·사용 마감일을 먼저 입력하고 투숙 기간은 별도로 안내해주세요.`);
+            return;
+        }
         // Handle published_at default
         let pubDate = currentCoupon.published_at;
         if (currentCoupon.status === 'published' && !pubDate) {
@@ -319,8 +327,8 @@ export default function AdminCoupons() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">유효기간</label>
-                                    <input required type="text" placeholder="예: 2026년 12월 31일 마감" value={currentCoupon?.expiry || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, expiry: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">예약·사용 마감일 (투숙 마감일과 구분)</label>
+                                    <input required type="text" placeholder="예: 2026.10.31 예약 / 2027.06.30 숙박" value={currentCoupon?.expiry || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, expiry: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <input type="checkbox" id="is_verified" checked={currentCoupon?.is_verified ?? true} onChange={e => setCurrentCoupon({ ...currentCoupon, is_verified: e.target.checked })} className="w-5 h-5 text-blue-600 rounded" />
@@ -338,7 +346,7 @@ export default function AdminCoupons() {
                                     <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">🚀 네이버/구글 SEO 상위 노출 가이드</h4>
                                     <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
                                         <li>SEO 제목에는 키워드(할인코드, 프로모션, 쿠폰)를 자연스럽게 포함하세요. (예: 2026년 4월 레노버 공식 할인코드 모음)</li>
-                                        <li>상세 콘텐츠(본문)는 <strong>단순한 링크 모음이 아닌 500자 이상의 유용한 정보글 형태</strong>로 작성해야 C-Rank 점수가 높아집니다.</li>
+                                        <li>상세 콘텐츠(본문)는 <strong>실제 적용 대상·할인 한도·사용 기간·오류 해결 정보</strong>를 담아주세요. 글자 수나 키워드 반복만으로 순위가 높아지지 않습니다.</li>
                                         <li>마크다운의 헤딩(##, ###)을 활용하여 문단을 나누고, 사용 팁과 주의사항을 상세히 적어주세요.</li>
                                     </ul>
                                 </div>
@@ -351,7 +359,7 @@ export default function AdminCoupons() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">📌 SEO 설명 <span className="text-blue-600">(meta description - 검색결과 설명문)</span></label>
-                                <textarea placeholder="예: 2026년 아고다 할인코드를 정리했습니다. 전 세계 숙소 7% 할인을 받으세요. 검증된 최신 할인쿠폰을 지금 바로 사용하세요." value={currentCoupon?.seo_description || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 text-sm leading-relaxed" rows={2} />
+                                <textarea placeholder="예: 2026년 아고다 할인코드를 정리했습니다. 전 세계 숙소 7% 할인을 받으세요. 할인 조건과 사용 기간을 확인하세요." value={currentCoupon?.seo_description || ''} onChange={e => setCurrentCoupon({ ...currentCoupon, seo_description: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50 text-sm leading-relaxed" rows={2} />
                                 <p className="text-xs text-gray-400 mt-1">150자 내외 권장. 비워두면 자동생성됩니다.</p>
                             </div>
                             <div>

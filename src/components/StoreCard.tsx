@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { StoreSummary } from '@/lib/models';
-import { Star, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const getGradientClass = (name: string) => {
     const gradients = [
@@ -25,7 +25,7 @@ const getGradientClass = (name: string) => {
 };
 
 export default function StoreCard({ store }: { store: StoreSummary }) {
-    const latestEventTitle = store.events?.length > 0 ? store.events[0].title : `${store.coupons?.length || 0}개의 할인코드`;
+    const latestEventTitle = store.coupons?.length ? `${store.coupons.length}개의 할인 혜택` : '현재 등록된 활성 쿠폰 없음';
 
     return (
         <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
@@ -34,10 +34,6 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
                         {store.name.charAt(0)}
                     </div>
-                    <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 flex-shrink-0 h-7 rounded text-sm font-medium">
-                        <Star size={14} className="fill-yellow-500 text-yellow-500" />
-                        <span>{Number(store.rating || 5).toFixed(1)}</span>
-                    </div>
                 </div>
 
                 <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">
@@ -45,7 +41,7 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
                 </h3>
 
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                    {store.description}
+                    {/\d{1,2}월 최신 할인 정보를 제공합니다/.test(store.description || '') ? `${store.name}의 할인 혜택과 적용 조건을 비교하세요.` : store.description}
                 </p>
 
                 <div className="pt-4 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-color)' }}>

@@ -67,8 +67,9 @@ export default function Navbar() {
                     <Link href="/category/fashion" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">명품·패션</Link>
                     <Link href="/category/electronics" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">전자제품</Link>
                     <Link href="/category/health" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">건강식품</Link>
+                    <Link href="/store" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">브랜드·상품·모델명 검색</Link>
                     <div className="h-px bg-gray-100 my-2"></div>
-                    <Link href="/about" className="btn-primary w-full text-center py-3">
+                    <Link href="/contact" className="btn-primary w-full text-center py-3">
                         제휴/문의
                     </Link>
                 </div>

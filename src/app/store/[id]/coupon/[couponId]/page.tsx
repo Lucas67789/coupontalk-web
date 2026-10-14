@@ -2,17 +2,15 @@ import type { CouponRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs } from '@/lib/faq';
 import { couponImages as contentImages, publicContentImages } from '@/lib/content-images';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
-import { isCouponExpired, couponExpiryTime } from '@/lib/utils';
+import { isCouponExpired } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Star, Tag, Clock, CheckCircle2, ChevronRight } from 'lucide-react';
-import SafeImage from '@/components/SafeImage';
+import { ArrowLeft, Clock, ChevronRight } from 'lucide-react';
 import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { hasCouponCode } from '@/lib/affiliate';
 import { agodaFaqs } from '@/components/AgodaGuide';
-import StoreGuide from '@/components/StoreGuide';
 import type { Metadata } from 'next';
 
 type RelatedCoupon = Pick<CouponRow, 'id' | 'title' | 'discount' | 'code' | 'store_id' | 'expiry' | 'published_at'>;
@@ -133,7 +131,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
     const { condText, affUrl } = parseCondition(coupon);
     const store = { ...coupon.stores };
-    store.faqs = storeId === 'agoda' ? agodaFaqs : defaultStoreFaqs(store.name);
+    store.faqs = storeId === 'agoda' ? agodaFaqs : defaultStoreFaqs(store.name, isCouponExpired(coupon.expiry, coupon.title) ? [] : [coupon]);
     const storeName = store?.name || '';
 
     const expired = isCouponExpired(coupon.expiry, coupon.title);
@@ -202,39 +200,20 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const faqLd = store?.faqs && store.faqs.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: store.faqs.map((faq: Faq) => ({
+        mainEntity: store.faqs.slice(0, 2).map((faq: Faq) => ({
             '@type': 'Question',
             name: faq.question,
             acceptedAnswer: { '@type': 'Answer', text: faq.answer }
         }))
     } : null;
 
-    // 만료일(expiry)이 실제 날짜 형식일 때만 validThrough로 사용 (형식이 안 맞으면 생략)
-    let validThroughIso: string | undefined;
-    if (coupon.expiry && /^\d{4}[.\-]\d{1,2}[.\-]\d{1,2}/.test(coupon.expiry)) {
-        const end = couponExpiryTime(coupon.expiry);
-        if (end !== null) validThroughIso = new Date(end).toISOString();
-    }
-
-    const offerLd = {
-        '@context': 'https://schema.org',
-        '@type': 'Offer',
-        name: coupon.title,
-        url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
-        priceCurrency: 'KRW',
-        price: '0',
-        availability: expired ? 'https://schema.org/Discontinued' : 'https://schema.org/InStock',
-        ...(validThroughIso ? { validThrough: validThroughIso } : {}),
-        seller: { '@type': 'Organization', name: storeName },
-    };
-
     const schemaGraph = {
         '@context': 'https://schema.org',
-        '@graph': [jsonLd, breadcrumbLd, offerLd, ...(faqLd ? [faqLd] : [])]
+        '@graph': [jsonLd, breadcrumbLd, ...(faqLd ? [faqLd] : [])]
     };
 
     return (
-        <div className="container mx-auto max-w-4xl border-x min-h-screen bg-white shadow-sm" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="container mx-auto max-w-4xl border-x min-h-screen pb-24 md:pb-0 bg-white shadow-sm" style={{ borderColor: 'var(--border-color)' }}>
             {/* JSON-LD Schema Graph */}
             <script
                 type="application/ld+json"
@@ -242,62 +221,26 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             />
 
             {/* Breadcrumb */}
-            <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500 [&>a]:shrink-0 [&>svg]:shrink-0">
                     <Link href="/" className="hover:text-blue-600 transition-colors">홈</Link>
                     <ChevronRight size={14} />
                     <Link href={`/store/${encodeURIComponent(storeId)}`} className="hover:text-blue-600 transition-colors">{storeName}</Link>
                     <ChevronRight size={14} />
-                    <span className="text-gray-800 font-medium truncate max-w-[200px]">{coupon.title}</span>
+                    <span className="text-gray-800 font-medium truncate max-w-[200px] hidden md:inline">{coupon.title}</span>
                 </nav>
             </div>
 
-            {/* Store Mini Header */}
-            <div className="p-6 border-b flex items-center gap-4" style={{ borderColor: 'var(--border-color)' }}>
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center bg-white p-2 shadow-sm flex-shrink-0">
-                    <SafeImage src={store?.logo} alt={storeName} />
-                </div>
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <Link href={`/store/${encodeURIComponent(storeId)}`} className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
-                            {storeName}
-                        </Link>
-                        {store?.rating && (
-                            <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
-                                <Star size={12} className="fill-yellow-500 text-yellow-500" />
-                                <span>{Number(store.rating).toFixed(1)}</span>
-                            </div>
-                        )}
-                    </div>
-                    <p className="text-sm text-gray-500">{store?.description}</p>
-                </div>
-            </div>
-
             {/* Affiliate Disclosure (KFTC) */}
-            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-400 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-600 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
                 이 포스팅은 제휴마케팅이 포함된 광고로 일정 커미션을 지급 받을 수 있습니다.
             </div>
 
             {/* H1 Title */}
-            <div className="p-6 md:p-10">
-                <div className="flex items-center gap-3 mb-4">
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
-                        {coupon.discount}
-                    </span>
-                    <span className="text-sm text-gray-400">
-                        {expired ? '기간 만료' : '프로모션 안내'}
-                    </span>
-                </div>
+            <div className="p-5 md:p-8">
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-6">
                     {h1Title}
                 </h1>
-
-                {/* Hero Image Extracted from Markdown */}
-                {mainImage && (
-                    <div className="mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm relative w-full">
-                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto" />
-                    </div>
-                )}
 
                 {/* Coupon CTA Section */}
                 <div className="mb-10">
@@ -316,29 +259,24 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     />
                 </div>
 
-                {/* Promotion guidance */}
-                {!expired && <div className="prose prose-blue max-w-none mb-8">
-                    <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                        <strong>{storeName} {!hasCouponCode(coupon.code) ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요?
-                        본 페이지에서는 <strong className="text-blue-700">{coupon.title}</strong> 프로모션 혜택을 통해 {storeName}에서 결제 시
-                        <span className="bg-blue-50 px-1 mx-1 font-bold text-blue-800">{coupon.discount}</span> 할인을 적용받을 수 있는 조건과 이용 방법을 안내합니다.
-                    </p>
-                    <p className="text-gray-600 leading-relaxed mb-4">
-                        해당 프로모션은 <strong>{condText ? condText : '상세 프로모션 페이지에서 대상 확인'}</strong>으로 진행되며,
-                        {!hasCouponCode(coupon.code) ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다.
-                        결제 전에 해당 {!hasCouponCode(coupon.code) ? '할인 링크' : '할인코드'}의 할인액과 최종 결제 금액을 확인하세요.
-                    </p>
-                    {!expired && coupon.is_verified && (
-                        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3 my-6">
-                            <CheckCircle2 className="text-green-600 mt-0.5 flex-shrink-0" size={20} />
-                            <div>
-                                <h4 className="font-bold text-green-900 mb-1">매니저 수동 검증 완료</h4>
-                                <p className="text-green-800 text-sm">등록 시 확인된 {storeName} 프로모션입니다. 실제 적용 가능 여부는 쇼핑몰 결제 화면에서 확인해주세요.</p>
-                            </div>
-                        </div>
-                    )}
-                </div>}
+                {/* Hero Image Extracted from Markdown */}
+                {mainImage && (
+                    <div className="mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm relative w-full">
+                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto" />
+                    </div>
+                )}
+
+
             </div>
+
+            {/* Markdown Content Section */}
+            {remainingContent && (
+                <div className="px-6 md:px-10 pb-8">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <MarkdownRenderer content={remainingContent} storeName={storeName} />
+                    </div>
+                </div>
+            )}
 
             {/* Related Coupons (Moved to replace TOC) */}
             {validRelatedCoupons.length > 0 && (
@@ -373,54 +311,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </div>
             )}
 
-            {/* Markdown Content Section */}
-            {remainingContent && (
-                <div className="px-6 md:px-10 pb-8">
-                    <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
-                        <MarkdownRenderer content={remainingContent} storeName={storeName} />
-                    </div>
-                </div>
-            )}
-
-            <StoreGuide name={storeName} travel={store.tags?.includes("travel")} />
-
-            {/* Store FAQs */}
-            {store?.faqs && store.faqs.length > 0 && (
-                <div className="px-6 md:px-10 pb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                        {storeName} 자주 묻는 질문
-                    </h2>
-                    <div className="flex flex-col gap-3">
-                        {store.faqs.map((faq: Faq, i: number) => (
-                            <div key={i} className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                                <h3 className="text-base font-bold text-gray-900 mb-2 flex items-start gap-2">
-                                    <span className="text-blue-600 flex-shrink-0">Q.</span>
-                                    {faq.question}
-                                </h3>
-                                <p className="text-gray-600 pl-6 leading-relaxed text-sm">
-                                    {faq.answer}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Guide Content */}
-            {store?.guide_content && (
-                <div className="px-6 md:px-10 pb-10">
-                    <div className="bg-blue-50/50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
-                        <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900 border-b border-blue-100/50 pb-4">
-                            💡 초보자를 위한 {storeName} {!hasCouponCode(coupon.code) ? '할인 혜택 이용 방법' : '쿠폰코드 사용법'}
-                        </h2>
-                        <p className="text-blue-800 mb-6 text-sm">아래 안내와 해당 프로모션의 조건을 확인하고, 결제 전에 할인 내역을 확인하세요.</p>
-                        <div className="flex flex-col gap-2">
-                            <MarkdownRenderer content={store.guide_content} storeName={storeName} />
-                        </div>
-                    </div>
-                </div>
-            )}
-
+            <div className="px-6 pb-8"><Link href={`/store/${encodeURIComponent(storeId)}#how-to-use`} className="text-blue-700 underline">{storeName} 이용 가이드와 자주 묻는 질문 보기</Link></div>
+            <section className="px-6 pb-8"><h2 className="text-xl font-bold mb-4">이 쿠폰의 적용 조건</h2>{store.faqs.slice(0, 2).map((faq: Faq) => <div key={faq.question} className="mb-4"><h3 className="font-semibold">{faq.question}</h3><p className="mt-2 text-sm leading-7 text-gray-600">{faq.answer}</p></div>)}</section>
             {/* Expired Related Coupons */}
             {expiredRelatedCoupons.length > 0 && (
                 <div className="px-6 md:px-10 pb-10">

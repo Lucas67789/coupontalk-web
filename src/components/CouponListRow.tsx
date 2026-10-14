@@ -34,8 +34,8 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
 
     return (
-        <article className={`flex min-w-0 flex-col bg-white border rounded-xl p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
-            {thumbnail && <Link href={detailHref} className="relative mb-4 block aspect-[4/3] overflow-hidden rounded-lg bg-slate-50">
+        <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
+            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-5 block aspect-[3/2] overflow-hidden rounded-xl bg-slate-50">
                 <Image src={thumbnail} alt={coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
             </Link>}
             
@@ -46,21 +46,21 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
                         기간 만료
                     </span>
                 )}
-                <span className={`px-3 py-1.5 rounded-md text-sm font-black tracking-wide ${isExpired ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-700'}`}>
+                <span className={`px-3 py-1.5 rounded-md text-xl font-bold tracking-tight ${isExpired ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-700'}`}>
                     {coupon.discount}
                 </span>
-                <span className={`text-sm font-medium px-3 py-1.5 rounded-md ${isExpired ? 'text-gray-400 bg-gray-50 line-through' : 'text-gray-500 bg-gray-100'}`}>
-                    유효기간: {coupon.expiry}
+                <span className={`text-xs font-medium px-2 py-1 rounded-md ${isExpired ? 'text-gray-400 bg-gray-50 line-through' : 'text-gray-500 bg-gray-100'}`}>
+                    기간: {coupon.expiry || "판매처에서 확인"}
                 </span>
             </div>
 
             {/* Title */}
-            <h3 className={`text-xl font-bold leading-snug transition-colors mb-4 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 hover:text-blue-700'}`}>
+            <h3 className={`text-base font-bold leading-snug transition-colors mb-4 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 hover:text-blue-700'}`}>
                 <Link href={detailHref} className="hover:underline">{coupon.title}</Link>
             </h3>
 
             {/* Condition Bullet */}
-            <div className={`flex items-start gap-2 text-base mb-6 p-4 rounded-xl ${isExpired ? 'text-gray-400 bg-gray-50/50' : 'text-gray-700 bg-gray-50'}`}>
+            <div className={`flex items-start gap-2 text-sm mb-3 p-3 rounded-xl ${isExpired ? 'text-gray-400 bg-gray-50/50' : 'text-gray-700 bg-gray-50'}`}>
                 <CheckCircle2 size={20} className={`${isExpired ? 'text-gray-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
                 <span className="font-medium whitespace-pre-wrap leading-relaxed">{parsedConditionText}</span>
             </div>
@@ -72,9 +72,9 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
                 className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
                 {isNoCode ? (
-                    <>특가 보러가기 <ExternalLink size={20} /></>
+                    <>할인 페이지로 이동 <ExternalLink size={20} /></>
                 ) : (
-                    <>쿠폰 복사하기 <Copy size={20} /></>
+                    <>복사하고 할인받기 <Copy size={20} /></>
                 )}
             </button>}
         </article>

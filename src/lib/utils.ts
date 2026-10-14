@@ -37,3 +37,15 @@ export function isCouponExpired(expiry?: string | null, title?: string, now = Da
     const targetMonth = Number(month[2]);
     return targetYear < year || (targetYear === year && targetMonth < local.getUTCMonth() + 1);
 }
+
+// Only explicit full-date booking periods are compared; ambiguous prose is left for review.
+export function bookingDeadlineFromContent(content: string): string | null {
+    const text = content.replace(/<\/(?:p|li|tr)>/gi, '\n').replace(/<[^>]+>/g, ' ').replace(/\*\*/g, '');
+    for (const line of text.split('\n')) {
+        if (!/예약\s*(?:가능\s*)?기간/.test(line)) continue;
+        const section = line.slice(line.search(/예약\s*(?:가능\s*)?기간/)).split(/숙박|투숙|기획전|출발/)[0];
+        const dates = [...section.matchAll(/\d{4}[.\-/년]\s*\d{1,2}[.\-/월]\s*\d{1,2}/g)];
+        if (dates.length) return dates.at(-1)![0];
+    }
+    return null;
+}

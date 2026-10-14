@@ -1,4 +1,4 @@
-export const metadata = { title: '제휴 및 문의 | 쿠폰톡' };
+export const metadata = { title: '제휴 및 문의 | 쿠폰톡', description: '쿠폰톡 제휴 제안과 할인 정보 수정 요청에 필요한 내용을 안내합니다.', alternates: { canonical: 'https://coupontalk.kr/contact' } };
 export default function ContactPage() {
     const email = process.env.CONTACT_EMAIL;
     return <article className="container mx-auto max-w-3xl px-6 py-12 prose">

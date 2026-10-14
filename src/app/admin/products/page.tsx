@@ -1,4 +1,6 @@
 "use client";
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
+
 import type { ProductRow, StoreRow } from '@/lib/models';
 
 import { useEffect, useState } from 'react';
@@ -31,7 +33,7 @@ export default function AdminProducts() {
     // Load Stores once
     useEffect(() => {
         const fetchStores = async () => {
-            const { data } = await fetchAllRows(supabase.from('stores').select('id, name'));
+            const { data } = await fetchAllRows(supabase.from('stores').select('id, name').not('id', 'in', ALIAS_STORE_FILTER));
             if (data) setStores(data);
         };
         fetchStores();

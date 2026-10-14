@@ -1,3 +1,4 @@
+export const metadata = { title: '쿠폰톡 소개 | 할인 정보 운영 안내', description: '쿠폰톡의 할인 정보 제공 방식과 제휴 링크, 이용 시 확인할 사항을 안내합니다.', alternates: { canonical: 'https://coupontalk.kr/about' } };
 import Link from 'next/link';
 import { Info, ShieldCheck, Zap, HeartHandshake } from 'lucide-react';
 
@@ -19,10 +20,10 @@ export default function AboutPage() {
                     <Info className="text-blue-600" /> 쿠폰톡은 어떤 곳인가요?
                 </h2>
                 <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                    쿠폰톡은 국내외 유명 온라인 쇼핑몰, 호텔 예약 사이트, 패션 플랫폼 등 다양한 제휴사의 <strong className="text-blue-700">검증된 할인 쿠폰과 프로모션 코드</strong>를 한 곳에 모아 제공하는 플랫폼입니다.
+                    쿠폰톡은 국내외 유명 온라인 쇼핑몰, 호텔 예약 사이트, 패션 플랫폼 등 다양한 제휴사의 <strong className="text-blue-700">할인 쿠폰과 프로모션 코드</strong>를 한 곳에 모아 제공하는 플랫폼입니다.
                 </p>
                 <p className="text-gray-700 leading-relaxed text-lg">
-                    숨겨져 있는 시크릿 할인코드나 선착순 쿠폰 등 놓치기 쉬운 혜택을 매일 업데이트하여, 누구나 회원가입 없이 쉽게 이용할 수 있도록 돕습니다.
+                    숨겨져 있는 시크릿 할인코드나 선착순 쿠폰 등 놓치기 쉬운 혜택을 모아 안내하여, 누구나 회원가입 없이 쉽게 이용할 수 있도록 돕습니다.
                 </p>
             </div>
 

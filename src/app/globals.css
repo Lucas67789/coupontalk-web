@@ -150,3 +150,6 @@ img {
 .animate-fade-in {
   animation: fadeIn var(--transition-slow) forwards;
 }
+/* Keep Korean titles readable and keyboard actions visible. */
+h1, h2, h3 { word-break: keep-all; overflow-wrap: anywhere; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

@@ -2,12 +2,13 @@ import { MetadataRoute } from 'next';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { couponImages as contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://coupontalk.kr'; // 배포된 실제 도메인
-    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id, created_at, updated_at'));
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id, created_at, updated_at').not('id', 'in', ALIAS_STORE_FILTER));
     const { data: categories } = await fetchAllRows(supabase.from('categories').select('id'));
     const now = new Date().toISOString();
     const { data: coupons } = await fetchAllRows(supabase.from('coupons')
@@ -18,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const storeUrls = (stores || []).map((store) => ({
         url: `${baseUrl}/store/${encodeURIComponent(store.id)}`,
         images: [...new Set((coupons || []).filter(c => c.store_id === store.id && !isCouponExpired(c.expiry, c.title)).flatMap(c => contentImages(c.content_body)))],
-        lastModified: store.updated_at || store.created_at || undefined,
+        lastModified: [...[store.updated_at, store.created_at], ...(coupons || []).filter(c => c.store_id === store.id).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1),
         changeFrequency: 'daily' as const,
         priority: 0.8,
     }));
@@ -54,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.5,
         },
         ...categoryUrls,
-        ...['faq', 'contact', 'terms', 'privacy'].map(path => ({ url: `${baseUrl}/${path}` })),
+        ...['faq', 'contact', 'terms'].map(path => ({ url: `${baseUrl}/${path}` })),
         ...storeUrls,
         ...couponUrls,
     ];

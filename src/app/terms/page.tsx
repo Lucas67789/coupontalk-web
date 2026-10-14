@@ -1,4 +1,4 @@
-export const metadata = { title: '서비스 이용 안내 | 쿠폰톡' };
+export const metadata = { title: '이용약관 | 쿠폰톡', description: '쿠폰톡 서비스 이용 조건과 할인 정보 제공 범위에 관한 약관입니다.', alternates: { canonical: 'https://coupontalk.kr/terms' } };
 export default function TermsPage() {
     return <article className="container mx-auto max-w-3xl px-6 py-12 prose">
         <h1>서비스 이용 안내</h1>

@@ -92,7 +92,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                                 만료
                             </span>
                         )}
-                        <span className={`${isExpired ? 'bg-gray-100 text-gray-500' : theme.badgeBg + ' ' + theme.badgeText} px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider truncate flex-1 min-w-0`}>
+                        <span className={`${isExpired ? 'bg-gray-100 text-gray-500' : theme.badgeBg + ' ' + theme.badgeText} px-3 py-1.5 rounded-full text-base font-bold flex-1 min-w-0`}>
                             {coupon.discount}
                         </span>
                         <div className="flex items-center gap-1.5 ml-1 flex-shrink-0">
@@ -116,11 +116,11 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
                         <li className="flex items-start gap-2">
                             <CheckCircle2 size={16} className={`${isExpired ? 'text-gray-400' : 'text-green-500'} flex-shrink-0 mt-0.5`} />
-                            <span className="line-clamp-2">조건: <strong>{parsedConditionText}</strong></span>
+                            <span className="leading-6">조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
-                            <span className={isExpired ? 'line-through' : ''}>유효기간: {formattedExpiry}</span>
+                            <span className={isExpired ? 'line-through' : ''}>유효기간: {formattedExpiry || '판매처에서 확인'}</span>
                         </li>
                     </ul>
                 </div>
@@ -151,9 +151,9 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     ) : isExpired ? (
                         <>만료된 혜택 보기 <ExternalLink size={18} /></>
                     ) : isNoCode ? (
-                        <>할인 받기 <ExternalLink size={18} /></>
+                        <>할인 페이지로 이동 <ExternalLink size={18} /></>
                     ) : (
-                        <>코드 복사하기 <Copy size={18} /></>
+                        <>복사하고 할인받기 <Copy size={18} /></>
                     )}
                 </button>
             </div>

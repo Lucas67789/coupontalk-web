@@ -5,14 +5,13 @@ import { isCouponExpired } from '@/lib/utils';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
 import AgodaGuide, { agodaFaqs, agodaGuideUpdatedAt } from '@/components/AgodaGuide';
-import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
+import { hasCouponCode } from '@/lib/affiliate';
 import CouponListRow from '@/components/CouponListRow';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, CalendarDays, HelpCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CalendarDays, HelpCircle, CheckCircle } from 'lucide-react';
 import StoreGuide from '@/components/StoreGuide';
-import Image from 'next/image';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
@@ -25,10 +24,11 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const { data: store } = await supabase.from('stores').select('*').eq('id', storeId).single();
     if (!store) return { title: 'Not Found' };
 
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
-    const title = `[${currentYear}년 ${currentMonth}월] ${store.name} 할인코드 및 카드 프로모션 총정리 | 쿠폰톡`;
-    
+    const koreaNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+    const currentMonth = koreaNow.getUTCMonth() + 1;
+    const currentYear = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).getUTCFullYear();
+
+
     // 우선순위 4: 메타 디스크립션 동적 키워드 보강
     const { data: topCoupons } = await supabase
         .from('coupons')
@@ -41,14 +41,10 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title));
     const previewImages = [...new Set(activeCoupons.flatMap(c => contentImages(c.content_body)))].slice(0, 8);
 
-    let description = `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드와 프로모션의 적용 조건, 유효기간, 사용 방법을 확인하세요.`;
-    if (activeCoupons.length > 0) {
-        const dynamicHints = activeCoupons.slice(0, 2).map(c => {
-            const isNoCode = !c.code || c.code === 'NO_CODE_REQUIRED' || c.code === '없음';
-            return isNoCode ? c.title : `${c.code}(${c.discount})`;
-        }).join(', ');
-        description = `${store.name} ${currentMonth}월 할인코드와 결제 혜택: ${dynamicHints}. 대상 조건과 예약 마감일, 사용 방법을 비교하세요.`;
-    }
+    const title = activeCoupons.length ? `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교` : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
+    const description = activeCoupons.length
+        ? `${store.name} 할인 혜택 ${activeCoupons.length}개. ${activeCoupons.slice(0, 2).map(c => c.discount).join(', ')}. 쿠폰별 적용 대상과 할인 한도, 사용 기간을 비교하세요.`
+        : `${store.name}의 현재 등록된 활성 쿠폰은 없습니다. 지난 프로모션과 이용 시 확인할 조건을 안내하며, 새 혜택이 등록되면 이 페이지에서 확인할 수 있습니다.`;
 
 
     return {
@@ -103,10 +99,10 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const offerImages = [...new Set<string>(activeCoupons.flatMap((c: CouponRow) => contentImages(c.content_body)))];
     const expiredCoupons = tableCoupons.filter((c: CouponRow) => c.isExpired);
     const isAgoda = storeId === 'agoda';
-    const websiteUrl = safeAffiliateUrl(store.website_url);
 
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).getUTCFullYear();
+    const koreaNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+    const currentMonth = koreaNow.getUTCMonth() + 1;
 
     // 우선순위 5: dateModified는 실제 쿠폰/상품 데이터의 최근 업데이트 시점 기준
     const updateTimes = [store, ...publishedCoupons, ...publishedProducts]
@@ -116,14 +112,14 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const dateModified = updateTimes.length ? new Date(Math.max(...updateTimes)).toISOString() : undefined;
 
     // 우선순위 3: 동적 FAQ 생성 로직 (DB에 없으면 기본 템플릿 사용)
-    const defaultFaqs = defaultStoreFaqs(store.name);
+    const defaultFaqs = defaultStoreFaqs(store.name, activeCoupons);
     const faqs = isAgoda ? agodaFaqs : defaultFaqs;
 
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Article',
-        headline: `[${currentYear}년 ${currentMonth}월] ${store.name} 할인코드 및 카드 프로모션 총정리`,
-        description: `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다.`,
+        headline: `${store.name} 할인코드와 적용 조건`,
+        description: `${store.name} 등록된 활성 쿠폰 ${activeCoupons.length}개와 이용 조건 안내.`,
         datePublished: store.created_at || now,
         dateModified: dateModified,
         image: offerImages.length ? offerImages : ['https://coupontalk.kr/og-image.png'],
@@ -156,7 +152,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         itemListElement: activeCoupons.map((coupon: CouponRow, index: number) => {
-            const imageUrl = contentImages(coupon.content_body)[0] || safeAffiliateUrl(store.logo) || undefined;
+            const imageUrl = contentImages(coupon.content_body)[0] || undefined;
             return {
                 '@type': 'ListItem',
                 position: index + 1,
@@ -174,36 +170,49 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     };
 
     return (
-        <div className="container mx-auto max-w-4xl border-x min-h-screen bg-white shadow-sm pb-28" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="container mx-auto max-w-5xl border-x min-h-screen bg-white shadow-sm pb-28" style={{ borderColor: 'var(--border-color)' }}>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
-            
-            <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
+
+            <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors">
                     <ArrowLeft size={16} /> 전체 목록으로
                 </Link>
             </div>
 
-            <header className="p-6 md:p-10 border-b border-gray-200">
-                {activeCoupons.length === 0 && <Image src="/og-image.png" alt="쿠폰톡 할인 혜택 안내" width={600} height={315} className="mb-5 rounded-xl w-full max-w-sm h-auto" />}
-                <p className="text-sm font-semibold text-blue-700 mb-3">{store.name} 프로모션 · {currentYear}년 {currentMonth}월</p>
+            <header className="p-5 md:p-6 border-b border-gray-200">
+
+                <p className="text-sm font-semibold text-blue-700 mb-3">{activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 등록된 활성 혜택 ${activeCoupons.length}개` : "현재 등록된 활성 쿠폰 없음"}</p>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{store.name} 할인코드</h1>
-                {!isAgoda && store.description && !/\d{1,2}월 최신 할인 정보를 제공합니다/.test(store.description) && <p className="mt-3 text-gray-600">{store.description}</p>}
-                <p className="mt-4 max-w-2xl text-gray-600 leading-7">{isAgoda ? "국내·해외 숙소 할인코드부터 신규 고객, 네이버페이·토스페이 결제 혜택까지. 예약 조건을 비교하고 내 여행에 맞는 쿠폰을 확인하세요." : `${store.name} 할인코드와 프로모션의 대상 조건·유효기간·사용 방법을 비교하세요. 상품별 상세 정보와 모델명은 각 혜택에서 확인할 수 있습니다.`}</p>
-                <nav aria-label={`${store.name} 페이지 목차`} className="mt-6 flex flex-wrap gap-2">
+                <p className="mt-3 text-sm text-gray-600 leading-6">적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요.</p>
+                <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
                     {[["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]].map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
-            <div className="px-6 md:px-10 py-4 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="px-5 md:px-6 py-2 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
                 <CheckCircle size={20} className="text-green-600" />
                 <p className="font-semibold text-sm">
                     {dateModified ? <>최근 내용 수정: <span className="text-gray-900 font-bold">{new Date(dateModified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</span></> : '쿠폰별 유효기간과 적용 조건을 확인하세요.'}
                 </p>
             </div>
 
-            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-400 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-600 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
                 이 포스팅은 제휴마케팅이 포함된 광고로 일정 커미션을 지급 받을 수 있습니다.
             </div>
+
+            {(
+                <div id="coupons" className="p-4 md:p-6 bg-slate-50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        {activeCoupons.map((coupon: CouponRow) => (
+                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
+                        ))}
+                    </div>
+                    {activeCoupons.length === 0 && <p className="text-gray-600">현재 등록된 활성 쿠폰이 없습니다. 새로운 프로모션이 등록되면 이곳에서 확인할 수 있습니다.</p>}
+                </div>
+            )}
 
             {activeCoupons.length > 0 && (
                 <div className="p-6 md:p-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
@@ -227,11 +236,11 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                                             parsedCond = JSON.parse(coupon.condition).text || parsedCond;
                                         }
                                     } catch {}
-                                    
+
                                     // 우선순위 2: 방어 로직 (날짜 형식이 아니거나 알 수 없는 경우 예외 처리)
                                     let displayExpiry = coupon.expiry;
                                     if (!displayExpiry || displayExpiry.length < 2) displayExpiry = '선착순 조기종료';
-                                    
+
                                     return (
                                         <tr key={coupon.id} className="bg-white hover:bg-gray-50 transition-colors">
                                             <td className="px-4 py-3 font-semibold text-blue-700"><Link className="underline underline-offset-4" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{coupon.discount}</Link></td>
@@ -275,22 +284,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </div>
             )}
 
-            {(
-                <div id="coupons" className="p-6 md:p-10 bg-gray-50/50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                        할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        {activeCoupons.map((coupon: CouponRow) => (
-                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
-                        ))}
-                    </div>
-                    {activeCoupons.length === 0 && <p className="text-gray-600">현재 예약 기간이 남은 혜택이 없습니다. 새로운 프로모션이 등록되면 이곳에서 확인할 수 있습니다.</p>}
-                </div>
-            )}
 
             {publishedProducts.length > 0 && (
-                <div className="p-6 md:p-10 bg-white border-b" style={{ borderColor: 'var(--border-color)' }}>
+                <div id="products" className="p-6 md:p-10 bg-white border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                         🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
                     </h2>
@@ -311,7 +307,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             )}
 
             {/* 우선순위 3: 콘텐츠 대폭 확장 (4단계 적용 가이드, 결제수단별 혜택, 예약 꿀팁, 브랜드 안내) */}
-            {isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={store.tags?.includes("travel")} />}
+            {isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={store.tags?.includes("travel")} storeId={storeId} />}
 
             {/* FAQs */}
             <div id="faq" className="p-6 md:p-10 border-t scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
@@ -333,7 +329,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </div>
 
             {/* Guide Content */}
-            {!isAgoda && store.guide_content && (
+            {!['agoda', 'klook', 'lenovo'].includes(storeId) && store.guide_content && (
                 <div className="px-6 md:px-10 py-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 팁</h2>
                     <TableOfContents content={store.guide_content} />
@@ -346,21 +342,11 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {/* Sticky Bottom CTA */}
             {expiredCoupons.length > 0 && <details className="mx-6 md:mx-10 my-8 rounded-xl border border-gray-200 p-5">
                 <summary className="cursor-pointer font-semibold text-gray-600">종료된 할인 혜택 ({expiredCoupons.length})</summary>
-                <p className="mt-3 text-sm text-gray-500">지난 프로모션 기록입니다. 현재 예약에는 사용할 수 없습니다.</p>
+                <p className="mt-3 text-sm text-gray-500">지난 프로모션 기록입니다. 현재 구매·예약에는 사용할 수 없습니다.</p>
                 <ul className="mt-4 divide-y divide-gray-100">{expiredCoupons.map((coupon: CouponRow) => <li key={coupon.id} className="py-3"><Link className="text-sm text-gray-600 hover:underline" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{coupon.title}</Link><p className="mt-1 text-xs text-gray-500">{coupon.expiry}</p></li>)}</ul>
             </details>}
-            {websiteUrl && (
-                <div className="fixed bottom-0 left-0 w-full z-50 p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 flex justify-center shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-                    <a 
-                        href={websiteUrl}
-                        target="_blank" 
-                        rel="sponsored noopener noreferrer"
-                        className="w-full max-w-4xl py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg text-center transition-colors flex items-center justify-center gap-2 shadow-lg hover:-translate-y-1"
-                    >
-                        {store.name} 특가 보러가기 <ExternalLink size={20} />
-                    </a>
-                </div>
-            )}
+            {activeCoupons.length > 0 && <div className="fixed bottom-0 left-0 w-full z-40 p-3 bg-white border-t border-gray-200 md:hidden"><a href="#coupons" className="flex justify-center rounded-xl bg-blue-600 p-3 font-bold text-white">{store.name} 쿠폰 {activeCoupons.length}개 비교하기</a></div>}
+
         </div>
     );
 }

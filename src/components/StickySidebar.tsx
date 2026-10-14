@@ -1,3 +1,4 @@
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 import React from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -20,7 +21,7 @@ export default async function StickySidebar() {
     const { data: stores } = await supabase
         .from('stores')
         .select('id, name, tags')
-        .not('tags', 'is', null);
+        .not('id', 'in', ALIAS_STORE_FILTER).not('tags', 'is', null);
 
     if (!stores || stores.length === 0) return null;
 

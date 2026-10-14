@@ -1,4 +1,4 @@
-export const metadata = { title: '자주 묻는 질문 | 쿠폰톡' };
+export const metadata = { title: '자주 묻는 질문 | 쿠폰톡', description: '할인코드 복사, 적용 오류, 전용 링크 사용과 구매 취소에 관한 안내입니다.', alternates: { canonical: 'https://coupontalk.kr/faq' } };
 export default function FaqPage() {
     return <article className="container mx-auto max-w-3xl px-6 py-12 prose">
         <h1>자주 묻는 질문</h1>

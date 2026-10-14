@@ -1,5 +1,7 @@
+import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
+import { isCouponExpired } from '@/lib/utils';
 import StoreCard from '@/components/StoreCard';
 import { notFound } from 'next/navigation';
 import * as LucideIcons from 'lucide-react';
@@ -17,13 +19,13 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 
     return {
         title: `${category.name} 할인코드 및 프로모션 | 쿠폰톡`,
-        description: `검증된 ${category.name} 관련 할인코드와 쿠폰을 확인하세요. ${category.description}`,
+        description: `${category.name} 관련 할인코드와 쿠폰을 확인하세요. ${category.description}`,
         alternates: {
             canonical: `https://coupontalk.kr/category/${encodeURIComponent(categoryId)}`,
         },
         openGraph: {
             title: `${category.name} 최신 할인 정보`,
-            description: `검증된 ${category.name} 관련 할인코드와 쿠폰을 확인하세요.`,
+            description: `${category.name} 관련 할인코드와 쿠폰을 확인하세요.`,
         }
     };
 }
@@ -42,7 +44,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
             *,
             coupons(*)
         `)
-        .contains('tags', [categoryId])
+        .not('id', 'in', ALIAS_STORE_FILTER).contains('tags', [categoryId])
         .eq('coupons.status', 'published')
         .lte('coupons.published_at', now);
 
@@ -58,7 +60,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
         notFound();
     }
 
-    const storesList = categoryStores || [];
+    const storesList = (categoryStores || []).map(store => ({ ...store, coupons: store.coupons.filter((c: { expiry: string; title: string }) => !isCouponExpired(c.expiry, c.title)) }));
     const IconComponent = (() => { const icon = LucideIcons[category.icon as keyof typeof LucideIcons]; return typeof icon === "object" || typeof icon === "function" ? icon as LucideIcons.LucideIcon : LucideIcons.Tag; })();
 
     const breadcrumbLd = {

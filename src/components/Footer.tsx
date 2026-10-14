@@ -17,7 +17,7 @@ export default function Footer() {
                             </span>
                         </Link>
                         <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-                            가장 최신의 검증된 할인코드만 모았습니다.<br />
+                            브랜드별 할인코드와 적용 조건을 모았습니다.<br />
                             프로모션 조건과 유효기간을 확인하세요.
                         </p>
 
