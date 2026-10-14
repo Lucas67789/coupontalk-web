@@ -2,15 +2,12 @@
 import type { CouponRow } from '@/lib/models';
 import { Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
-import { useState } from 'react';
 import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
-import SafeImage from './SafeImage';
 import Link from 'next/link';
 
-export default function CouponListRow({ coupon, storeName, storeId, storeLogo, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
+export default function CouponListRow({ coupon, storeName, storeId, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
     const { showToast } = useToast();
-    const [copied, setCopied] = useState(false);
 
     let parsedConditionText = coupon.condition;
     let parsedAffiliateUrl = coupon.affiliate_url || coupon.affiliateUrl || '';
@@ -22,18 +19,19 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo, i
                 parsedAffiliateUrl = p.url;
             }
         }
-    } catch (e) { }
+    } catch { }
 
     const handleCopyAndRedirect = async (e: React.MouseEvent) => {
         e.preventDefault(); e.stopPropagation();
+        if (isExpired) return;
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
     const isNoCode = !hasCouponCode(coupon.code);
-    const detailHref = `/store/${storeId}/coupon/${coupon.id}`;
+    const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
 
     return (
-        <Link href={detailHref} className={`flex flex-col bg-white border rounded-3xl p-6 transition-all mb-6 group cursor-pointer relative overflow-hidden ${isExpired ? 'opacity-60 grayscale hover:opacity-100 hover:grayscale-0 border-gray-200' : 'hover:shadow-xl border-gray-200'}`}>
+        <article className={`flex min-w-0 flex-col bg-white border rounded-xl p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
             
             {/* Top: Badges */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -51,37 +49,28 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo, i
             </div>
 
             {/* Title */}
-            <h3 className={`text-xl md:text-2xl font-bold leading-tight transition-colors mb-4 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 group-hover:text-[#ff385c]'}`}>
-                {coupon.title}
+            <h3 className={`text-xl font-bold leading-snug transition-colors mb-4 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 hover:text-blue-700'}`}>
+                <Link href={detailHref} className="hover:underline">{coupon.title}</Link>
             </h3>
 
             {/* Condition Bullet */}
             <div className={`flex items-start gap-2 text-base mb-6 p-4 rounded-xl ${isExpired ? 'text-gray-400 bg-gray-50/50' : 'text-gray-700 bg-gray-50'}`}>
-                <CheckCircle2 size={20} className={`${isExpired ? 'text-gray-400' : 'text-[#ff385c]'} flex-shrink-0 mt-0.5`} />
+                <CheckCircle2 size={20} className={`${isExpired ? 'text-gray-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
                 <span className="font-medium whitespace-pre-wrap leading-relaxed">{parsedConditionText}</span>
             </div>
 
             {/* Full Width Button */}
-            <button
+            {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
+            {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">만료된 혜택 보기</Link> : <button
                 onClick={handleCopyAndRedirect}
-                className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${
-                    copied 
-                    ? 'bg-green-600 text-white shadow-lg' 
-                    : isExpired
-                    ? 'bg-gray-300 hover:bg-gray-400 text-gray-700'
-                    : 'bg-[#ff385c] hover:bg-[#e03150] text-white shadow-lg shadow-rose-200 hover:shadow-xl hover:-translate-y-1'
-                }`}
+                className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
-                {copied ? (
-                    '복사완료!'
-                ) : isExpired ? (
-                    '만료된 혜택 보기'
-                ) : isNoCode ? (
+                {isNoCode ? (
                     <>특가 보러가기 <ExternalLink size={20} /></>
                 ) : (
                     <>쿠폰 복사하기 <Copy size={20} /></>
                 )}
-            </button>
-        </Link>
+            </button>}
+        </article>
     );
 }

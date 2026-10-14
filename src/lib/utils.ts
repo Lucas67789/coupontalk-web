@@ -2,11 +2,22 @@
 export function couponExpiryTime(expiry?: string | null): number | null {
     if (!expiry) return null;
     // Booking deadlines end the offer; a later stay date does not extend it.
-    const beforeBooking = expiry.split('예약')[0];
-    const deadline = /\d{4}[.\-/]/.test(beforeBooking) && expiry.includes('예약') ? beforeBooking : expiry;
+    const bookingSection = expiry.split(/\s*[/|]\s*|[,，]|(?:숙박|투숙|체크인)/)[0];
+    const beforeBooking = bookingSection.split('예약')[0];
+    const deadline = expiry.includes('예약')
+        ? (/\d{4}[.\-/년]/.test(beforeBooking) ? beforeBooking : bookingSection)
+        : expiry;
     const dates = [...deadline.matchAll(/(\d{4})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})일?(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?/g)];
     const match = dates.at(-1);
-    if (!match) return null;
+    if (!match) {
+        // Legacy entries sometimes give only a booking month, followed by a stay date.
+        const monthOnly = deadline.match(/(\d{4})년\s*(\d{1,2})월/);
+        if (!monthOnly) return null;
+        const year = Number(monthOnly[1]);
+        const month = Number(monthOnly[2]);
+        if (month < 1 || month > 12) return null;
+        return Date.UTC(year, month, 1) - 9 * 60 * 60 * 1000 - 1;
+    }
     const [, year, month, day, hour, minute, second, fraction, zone] = match;
     const iso = year+'-'+month.padStart(2,'0')+'-'+day.padStart(2,'0')+'T'+(hour || '23').padStart(2,'0')+':'+(minute || '59')+':'+(second || (hour ? '00' : '59'))+(fraction || (hour ? '' : '.999'))+(zone || '+09:00');
     const time = Date.parse(iso);
