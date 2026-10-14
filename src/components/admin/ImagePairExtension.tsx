@@ -1,12 +1,12 @@
 "use client";
 
 import { Node } from "@tiptap/core";
-import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 // ── React NodeView 컴포넌트 ──
-function ImagePairView({ node, updateAttributes, deleteNode, selected }: any) {
+function ImagePairView({ node, updateAttributes, deleteNode, selected }: NodeViewProps) {
   const { src1, src2 } = node.attrs;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingSide, setUploadingSide] = useState<"left" | "right" | null>(null);

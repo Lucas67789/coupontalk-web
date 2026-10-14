@@ -1,3 +1,4 @@
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
 import StoreCard from '@/components/StoreCard';
 import { notFound } from 'next/navigation';
@@ -6,7 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 2592000;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
@@ -27,10 +28,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     };
 }
 
-export async function generateStaticParams() {
-    const { data: categories } = await supabase.from('categories').select('id');
-    return categories || [];
-}
+
 
 export default async function CategoryPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -61,7 +59,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
     }
 
     const storesList = categoryStores || [];
-    const IconComponent = (LucideIcons as any)[category.icon];
+    const IconComponent = (() => { const icon = LucideIcons[category.icon as keyof typeof LucideIcons]; return typeof icon === "object" || typeof icon === "function" ? icon as LucideIcons.LucideIcon : LucideIcons.Tag; })();
 
     const breadcrumbLd = {
         '@context': 'https://schema.org',
@@ -75,7 +73,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
     const itemListLd = {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        itemListElement: storesList.map((store: any, index: number) => ({
+        itemListElement: storesList.map((store, index: number) => ({
             '@type': 'ListItem',
             position: index + 1,
             name: store.name,
@@ -87,7 +85,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
         <div className="container mx-auto">
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': [breadcrumbLd, itemListLd] }) }}
+                dangerouslySetInnerHTML={{ __html: serializeJsonLd({ '@context': 'https://schema.org', '@graph': [breadcrumbLd, itemListLd] }) }}
             />
 
             {/* Breadcrumb / Back button */}

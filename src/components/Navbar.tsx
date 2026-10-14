@@ -41,10 +41,10 @@ export default function Navbar() {
 
                 {/* Action Buttons */}
                 <div className="hidden md:flex items-center gap-4">
-                    <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors border border-transparent hover:border-blue-100 rounded-full">
+                    <Link href="/store" aria-label="쇼핑몰 검색" className="p-2 text-gray-600 hover:text-blue-600 transition-colors border border-transparent hover:border-blue-100 rounded-full">
                         <Search size={20} />
-                    </button>
-                    <Link href="/about" className="btn-primary">
+                    </Link>
+                    <Link href="/contact" className="btn-primary">
                         제휴/문의
                     </Link>
                 </div>
@@ -52,6 +52,8 @@ export default function Navbar() {
                 {/* Mobile Toggle */}
                 <button
                     className="md:hidden p-2 text-gray-800"
+                    aria-label="메뉴"
+                    aria-expanded={mobileMenuOpen}
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                     {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -60,7 +62,7 @@ export default function Navbar() {
 
             {/* Mobile Nav */}
             {mobileMenuOpen && (
-                <div className="absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-100 p-4 flex flex-col gap-4 md:hidden">
+                <div className="absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-100 p-4 flex flex-col gap-4 md:hidden" onClick={() => setMobileMenuOpen(false)}>
                     <Link href="/category/travel" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">호텔·항공권</Link>
                     <Link href="/category/fashion" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">명품·패션</Link>
                     <Link href="/category/electronics" className="w-full text-left p-3 hover:bg-blue-50 rounded-lg">전자제품</Link>

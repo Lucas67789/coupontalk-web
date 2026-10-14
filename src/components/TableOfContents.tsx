@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+
 import { List } from 'lucide-react';
 
 interface TOCItem {
@@ -10,13 +10,13 @@ interface TOCItem {
 }
 
 export default function TableOfContents({ content }: { content?: string }) {
-    const [items, setItems] = useState<TOCItem[]>([]);
 
-    useEffect(() => {
-        if (!content) return;
+
+    const items: TOCItem[] = [];
+    if (content) {
 
         // Extract ## and ### headings
-        const headings: TOCItem[] = [];
+
         const lines = content.split('\n');
 
         lines.forEach(line => {
@@ -25,12 +25,11 @@ export default function TableOfContents({ content }: { content?: string }) {
                 const level = trimmed.startsWith('### ') ? 3 : 2;
                 const text = trimmed.replace(/^#+\s/, '');
                 const id = text.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9가-힣-]/g, '');
-                headings.push({ id, text, level });
+                items.push({ id, text, level });
             }
         });
 
-        setItems(headings);
-    }, [content]);
+    }
 
     if (items.length === 0) return null;
 

@@ -1,3 +1,4 @@
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -61,7 +62,7 @@ export default function RootLayout({
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
+        __html: serializeJsonLd({
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "쿠폰톡",

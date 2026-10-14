@@ -1,18 +1,19 @@
 "use client";
+import type { StoreRow } from '@/lib/models';
 
 import { useEffect, useState } from 'react';
 import { supabase, fetchAllRows } from '@/lib/supabase';
-import { clearAllCache } from '@/app/actions/cacheActions';
+import { saveAdminChange } from '@/lib/admin-mutation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminStores() {
-    const [stores, setStores] = useState<any[]>([]);
+    const [stores, setStores] = useState<StoreRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentStore, setCurrentStore] = useState<any>(null);
+    const [currentStore, setCurrentStore] = useState<Partial<Omit<StoreRow, 'tags' | 'rating'>> & { tags?: string | string[]; rating?: string | number }>({});
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
 
@@ -46,7 +47,7 @@ export default function AdminStores() {
             logo: currentStore.logo || '',
             website_url: currentStore.website_url || null,
             guide_content: currentStore.guide_content || null,
-            rating: parseFloat(currentStore.rating) || 0,
+            rating: parseFloat(String(currentStore.rating || 0)) || 0,
             tags: tagsArray || [],
             events: currentStore.events || [],
             faqs: currentStore.faqs || []
@@ -54,28 +55,27 @@ export default function AdminStores() {
 
         if (currentStore.id) {
             // Update
-            await supabase.from('stores').update(payload).eq('id', currentStore.id);
+            if (!await saveAdminChange(supabase.from('stores').update(payload).eq('id', currentStore.id).select('id'))) return;
         } else {
             // Insert - generate URL-friendly ID from name
-            const generatedId = currentStore.name
+            const generatedId = (currentStore.name || '')
                 .toLowerCase()
                 .replace(/[^a-z0-9가-힣]/g, '-') // 한글, 영문, 숫자 외 하이픈으로 변경
                 .replace(/-+/g, '-') // 연속된 하이픈 제거
                 .replace(/^-|-$/g, ''); // 앞뒤 하이픈 제거
 
-            await supabase.from('stores').insert([{ ...payload, id: generatedId }]);
+            if (!await saveAdminChange(supabase.from('stores').insert([{ ...payload, id: generatedId }]).select('id'))) return;
         }
 
         setIsEditing(false);
-        setCurrentStore(null);
-        await clearAllCache();
+        setCurrentStore({});
         fetchStores();
     };
 
     const handleDelete = async (id: string) => {
         if (confirm("정말로 이 스토어를 삭제하시겠습니까? 관련 쿠폰도 영향을 받을 수 있습니다.")) {
-            await supabase.from('stores').delete().eq('id', id);
-            await clearAllCache();
+            if (!await saveAdminChange(supabase.from('stores').delete().eq('id', id).select('id'))) return;
+
             fetchStores();
         }
     };
@@ -100,9 +100,9 @@ export default function AdminStores() {
             const imageMarkdown = `\n![이미지](${imageUrl})\n`;
 
             setCurrentStore({ ...currentStore, guide_content: (currentStore.guide_content || '') + imageMarkdown });
-            
+
         } catch (error) {
-            alert('이미지 업로드 실패: ' + (error as any).message + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
+            alert('이미지 업로드 실패: ' + (error instanceof Error ? error.message : '연결 오류') + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
         } finally {
             setUploading(false);
         }
@@ -160,9 +160,9 @@ export default function AdminStores() {
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium text-gray-700">할인코드 적용 가이드 (에디터 지원)</label>
                                 </div>
-                                <RichTextEditor 
-                                    value={currentStore?.guide_content || ''} 
-                                    onChange={(val) => setCurrentStore({ ...currentStore, guide_content: val })} 
+                                <RichTextEditor draftKey={`store-guide-${currentStore?.id || "new"}`}
+                                    value={currentStore?.guide_content || ''}
+                                    onChange={(val) => setCurrentStore({ ...currentStore, guide_content: val })}
                                     placeholder="가이드 내용 입력..."
                                 />
                             </div>

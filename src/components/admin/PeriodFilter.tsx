@@ -27,7 +27,7 @@ export default function PeriodFilter({ period, onChange, onClearCache }: PeriodF
                 ].map((item) => (
                     <button
                         key={item.id}
-                        onClick={() => onChange(item.id as any)}
+                        onClick={() => onChange(item.id as PeriodFilterProps['period'])}
                         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                             period === item.id 
                                 ? 'bg-white text-blue-600 shadow-sm' 

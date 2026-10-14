@@ -1,8 +1,10 @@
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase, fetchAllRows } from '@/lib/supabase';
+import { isCouponExpired } from '@/lib/utils';
 import StoreList from '@/components/StoreList';
 import type { Metadata } from 'next';
 
-export const revalidate = 2592000;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
     title: '전체 쇼핑몰 할인코드 및 프로모션 모음 | 쿠폰톡',
@@ -19,13 +21,15 @@ export default async function AllStoresPage({
     searchParams: Promise<{ q?: string }>;
 }) {
     // Note: We need to pull tags and description to allow search matching
-    const { data: stores } = await fetchAllRows(supabase.from('stores').select('*, coupons(*)'));
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id,name,description,rating,tags,events,coupons(id,expiry,title)')
+        .eq('coupons.status', 'published').lte('coupons.published_at', new Date().toISOString()));
+    for (const store of stores || []) store.coupons = store.coupons.filter((coupon: { expiry: string; title: string }) => !isCouponExpired(coupon.expiry, coupon.title));
     const { q } = await searchParams;
 
     const itemListLd = {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        itemListElement: (stores || []).slice(0, 100).map((store: any, index: number) => ({
+        itemListElement: (stores || []).slice(0, 100).map((store, index: number) => ({
             '@type': 'ListItem',
             position: index + 1,
             name: store.name,
@@ -37,7 +41,7 @@ export default async function AllStoresPage({
         <div className="container mx-auto">
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+                dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListLd) }}
             />
             <StoreList initialStores={stores || []} initialQuery={q || ''} />
         </div>

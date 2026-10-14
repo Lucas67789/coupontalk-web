@@ -1,12 +1,14 @@
 "use client";
+import type { CouponRow } from '@/lib/models';
 import { Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { openCouponLink } from '@/lib/coupon-action';
+import { hasCouponCode } from '@/lib/affiliate';
 import SafeImage from './SafeImage';
 import Link from 'next/link';
 
-export default function CouponListRow({ coupon, storeName, storeId, storeLogo, isExpired }: { coupon: any, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
+export default function CouponListRow({ coupon, storeName, storeId, storeLogo, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
 
@@ -23,44 +25,11 @@ export default function CouponListRow({ coupon, storeName, storeId, storeLogo, i
     } catch (e) { }
 
     const handleCopyAndRedirect = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if (coupon.id) {
-            try {
-                let sessionId = localStorage.getItem('ct_session_id');
-                await fetch('/api/track/click', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(sessionId ? { 'x-session-id': sessionId } : {})
-                    },
-                    body: JSON.stringify({
-                        type: isNoCode ? 'affiliate_click' : 'code_copy',
-                        coupon_id: coupon.id,
-                        target_url: parsedAffiliateUrl
-                    })
-                });
-                await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id }); 
-            } catch (err) {}
-        }
-        
-        if (coupon.code !== 'NO_CODE_REQUIRED') {
-            navigator.clipboard.writeText(coupon.code).then(() => {
-                setCopied(true);
-                showToast(`'${coupon.code}' 복사 완료! 결제창에 입력하세요`);
-            });
-        } else {
-            showToast(`${storeName} 특가 페이지로 이동합니다`);
-        }
-        
-        setTimeout(() => {
-            window.open(parsedAffiliateUrl, '_blank');
-            setCopied(false);
-        }, 1000);
+        e.preventDefault(); e.stopPropagation();
+        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
-    const isNoCode = coupon.code === 'NO_CODE_REQUIRED';
+    const isNoCode = !hasCouponCode(coupon.code);
     const detailHref = `/store/${storeId}/coupon/${coupon.id}`;
 
     return (

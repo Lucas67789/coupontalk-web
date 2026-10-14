@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Store } from '@/data';
+import type { StoreSummary } from '@/lib/models';
 import { Star, ChevronRight } from 'lucide-react';
 
 const getGradientClass = (name: string) => {
@@ -24,7 +24,7 @@ const getGradientClass = (name: string) => {
     return gradients[Math.abs(hash) % gradients.length];
 };
 
-export default function StoreCard({ store }: { store: Store | any }) {
+export default function StoreCard({ store }: { store: StoreSummary }) {
     const latestEventTitle = store.events?.length > 0 ? store.events[0].title : `${store.coupons?.length || 0}개의 할인코드`;
 
     return (
@@ -36,7 +36,7 @@ export default function StoreCard({ store }: { store: Store | any }) {
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 flex-shrink-0 h-7 rounded text-sm font-medium">
                         <Star size={14} className="fill-yellow-500 text-yellow-500" />
-                        <span>{parseFloat(store.rating || 5).toFixed(1)}</span>
+                        <span>{Number(store.rating || 5).toFixed(1)}</span>
                     </div>
                 </div>
 

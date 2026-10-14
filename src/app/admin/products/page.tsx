@@ -1,8 +1,9 @@
 "use client";
+import type { ProductRow, StoreRow } from '@/lib/models';
 
 import { useEffect, useState } from 'react';
 import { supabase, fetchAllRows } from '@/lib/supabase';
-import { clearAllCache } from '@/app/actions/cacheActions';
+import { saveAdminChange } from '@/lib/admin-mutation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -10,11 +11,11 @@ import { useRouter } from 'next/navigation';
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminProducts() {
-    const [products, setProducts] = useState<any[]>([]);
-    const [stores, setStores] = useState<any[]>([]);
+    const [products, setProducts] = useState<ProductRow[]>([]);
+    const [stores, setStores] = useState<Pick<StoreRow, 'id' | 'name'>[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentProduct, setCurrentProduct] = useState<any>(null);
+    const [currentProduct, setCurrentProduct] = useState<Partial<ProductRow>>({});
     const [uploading, setUploading] = useState(false);
     
     // Filters & Pagination State
@@ -101,7 +102,7 @@ export default function AdminProducts() {
             pubDate = new Date().toISOString();
         }
 
-        const payload: any = {
+        const payload = {
             store_id: currentProduct.store_id,
             title: currentProduct.title,
             image_url: currentProduct.image_url || null,
@@ -115,23 +116,21 @@ export default function AdminProducts() {
         };
 
         if (currentProduct.id) {
-            await supabase.from('products').update(payload).eq('id', currentProduct.id);
+            if (!await saveAdminChange(supabase.from('products').update(payload).eq('id', currentProduct.id).select('id'))) return;
         } else {
             // Insert - generate unique ID (Unix timestamp + random string)
             const uniqueId = `prod-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-            await supabase.from('products').insert([{ ...payload, id: uniqueId }]);
+            if (!await saveAdminChange(supabase.from('products').insert([{ ...payload, id: uniqueId }]).select('id'))) return;
         }
 
         setIsEditing(false);
-        setCurrentProduct(null);
-        await clearAllCache();
+        setCurrentProduct({});
         fetchProducts();
     };
 
     const handleDelete = async (id: string) => {
         if (confirm("정말로 이 상품을 삭제하시겠습니까?")) {
-            await supabase.from('products').delete().eq('id', id);
-            await clearAllCache();
+            if (!await saveAdminChange(supabase.from('products').delete().eq('id', id).select('id'))) return;
             fetchProducts();
         }
     };
@@ -157,7 +156,7 @@ export default function AdminProducts() {
             setCurrentProduct({ ...currentProduct, image_url: imageUrl });
             
         } catch (error) {
-            alert('이미지 업로드 실패: ' + (error as any).message);
+            alert('이미지 업로드 실패: ' + (error instanceof Error ? error.message : '연결 오류'));
         } finally {
             setUploading(false);
         }

@@ -1,18 +1,23 @@
 "use client";
+import type { ProductRow } from '@/lib/models';
 
 import SafeImage from './SafeImage';
 import { ExternalLink, ShoppingCart, CheckCircle2 } from 'lucide-react';
+import { safeAffiliateUrl } from '@/lib/affiliate';
 import { useState } from 'react';
 
-export default function ProductCard({ product, storeName }: { product: any, storeName: string }) {
+export default function ProductCard({ product, storeName }: { product: ProductRow, storeName: string }) {
     const [clicked, setClicked] = useState(false);
 
     const handleRedirect = async () => {
+        const target = safeAffiliateUrl(product.affiliate_url);
+        if (!target) return;
+        window.open(target, '_blank', 'noopener,noreferrer');
         setClicked(true);
         try {
-            let sessionId = localStorage.getItem('ct_session_id');
-            await fetch('/api/track/click', {
-                method: 'POST',
+            const sessionId = localStorage.getItem('ct_session_id');
+            void fetch('/api/track/click', {
+                method: 'POST', keepalive: true,
                 headers: {
                     'Content-Type': 'application/json',
                     ...(sessionId ? { 'x-session-id': sessionId } : {})
@@ -22,9 +27,9 @@ export default function ProductCard({ product, storeName }: { product: any, stor
                     product_id: product.id,
                     target_url: product.affiliate_url
                 })
-            });
+            }).catch(() => {});
         } catch (err) {}
-        window.open(product.affiliate_url, '_blank', 'noopener,noreferrer');
+
         setTimeout(() => setClicked(false), 2000);
     };
 

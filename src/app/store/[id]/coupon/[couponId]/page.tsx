@@ -1,3 +1,7 @@
+import type { CouponRow, Faq } from '@/lib/models';
+import { parseFaqs } from '@/lib/faq';
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
+import { isCouponExpired, couponExpiryTime } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -7,10 +11,12 @@ import CouponDetailClient from '@/components/CouponDetailClient';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import type { Metadata } from 'next';
 
-export const revalidate = 2592000;
+type RelatedCoupon = Pick<CouponRow, 'id' | 'title' | 'discount' | 'code' | 'store_id' | 'expiry' | 'published_at'>;
+
+export const dynamic = 'force-dynamic';
 
 // Parse packed JSON condition
-function parseCondition(coupon: any) {
+function parseCondition(coupon: CouponRow) {
     let condText = coupon.condition;
     let affUrl = coupon.affiliate_url || '';
     try {
@@ -35,6 +41,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
         .from('coupons')
         .select('*, stores(name, description, logo)')
         .eq('id', couponId)
+        .eq('store_id', storeId)
         .eq('status', 'published')
         .lte('published_at', now)
         .single();
@@ -42,21 +49,20 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     if (!coupon) return { title: 'Not Found' };
 
     const storeName = coupon.stores?.name || '';
-    const currentMonth = new Date().getMonth() + 1;
 
     // Smart title generation to prevent keyword stuffing (e.g. "슈마커 슈마커")
     let defaultTitlePart1 = coupon.title;
     if (storeName && !defaultTitlePart1.includes(storeName)) {
         defaultTitlePart1 = `${storeName} ${defaultTitlePart1}`;
     }
-    
+
     let defaultTitlePart2 = coupon.discount || '';
     if (defaultTitlePart2 && !defaultTitlePart2.includes('할인')) {
         defaultTitlePart2 = `${defaultTitlePart2} 할인`;
     }
 
-    const title = coupon.seo_title || `${defaultTitlePart1} | ${defaultTitlePart2} ${currentMonth}월 | 쿠폰톡`;
-    
+    const title = coupon.seo_title || [defaultTitlePart1, defaultTitlePart2, '쿠폰톡'].filter(Boolean).join(' | ');
+
     // Smart description generation
     let defaultDescPart1 = coupon.title;
     if (storeName && !defaultDescPart1.includes(storeName)) {
@@ -121,16 +127,16 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     }
 
     const { condText, affUrl } = parseCondition(coupon);
-    const store = coupon.stores;
+    const store = { ...coupon.stores };
+    store.faqs = parseFaqs(store.faqs);
     const storeName = store?.name || '';
-    const currentMonth = new Date().getMonth() + 1;
 
-    const { isCouponExpired } = await import('@/lib/utils');
+    const expired = isCouponExpired(coupon.expiry, coupon.title);
 
-    const validRelatedCoupons: any[] = [];
-    const expiredRelatedCoupons: any[] = [];
+    const validRelatedCoupons: RelatedCoupon[] = [];
+    const expiredRelatedCoupons: RelatedCoupon[] = [];
     if (allRelatedCoupons) {
-        allRelatedCoupons.forEach((c: any) => {
+        allRelatedCoupons.forEach((c: RelatedCoupon) => {
             if (isCouponExpired(c.expiry, c.title)) {
                 if (expiredRelatedCoupons.length < 8) expiredRelatedCoupons.push(c);
             } else {
@@ -146,7 +152,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     let mainImage = null;
     let mainImageAlt = h1Title;
     let remainingContent = coupon.content_body || '';
-    
+
     // Look for the first image in markdown (e.g. ![alt text](url))
     const imgRegex = /!\[(.*?)\]\((.*?)\)/;
     const imgMatch = remainingContent.match(imgRegex);
@@ -164,7 +170,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         headline: h1Title,
         description: coupon.seo_description || `${storeName} ${coupon.title} - ${coupon.discount} 할인`,
         datePublished: new Date(coupon.published_at || coupon.created_at).toISOString(),
-        dateModified: new Date().toISOString(),
+        dateModified: new Date(coupon.updated_at || coupon.published_at || coupon.created_at).toISOString(),
         author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' },
         publisher: {
             '@type': 'Organization',
@@ -190,7 +196,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const faqLd = store?.faqs && store.faqs.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: store.faqs.map((faq: any) => ({
+        mainEntity: store.faqs.map((faq: Faq) => ({
             '@type': 'Question',
             name: faq.question,
             acceptedAnswer: { '@type': 'Answer', text: faq.answer }
@@ -200,8 +206,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     // 만료일(expiry)이 실제 날짜 형식일 때만 validThrough로 사용 (형식이 안 맞으면 생략)
     let validThroughIso: string | undefined;
     if (coupon.expiry && /^\d{4}[.\-]\d{1,2}[.\-]\d{1,2}/.test(coupon.expiry)) {
-        const parsed = new Date(coupon.expiry.replace(/\./g, '-'));
-        if (!isNaN(parsed.getTime())) validThroughIso = parsed.toISOString();
+        const end = couponExpiryTime(coupon.expiry);
+        if (end !== null) validThroughIso = new Date(end).toISOString();
     }
 
     const offerLd = {
@@ -211,7 +217,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         url: `https://coupontalk.kr/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(couponId)}`,
         priceCurrency: 'KRW',
         price: '0',
-        availability: 'https://schema.org/InStock',
+        availability: expired ? 'https://schema.org/Discontinued' : 'https://schema.org/InStock',
         ...(validThroughIso ? { validThrough: validThroughIso } : {}),
         seller: { '@type': 'Organization', name: storeName },
     };
@@ -226,7 +232,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
             {/* JSON-LD Schema Graph */}
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaGraph) }}
+                dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }}
             />
 
             {/* Breadcrumb */}
@@ -273,7 +279,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         {coupon.discount}
                     </span>
                     <span className="text-sm text-gray-400">
-                        {currentMonth}월 최신
+                        {expired ? '기간 만료' : '프로모션 안내'}
                     </span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-6">
@@ -304,28 +310,28 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                     />
                 </div>
 
-                {/* Automated SEO Content Block (Naver Keyword Targeting) */}
-                <div className="prose prose-blue max-w-none mb-8">
+                {/* Promotion guidance */}
+                {!expired && <div className="prose prose-blue max-w-none mb-8">
                     <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                        <strong>{currentMonth}월 최신 검증된 {storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요? 
-                        본 페이지에서는 <strong className="text-blue-700">{coupon.title}</strong> 프로모션 혜택을 통해 {storeName}에서 결제 시 
+                        <strong>{storeName} {coupon.code === 'NO_CODE_REQUIRED' ? '할인 혜택' : '할인코드'}</strong>을(를) 찾고 계신가요?
+                        본 페이지에서는 <strong className="text-blue-700">{coupon.title}</strong> 프로모션 혜택을 통해 {storeName}에서 결제 시
                         <span className="bg-blue-50 px-1 mx-1 font-bold text-blue-800">{coupon.discount}</span> 할인을 적용받을 수 있는 공식적이고 안전한 방법을 자세히 안내해 드립니다.
                     </p>
                     <p className="text-gray-600 leading-relaxed mb-4">
-                        해당 프로모션은 <strong>{condText ? condText : '스토어 전 가입자 대상'}</strong>으로 진행되며, 
-                        {coupon.code === 'NO_CODE_REQUIRED' ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다. 
-                        수많은 정보 속에서 헤매지 마시고, 쿠폰톡이 매일 직접 테스트하여 신뢰성을 담보하는 본 추가 {coupon.code === 'NO_CODE_REQUIRED' ? '할인 링크' : '할인코드'}를 사용하여 가장 저렴하게 쇼핑을 즐겨보세요!
+                        해당 프로모션은 <strong>{condText ? condText : '스토어 전 가입자 대상'}</strong>으로 진행되며,
+                        {coupon.code === 'NO_CODE_REQUIRED' ? '진행 기간은' : '유효기간은'} <strong className="text-red-500">{coupon.expiry ? coupon.expiry : '상시 진행 (조기 종료 가능)'}</strong>까지입니다.
+                        수많은 정보 속에서 헤매지 마시고, 본 {coupon.code === 'NO_CODE_REQUIRED' ? '할인 링크' : '할인코드'}를 사용하여 가장 저렴하게 쇼핑을 즐겨보세요!
                     </p>
-                    {coupon.is_verified && (
+                    {!expired && coupon.is_verified && (
                         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3 my-6">
                             <CheckCircle2 className="text-green-600 mt-0.5 flex-shrink-0" size={20} />
                             <div>
                                 <h4 className="font-bold text-green-900 mb-1">매니저 수동 검증 완료</h4>
-                                <p className="text-green-800 text-sm">해당 {storeName} 프로모션 코드는 {currentMonth}월 현재 정상 작동 여부가 쿠폰톡 매니저에 의해 최종 확인되었습니다. 안심하고 바로 사용하실 수 있습니다.</p>
+                                <p className="text-green-800 text-sm">등록 시 확인된 {storeName} 프로모션입니다. 실제 적용 가능 여부는 쇼핑몰 결제 화면에서 확인해주세요.</p>
                             </div>
                         </div>
                     )}
-                </div>
+                </div>}
             </div>
 
             {/* Related Coupons (Moved to replace TOC) */}
@@ -335,7 +341,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         {storeName}의 다른 {coupon.code === 'NO_CODE_REQUIRED' ? '혜택' : '할인코드'}
                     </h2>
                     <div className="flex flex-col gap-3">
-                        {validRelatedCoupons.map((rc: any) => (
+                        {validRelatedCoupons.map((rc: RelatedCoupon) => (
                             <Link
                                 key={rc.id}
                                 href={`/store/${rc.store_id}/coupon/${rc.id}`}
@@ -377,7 +383,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         {storeName} 자주 묻는 질문
                     </h2>
                     <div className="flex flex-col gap-3">
-                        {store.faqs.map((faq: any, i: number) => (
+                        {store.faqs.map((faq: Faq, i: number) => (
                             <div key={i} className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                                 <h3 className="text-base font-bold text-gray-900 mb-2 flex items-start gap-2">
                                     <span className="text-blue-600 flex-shrink-0">Q.</span>
@@ -414,7 +420,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                         <Clock size={20} /> {storeName}의 이미 종료된 혜택
                     </h2>
                     <div className="flex flex-col gap-3 opacity-50 grayscale">
-                        {expiredRelatedCoupons.map((rc: any) => (
+                        {expiredRelatedCoupons.map((rc: RelatedCoupon) => (
                             <div
                                 key={rc.id}
                                 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4 md:p-5"

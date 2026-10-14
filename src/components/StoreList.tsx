@@ -1,10 +1,11 @@
 "use client";
+import type { StoreSummary } from '@/lib/models';
 
 import { useState } from 'react';
 import StoreCard from '@/components/StoreCard';
 import { Search } from 'lucide-react';
 
-export default function StoreList({ initialStores, initialQuery = "" }: { initialStores: any[]; initialQuery?: string }) {
+export default function StoreList({ initialStores, initialQuery = "" }: { initialStores: StoreSummary[]; initialQuery?: string }) {
     // 홈 화면의 SearchAction(구글/네이버 사이트링크 검색창) 또는 ?q= 링크로 들어왔을 때
     // 초기 검색어로 반영되도록 함
     const [searchQuery, setSearchQuery] = useState(initialQuery);
@@ -53,13 +54,13 @@ export default function StoreList({ initialStores, initialQuery = "" }: { initia
 
             {filteredStores.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    {filteredStores.map((store: any) => (
+                    {filteredStores.map((store: StoreSummary) => (
                         <StoreCard key={store.id} store={store} />
                     ))}
                 </div>
             ) : (
                 <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
-                    <p className="text-2xl text-gray-500 font-bold mb-4">"{searchQuery}" 에 대한 결과가 없네요. 😢</p>
+                    <p className="text-2xl text-gray-500 font-bold mb-4">&quot;{searchQuery}&quot; 에 대한 결과가 없네요. 😢</p>
                     <p className="text-gray-400 mb-6">다른 스토어 이름이나 할인 카테고리를 검색해 보시겠어요?</p>
                     <button
                         onClick={() => setSearchQuery('')}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { sanitizeContent } from '@/lib/content-safety';
 
 export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
     const [error, setError] = useState(false);
@@ -31,7 +32,7 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
         return (
             <div 
                 className={`flex items-center justify-center w-full h-full [&>a]:flex [&>a]:items-center [&>a]:justify-center [&>a]:w-full [&>a]:h-full [&_img]:max-w-full [&_img]:max-h-full [&_img]:object-contain ${className || ''}`}
-                dangerouslySetInnerHTML={{ __html: src }} 
+                dangerouslySetInnerHTML={{ __html: sanitizeContent(src) }}
             />
         );
     }

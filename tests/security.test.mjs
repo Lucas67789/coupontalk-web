@@ -1,0 +1,41 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { sanitizeContent, jsonLd } from '../src/lib/content-safety.ts';
+import { safeAffiliateUrl, hasCouponCode } from '../src/lib/affiliate.ts';
+import { isCouponExpired } from '../src/lib/utils.ts';
+import { parseFaqs } from '../src/lib/faq.ts';
+
+test('FAQ arrays and legacy JSON strings render without accepting malformed entries', () => {
+    const faqs = [{ question: '사용 방법?', answer: '결제 화면에 입력' }];
+    assert.deepEqual(parseFaqs(faqs), faqs);
+    assert.deepEqual(parseFaqs(JSON.stringify(faqs)), faqs);
+    for (const value of [null, '{}', '{broken', 5]) assert.deepEqual(parseFaqs(value), []);
+    assert.deepEqual(parseFaqs([null, { question: {} }, ...faqs]), faqs);
+});
+
+test('stored HTML cannot execute handlers, embedded scripts or unsafe URLs', () => {
+    const clean = sanitizeContent('<p><img src="https://example.com/a.jpg" onerror="alert(1)"><a href="javascript:alert(1)">offer</a><svg onload="alert(1)"></svg><iframe srcdoc="<script>alert(1)</script>"></iframe><script>alert(1)</script></p>');
+    assert.doesNotMatch(clean, /onerror|javascript:|<script|<svg|<iframe|srcdoc/);
+    assert.match(clean, /https:\/\/example.com\/a.jpg/);
+    assert.match(sanitizeContent('<h1>Hello</h1><p style="color:#ff0000;text-align:center">World</p>'), /<h2>Hello<\/h2>/);
+});
+test('JSON-LD data cannot close its HTML script element', () => {
+    const payload = { title: '</script><script>alert(1)</script>' };
+    const encoded = jsonLd(payload);
+    assert.ok(!encoded.includes('<'));
+    assert.deepEqual(JSON.parse(encoded), payload);
+});
+test('affiliate URLs only allow absolute HTTP(S) links without credentials', () => {
+    for (const value of ['javascript:alert(1)', 'data:text/html,test', '//evil.test', 'https://user:password@example.com', '', undefined]) assert.equal(safeAffiliateUrl(value), null);
+    assert.equal(safeAffiliateUrl('https://example.com/?aff=owner'), 'https://example.com/?aff=owner');
+    assert.equal(hasCouponCode('전용링크 자동적용'), false);
+    assert.equal(hasCouponCode('LKP10'), true);
+});
+test('expiry follows Korea midnight, precise time and range end', () => {
+    assert.equal(isCouponExpired('2026.09.30', '', Date.parse('2026-09-30T14:59:59Z')), false);
+    assert.equal(isCouponExpired('2026.09.30', '', Date.parse('2026-09-30T15:00:00Z')), true);
+    assert.equal(isCouponExpired('2026-10-02 12:00:00', '', Date.parse('2026-10-02T04:00:00Z')), true);
+    assert.equal(isCouponExpired('2026-09-01 ~ 2026-10-31', '', Date.parse('2026-10-02T04:00:00Z')), false);
+    assert.equal(isCouponExpired('상시진행', '9월 등록', Date.parse('2026-10-02T04:00:00Z')), false);
+    assert.equal(isCouponExpired('2026.09.30 예약 / 2026.12.31 투숙', '', Date.parse('2026-10-02T04:00:00Z')), true);
+});

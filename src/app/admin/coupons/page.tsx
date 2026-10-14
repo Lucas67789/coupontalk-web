@@ -1,8 +1,9 @@
 "use client";
+import type { CouponRow, StoreRow } from '@/lib/models';
 
 import { useEffect, useState } from 'react';
 import { supabase, fetchAllRows } from '@/lib/supabase';
-import { clearAllCache } from '@/app/actions/cacheActions';
+import { saveAdminChange } from '@/lib/admin-mutation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import TiptapEditor from '@/components/admin/TiptapEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
@@ -11,11 +12,11 @@ import { useRouter } from 'next/navigation';
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminCoupons() {
-    const [coupons, setCoupons] = useState<any[]>([]);
-    const [stores, setStores] = useState<any[]>([]);
+    const [coupons, setCoupons] = useState<CouponRow[]>([]);
+    const [stores, setStores] = useState<Pick<StoreRow, 'id' | 'name'>[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentCoupon, setCurrentCoupon] = useState<any>(null);
+    const [currentCoupon, setCurrentCoupon] = useState<Partial<CouponRow>>({});
     const [uploading, setUploading] = useState(false);
     
     // Filters & Pagination State
@@ -29,7 +30,7 @@ export default function AdminCoupons() {
     const router = useRouter();
 
     // Helper to parse condition JSON
-    const parseCondition = (coupon: any) => {
+    const parseCondition = (coupon: CouponRow) => {
         let cond = coupon.condition;
         let url = coupon.affiliate_url || coupon.affiliateUrl || '';
         let verified = coupon.is_verified ?? true;
@@ -113,7 +114,7 @@ export default function AdminCoupons() {
             pubDate = new Date().toISOString();
         }
 
-        const payload: any = {
+        const payload = {
             store_id: currentCoupon.store_id,
             title: currentCoupon.title,
             discount: currentCoupon.discount,
@@ -132,23 +133,22 @@ export default function AdminCoupons() {
         };
 
         if (currentCoupon.id) {
-            await supabase.from('coupons').update(payload).eq('id', currentCoupon.id);
+            if (!await saveAdminChange(supabase.from('coupons').update(payload).eq('id', currentCoupon.id).select('id'))) return;
         } else {
             // Insert - generate unique ID (Unix timestamp + random string)
             const uniqueId = `coupon-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-            await supabase.from('coupons').insert([{ ...payload, id: uniqueId }]);
+            if (!await saveAdminChange(supabase.from('coupons').insert([{ ...payload, id: uniqueId }]).select('id'))) return;
         }
 
         setIsEditing(false);
-        setCurrentCoupon(null);
-        await clearAllCache();
+        setCurrentCoupon({});
         fetchCoupons();
     };
 
     const handleDelete = async (id: string) => {
         if (confirm("정말로 이 쿠폰을 삭제하시겠습니까?")) {
-            await supabase.from('coupons').delete().eq('id', id);
-            await clearAllCache();
+            if (!await saveAdminChange(supabase.from('coupons').delete().eq('id', id).select('id'))) return;
+
             fetchCoupons();
         }
     };
@@ -175,7 +175,7 @@ export default function AdminCoupons() {
             setCurrentCoupon({ ...currentCoupon, content_body: (currentCoupon.content_body || '') + imageMarkdown });
             
         } catch (error) {
-            alert('이미지 업로드 실패: ' + (error as any).message + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
+            alert('이미지 업로드 실패: ' + (error instanceof Error ? error.message : '연결 오류') + '\n\nSupabase Storage에 "images" 버킷이 Public으로 생성되어 있는지 확인해주세요.');
         } finally {
             setUploading(false);
         }

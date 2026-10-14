@@ -18,13 +18,9 @@ export default function Footer() {
                         </Link>
                         <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
                             가장 최신의 검증된 할인코드만 모았습니다.<br />
-                            직접 테스트하고 매일 업데이트합니다.
+                            프로모션 조건과 유효기간을 확인하세요.
                         </p>
-                        <div className="flex items-center gap-4" style={{ color: 'var(--text-tertiary)' }}>
-                            <a href="#" className="hover:text-blue-600 transition-colors"><Instagram size={20} /></a>
-                            <a href="#" className="hover:text-blue-600 transition-colors"><Facebook size={20} /></a>
-                            <a href="#" className="hover:text-blue-600 transition-colors"><Mail size={20} /></a>
-                        </div>
+
                     </div>
 
                     <div>

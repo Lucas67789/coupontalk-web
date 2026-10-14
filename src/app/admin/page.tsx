@@ -1,4 +1,7 @@
 "use client";
+import type { User } from '@supabase/supabase-js';
+import type { TopRankingItem } from '@/components/admin/TopRankingTable';
+import type { ActivityItem } from '@/components/admin/RecentActivityFeed';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -14,7 +17,7 @@ import { clearAllCache } from '@/app/actions/cacheActions';
 import { useToast } from '@/components/ToastProvider';
 
 export default function AdminDashboard() {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('all');
     const [isLoading, setIsLoading] = useState(true);
     const { showToast } = useToast();
@@ -36,9 +39,9 @@ export default function AdminDashboard() {
         categories: { travel: 0, fashion: 0, tech: 0, health: 0 }
     });
 
-    const [topCoupons, setTopCoupons] = useState<any[]>([]);
-    const [topStores, setTopStores] = useState<any[]>([]);
-    const [recentActivities, setRecentActivities] = useState<any[]>([]);
+    const [topCoupons, setTopCoupons] = useState<TopRankingItem[]>([]);
+    const [topStores, setTopStores] = useState<TopRankingItem[]>([]);
+    const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 
     const router = useRouter();
 
@@ -69,7 +72,7 @@ export default function AdminDashboard() {
             // Note: Supabase has a default limit of 1000 rows per request. We need to paginate to get all data.
             
             // Page Views
-            let views: any[] = [];
+            let views: { path: string; session_id: string; store_id: string }[] = [];
             let fromViews = 0;
             while (true) {
                 const { data, error } = await supabase
@@ -87,7 +90,7 @@ export default function AdminDashboard() {
             const uniqueSessions = new Set(views.map(v => v.session_id)).size;
             
             // Click Events
-            let clicks: any[] = [];
+            let clicks: { type: string; store_id: string; coupon_id: string }[] = [];
             let fromClicks = 0;
             while (true) {
                 const { data, error } = await supabase
@@ -133,25 +136,25 @@ export default function AdminDashboard() {
             });
             
             if (period === 'all') {
-                let { data: topC } = await supabase.from('coupons').select('id, title, discount, stores(name), click_count').order('click_count', { ascending: false }).limit(10);
+                const { data: topC } = await supabase.from('coupons').select('id, title, discount, stores(name), click_count').order('click_count', { ascending: false }).limit(10);
                 if (topC) {
                     const mergedTopC = topC.map(c => ({
                         id: c.id,
                         title: c.title,
-                        subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as any)?.name} · ${c.discount}`,
-                        val1: (couponClickMap.get(c.id) || 0) + (c.click_count || 0)
+                        subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as { name: string } | null)?.name} · ${c.discount}`,
+                        val1: Math.max(couponClickMap.get(c.id) || 0, c.click_count || 0)
                     })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
                     setTopCoupons(mergedTopC);
                 }
             } else {
                 const clickedCouponIds = Array.from(couponClickMap.keys());
                 if (clickedCouponIds.length > 0) {
-                    let { data: activeC } = await supabase.from('coupons').select('id, title, discount, stores(name)').in('id', clickedCouponIds);
+                    const { data: activeC } = await supabase.from('coupons').select('id, title, discount, stores(name)').in('id', clickedCouponIds);
                     if (activeC) {
                         const mergedTopC = activeC.map(c => ({
                             id: c.id,
                             title: c.title,
-                            subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as any)?.name} · ${c.discount}`,
+                            subtitle: `${Array.isArray(c.stores) ? c.stores[0]?.name : (c.stores as { name: string } | null)?.name} · ${c.discount}`,
                             val1: couponClickMap.get(c.id) || 0
                         })).sort((a, b) => b.val1 - a.val1).slice(0, 10);
                         setTopCoupons(mergedTopC);
@@ -229,7 +232,7 @@ export default function AdminDashboard() {
                     else if (c.product_id && productMap.has(c.product_id)) targetTitle = productMap.get(c.product_id);
                     else if (c.store_id && storeMap.has(c.store_id)) targetTitle = storeMap.get(c.store_id); // Fallback for pure store clicks
                     
-                    let storeName = c.store_id && storeMap.has(c.store_id) ? storeMap.get(c.store_id) : undefined;
+                    const storeName = c.store_id && storeMap.has(c.store_id) ? storeMap.get(c.store_id) : undefined;
 
                     return {
                         id: c.id,

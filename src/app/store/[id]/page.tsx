@@ -1,3 +1,7 @@
+import type { CouponRow, ProductRow, Faq } from '@/lib/models';
+import { parseFaqs } from '@/lib/faq';
+import { isCouponExpired } from '@/lib/utils';
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import { supabase } from '@/lib/supabase';
 import CouponCard from '@/components/CouponCard';
 import CouponListRow from '@/components/CouponListRow';
@@ -10,7 +14,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
 
-export const revalidate = 2592000;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const params = await props.params;
@@ -25,15 +29,17 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     // 우선순위 4: 메타 디스크립션 동적 키워드 보강
     const { data: topCoupons } = await supabase
         .from('coupons')
-        .select('code, discount, title')
+        .select('code, discount, title, expiry')
         .eq('store_id', storeId)
         .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(2);
+        .lte('published_at', new Date().toISOString())
+        .order('published_at', { ascending: false });
+
+    const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title)).slice(0, 2);
 
     let description = `${currentYear}년 ${currentMonth}월 ${store.name} 할인코드 및 프로모션을 총정리하였습니다. 검증된 최신 할인쿠폰과 카드 혜택을 확인하세요.`;
-    if (topCoupons && topCoupons.length > 0) {
-        const dynamicHints = topCoupons.map(c => {
+    if (activeCoupons.length > 0) {
+        const dynamicHints = activeCoupons.map(c => {
             const isNoCode = !c.code || c.code === 'NO_CODE_REQUIRED' || c.code === '없음';
             return isNoCode ? c.title : `${c.code}(${c.discount})`;
         }).join(', ');
@@ -76,30 +82,31 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             products(*)
         `)
         .eq('id', storeId)
+        .eq('coupons.status','published').lte('coupons.published_at',now)
+        .eq('products.status','published').lte('products.published_at',now)
         .single();
 
     if (!store) notFound();
 
-    const publishedCoupons = store.coupons?.filter((c: any) => c.status === 'published' && (!c.published_at || new Date(c.published_at) <= new Date(now))) || [];
-    const publishedProducts = store.products?.filter((p: any) => p.status === 'published' && (!p.published_at || new Date(p.published_at) <= new Date(now))) || [];
+    const publishedCoupons = store.coupons?.filter((c: CouponRow) => c.status === 'published' && (!c.published_at || new Date(c.published_at) <= new Date(now))) || [];
+    const publishedProducts = store.products?.filter((p: ProductRow) => p.status === 'published' && (!p.published_at || new Date(p.published_at) <= new Date(now))) || [];
 
-    publishedCoupons.sort((a: any, b: any) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
-    publishedProducts.sort((a: any, b: any) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
+    publishedCoupons.sort((a: CouponRow, b: CouponRow) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
+    publishedProducts.sort((a: ProductRow, b: ProductRow) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
 
-    const { isCouponExpired } = await import('@/lib/utils');
-
-    const tableCoupons = publishedCoupons.map((c: any) => ({
+    const tableCoupons = publishedCoupons.map((c: CouponRow) => ({
         ...c,
         isExpired: isCouponExpired(c.expiry, c.title)
-    })).sort((a: any, b: any) => (a.isExpired === b.isExpired ? 0 : a.isExpired ? 1 : -1));
+    })).sort((a: CouponRow, b: CouponRow) => (a.isExpired === b.isExpired ? 0 : a.isExpired ? 1 : -1));
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
-    const currentDate = new Date().getDate();
 
     // 우선순위 5: dateModified는 실제 쿠폰/상품 데이터의 최근 업데이트 시점 기준
-    const latestCouponUpdate = publishedCoupons[0]?.updated_at || publishedCoupons[0]?.created_at;
-    const dateModified = latestCouponUpdate ? new Date(latestCouponUpdate).toISOString() : now;
+    const updateTimes = [store, ...publishedCoupons, ...publishedProducts]
+        .map(row => Date.parse(row.updated_at || row.published_at || row.created_at || ''))
+        .filter(Number.isFinite);
+    const dateModified = updateTimes.length ? new Date(Math.max(...updateTimes)).toISOString() : undefined;
 
     // 우선순위 3: 동적 FAQ 생성 로직 (DB에 없으면 기본 템플릿 사용)
     const defaultFaqs = [
@@ -108,14 +115,8 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         { question: `결제수단별 혜택과 중복 할인이 되나요?`, answer: `대부분의 경우 전용 결제수단(네이버페이, 토스페이, 특정 카드사 등) 혜택과 일반 할인코드는 중복 적용되지 않으므로, 둘 중 혜택이 더 큰 것을 선택하시는 것이 좋습니다.` },
         { question: `${store.name} 예약 취소 시 쿠폰은 어떻게 되나요?`, answer: `사용하신 쿠폰의 규정에 따라 다릅니다. 일반적인 할인코드는 취소 시 복구되어 재사용이 가능하지만, 선착순 쿠폰이나 프로모션 기간이 종료된 경우에는 복구되지 않을 수 있으니 주의 바랍니다.` }
     ];
-    let parsedFaqs = defaultFaqs;
-    if (store.faqs) {
-        try {
-            const raw = typeof store.faqs === 'string' ? JSON.parse(store.faqs) : store.faqs;
-            if (Array.isArray(raw) && raw.length > 0) parsedFaqs = raw;
-        } catch { /* use defaultFaqs */ }
-    }
-    const faqs = parsedFaqs;
+    const parsedFaqs = parseFaqs(store.faqs);
+    const faqs = parsedFaqs.length ? parsedFaqs : defaultFaqs;
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -142,7 +143,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const faqLd = {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: faqs.map((faq: any) => ({
+        mainEntity: faqs.map((faq: Faq) => ({
             '@type': 'Question',
             name: faq.question,
             acceptedAnswer: { '@type': 'Answer', text: faq.answer }
@@ -152,7 +153,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const itemListLd = tableCoupons.length > 0 ? {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        itemListElement: tableCoupons.map((coupon: any, index: number) => {
+        itemListElement: tableCoupons.map((coupon: CouponRow, index: number) => {
             let imageUrl = store?.logo || 'https://coupontalk.kr/og-image.png';
             if (coupon.content_body) {
                 const imgMatch = coupon.content_body.match(/!\[.*?\]\((.*?)\)/);
@@ -176,7 +177,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
     return (
         <div className="container mx-auto max-w-4xl border-x min-h-screen bg-white shadow-sm" style={{ borderColor: 'var(--border-color)' }}>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaGraph) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
             
             <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors">
@@ -212,7 +213,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             <div className="px-6 md:px-10 py-4 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
                 <CheckCircle size={20} className="text-green-600" />
                 <p className="font-semibold text-sm">
-                    최신 업데이트: <span className="text-gray-900 font-bold">{currentYear}년 {currentMonth}월 {currentDate}일</span> 기준 검증 완료
+                    {dateModified ? <>최근 데이터 수정: <span className="text-gray-900 font-bold">{new Date(dateModified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</span></> : '쿠폰별 유효기간과 적용 조건을 확인하세요.'}
                 </p>
             </div>
 
@@ -234,7 +235,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {tableCoupons.map((coupon: any) => {
+                                {tableCoupons.map((coupon: CouponRow) => {
                                     let parsedCond = coupon.condition;
                                     try {
                                         if (coupon.condition && coupon.condition.startsWith('{')) {
@@ -279,7 +280,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                         <CalendarDays size={20} className="text-blue-600" /> 이달의 카드 프로모션 및 이벤트
                     </h2>
                     <ul className="flex flex-col gap-3">
-                        {store.events?.map((event: any, i: number) => (
+                        {store.events?.map((event: { title: string; date: string }, i: number) => (
                             <li key={i} className="flex gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-blue-100">
                                 <span className="font-bold text-gray-900">{event.title}</span>
                                 <span className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-700 rounded-full">{event.date}</span>
@@ -292,10 +293,10 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {tableCoupons.length > 0 && (
                 <div className="p-6 md:p-10 bg-gray-50/50 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                        💰 사용 가능한 할인코드 <span className="text-blue-600">({tableCoupons.filter((c: any) => !c.isExpired).length})</span>
+                        💰 사용 가능한 할인코드 <span className="text-blue-600">({tableCoupons.filter((c: CouponRow) => !c.isExpired).length})</span>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        {tableCoupons.map((coupon: any) => (
+                        {tableCoupons.map((coupon: CouponRow) => (
                             <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
                         ))}
                     </div>
@@ -308,7 +309,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                         🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
                     </h2>
                     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-                        {publishedProducts.map((product: any) => (
+                        {publishedProducts.map((product: ProductRow) => (
                             <ProductCard key={product.id} product={product} storeName={store.name} />
                         ))}
                     </div>
@@ -352,7 +353,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
                         <div className="text-sm font-bold text-blue-600 mb-1">STEP 3</div>
                         <h3 className="font-bold text-gray-900 mb-2">결제 페이지에서 코드 입력</h3>
-                        <p className="text-gray-600 text-sm">최종 결제 전 [쿠폰/할인코드 입력] 란에 복사해둔 코드를 붙여넣기 한 후 '적용' 버튼을 누릅니다.</p>
+                        <p className="text-gray-600 text-sm">최종 결제 전 [쿠폰/할인코드 입력] 란에 복사해둔 코드를 붙여넣기 한 후 &apos;적용&apos; 버튼을 누릅니다.</p>
                     </div>
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
                         <div className="text-sm font-bold text-blue-600 mb-1">STEP 4</div>
@@ -380,7 +381,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     <HelpCircle size={24} className="text-blue-600" /> {store.name} 자주 묻는 질문 (FAQ)
                 </h2>
                 <div className="flex flex-col gap-4">
-                    {faqs.map((faq: any, i: number) => (
+                    {faqs.map((faq: Faq, i: number) => (
                         <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                             <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-start gap-2">
                                 <span className="text-blue-600">Q.</span> {faq.question}

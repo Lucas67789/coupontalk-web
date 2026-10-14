@@ -3,7 +3,9 @@
 import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { openCouponLink } from '@/lib/coupon-action';
+import { isCouponExpired } from '@/lib/utils';
+import { hasCouponCode } from '@/lib/affiliate';
 
 interface CouponDetailClientProps {
     coupon: {
@@ -23,57 +25,16 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
 
-    const isNoCode = coupon.code === 'NO_CODE_REQUIRED';
+    const expired = isCouponExpired(coupon.expiry, coupon.title);
+    const isNoCode = !hasCouponCode(coupon.code);
 
     const handleCopyAndRedirect = async () => {
-        // Track click
-        if (coupon.id) {
-            try {
-                // Call new tracking API
-                let sessionId = localStorage.getItem('ct_session_id');
-                await fetch('/api/track/click', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(sessionId ? { 'x-session-id': sessionId } : {})
-                    },
-                    body: JSON.stringify({
-                        type: isNoCode ? 'affiliate_click' : 'code_copy',
-                        coupon_id: coupon.id,
-                        target_url: affiliateUrl
-                    })
-                });
-                
-                // Legacy RPC for click_count fallback
-                await supabase.rpc('increment_coupon_click', { coupon_id: coupon.id });
-            } catch (err) {
-                console.error('Failed to register click', err);
-            }
-        }
-
-        // Copy code
-        if (!isNoCode) {
-            try {
-                await navigator.clipboard.writeText(coupon.code);
-                setCopied(true);
-                showToast(`'${coupon.code}' 복사 완료! 결제창에서 입력하세요.`);
-            } catch (err) {
-                console.error("복사실패", err);
-                showToast("코드 복사에 실패했습니다. 수동으로 복사해주세요.");
-            }
-        } else {
-            showToast(`${storeName} 할인 페이지로 이동합니다.`);
-        }
-
-        // Open affiliate link
-        setTimeout(() => {
-            window.open(affiliateUrl, '_blank');
-            setCopied(false);
-        }, 1000);
+        showToast(await openCouponLink(coupon, affiliateUrl, storeName));
     };
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
+            {expired && <p role="status" className="mb-4 rounded-lg bg-gray-100 p-4 text-gray-700">이 프로모션은 종료되었습니다. 다른 할인 혜택을 확인해주세요.</p>}
             {/* Coupon Code Display */}
             {!isNoCode && (
                 <div className="text-center mb-6">
@@ -87,9 +48,10 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
             {/* CTA Button */}
             <button
                 onClick={handleCopyAndRedirect}
+                disabled={expired}
                 className={`btn-primary w-full justify-center py-4 text-lg font-bold ${copied ? 'bg-green-600 hover:bg-green-700 shadow-none' : ''}`}
             >
-                {copied ? (
+                {expired ? "기간 만료" : copied ? (
                     <>복사완료! 이동중...</>
                 ) : isNoCode ? (
                     <>특가 바로가기 <ExternalLink size={20} /></>

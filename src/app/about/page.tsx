@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Info, ShieldCheck, Zap, HeartHandshake } from 'lucide-react';
 
 export default function AboutPage() {
@@ -33,9 +34,9 @@ export default function AboutPage() {
                     <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <ShieldCheck size={32} />
                     </div>
-                    <h3 className="text-xl font-bold mb-3">100% 검증</h3>
+                    <h3 className="text-xl font-bold mb-3">조건 확인</h3>
                     <p className="text-gray-600">
-                        5년 이상의 노하우로 모든 코드는 운영진이 직접 테스트한 뒤에만 업로드됩니다. 작동하지 않는 코드는 즉각 삭제합니다.
+                        할인 조건과 유효기간을 함께 안내합니다. 최종 적용 여부는 쇼핑몰 결제 화면에서 확인해주세요.
                     </p>
                 </div>
 
@@ -45,7 +46,7 @@ export default function AboutPage() {
                     </div>
                     <h3 className="text-xl font-bold mb-3">빠른 업데이트</h3>
                     <p className="text-gray-600">
-                        인기 스토어의 프로모션이 시작되는 즉시 가장 빠르게 할인 정보를 캐치하여 전달합니다. 매일 오전 새롭게 갱신됩니다.
+                        인기 스토어의 프로모션이 시작되는 즉시 가장 빠르게 할인 정보를 캐치하여 전달합니다. 프로모션 정보는 수시로 갱신됩니다.
                     </p>
                 </div>
 
@@ -66,9 +67,9 @@ export default function AboutPage() {
                 <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
                     알리익스프레스 직구부터 아고다 호텔 예약, 쿠팡 로켓배송까지. 당신이 찾는 모든 할인이 이곳에 있습니다.
                 </p>
-                <a href="/" className="btn-primary" style={{ backgroundColor: 'white', color: '#0f172a' }}>
+                <Link href="/" className="btn-primary" style={{ backgroundColor: 'white', color: '#0f172a' }}>
                     할인코드 찾아보기
-                </a>
+                </Link>
             </div>
 
         </div>

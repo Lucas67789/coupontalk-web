@@ -14,7 +14,7 @@ export default function PageViewTracker() {
 
         const trackView = async () => {
             try {
-                let sessionId = localStorage.getItem('ct_session_id');
+                const sessionId = localStorage.getItem('ct_session_id');
                 
                 // Extract possible IDs from path
                 let storeId = null;

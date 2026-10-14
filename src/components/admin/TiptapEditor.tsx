@@ -57,6 +57,7 @@ export default function TiptapEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3, 4] },
+        link: false, underline: false,
         horizontalRule: {},
         bulletList: {},
         orderedList: {},
@@ -170,12 +171,15 @@ export default function TiptapEditor({
     if (!editor || draftLoaded.current) return;
     draftLoaded.current = true;
 
-    const savedDraft = typeof window !== "undefined" ? localStorage.getItem(draftKey) : null;
+    let savedDraft: string | null = null;
+    try { savedDraft = localStorage.getItem(draftKey); } catch { /* Storage may be disabled. */ }
+    if (initialContent) editor.commands.setContent(initialContent);
 
     if (savedDraft) {
       try {
         const draftContent = JSON.parse(savedDraft);
         if (draftContent && typeof draftContent === "string" && draftContent.trim() && draftContent !== initialContent) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronize the external localStorage draft after mounting.
           setDraftContentToLoad(draftContent);
           setShowDraftBanner(true);
           return;

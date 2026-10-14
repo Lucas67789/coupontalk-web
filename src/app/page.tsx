@@ -1,11 +1,14 @@
+import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import Link from 'next/link';
 import * as LucideIcons from 'lucide-react';
 import CouponCard from '@/components/CouponCard';
 import StickySidebar from '@/components/StickySidebar';
-import { supabase } from '@/lib/supabase';
+import { supabase, fetchAllRows } from '@/lib/supabase';
 import { isCouponExpired } from '@/lib/utils';
 
-export const revalidate = 2592000;
+export const dynamic = 'force-dynamic';
+
+export const metadata = { alternates: { canonical: 'https://coupontalk.kr' } };
 
 export default async function Home() {
   // 참고: 검색(SearchAction)은 이 페이지에서 직접 필터링하지 않고,
@@ -15,19 +18,19 @@ export default async function Home() {
 
   const categoriesPromise = supabase.from('categories').select('*');
   
-  const newCouponsPromise = supabase.from('coupons')
+  const newCouponsPromise = fetchAllRows(supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
     .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(15);
+    );
 
-  const popularCouponsPromise = supabase.from('coupons')
+  const popularCouponsPromise = fetchAllRows(supabase.from('coupons')
     .select('*, stores(name, id)')
     .eq('status', 'published')
     .lte('published_at', now)
     .order('click_count', { ascending: false, nullsFirst: false })
-    .limit(15);
+    );
 
   const [
     { data: categories },
@@ -40,15 +43,15 @@ export default async function Home() {
   ]);
 
   // Filter out expired coupons from homepage lists
-  const newCoupons = (rawNewCoupons || []).filter((c: any) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
-  const popularCoupons = (rawPopularCoupons || []).filter((c: any) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
+  const newCoupons = (rawNewCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
+  const popularCoupons = (rawPopularCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 5);
 
   return (
     <div className="container mx-auto px-4 lg:px-0">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: '쿠폰톡',
@@ -73,17 +76,17 @@ export default async function Home() {
 
         <div className="flex-1 relative z-10">
           <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-bold tracking-wider mb-4">
-            매일 오전 9시 업데이트
+            쇼핑몰별 할인 정보
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
             가장 확실한<br />
             <span style={{ color: 'var(--brand-primary)' }}>할인코드만</span> 모았습니다
           </h1>
           <p className="text-lg text-gray-600 mb-8 max-w-lg">
-            직접 테스트한 100% 검증된 할인코드. 쿠팡, 알리익스프레스, 아고다 등 원하는 쇼핑몰의 할인을 지금 바로 적용하세요.
+            쇼핑몰별 할인코드와 프로모션 정보. 쿠팡, 알리익스프레스, 아고다 등 원하는 쇼핑몰의 할인을 지금 바로 적용하세요.
           </p>
           <div className="flex gap-4">
-            <Link href="#popular-stores" className="btn-primary">
+            <Link href="#popular-coupons" className="btn-primary">
               인기 쇼핑몰 할인 보기
             </Link>
             <Link href="#categories" className="px-6 py-3 rounded-full font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm">
@@ -126,7 +129,7 @@ export default async function Home() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {categories?.map((cat, i) => {
             // Dynamically render lucide icon
-            const IconComponent = (LucideIcons as any)[cat.icon];
+            const IconComponent = (() => { const icon = LucideIcons[cat.icon as keyof typeof LucideIcons]; return typeof icon === "object" || typeof icon === "function" ? icon as LucideIcons.LucideIcon : LucideIcons.Tag; })();
             return (
               <Link
                 href={`/category/${cat.id}`}
@@ -153,7 +156,7 @@ export default async function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {newCoupons?.map((coupon: any) => (
+          {newCoupons?.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} isExpired={isCouponExpired(coupon.expiry, coupon.title)} />
           ))}
         </div>
@@ -168,7 +171,7 @@ export default async function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {popularCoupons?.map((coupon: any) => (
+          {popularCoupons?.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.stores?.id} isExpired={isCouponExpired(coupon.expiry, coupon.title)} />
           ))}
         </div>
@@ -181,12 +184,12 @@ export default async function Home() {
           <div>
             <div className="text-4xl font-extrabold mb-2 text-blue-200">5년+</div>
             <p className="font-medium text-lg">노하우 축적</p>
-            <p className="text-blue-100 text-sm mt-2">직접 테스트하고 검증한 코드만 제공합니다.</p>
+            <p className="text-blue-100 text-sm mt-2">프로모션 조건과 유효기간을 함께 안내합니다.</p>
           </div>
           <div>
             <div className="text-4xl font-extrabold mb-2 text-blue-200">매일</div>
             <p className="font-medium text-lg">실시간 업데이트</p>
-            <p className="text-blue-100 text-sm mt-2">만료된 코드 걱정 없이 바로 사용하세요.</p>
+            <p className="text-blue-100 text-sm mt-2">사용 전 쇼핑몰의 최종 적용 조건을 확인하세요.</p>
           </div>
           <div>
             <div className="text-4xl font-extrabold mb-2 text-blue-200">100%</div>

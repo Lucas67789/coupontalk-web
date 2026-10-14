@@ -19,5 +19,11 @@ export async function clearAllCache(access_token?: string) {
     throw new Error("Unauthorized");
   }
 
+  const authorized = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${access_token}` } }, auth: { persistSession: false } }
+  );
+  const { data: isAdmin, error: roleError } = await authorized.rpc('is_admin');
+  if (roleError || isAdmin !== true) throw new Error('Forbidden');
   revalidatePath("/", "layout");
 }

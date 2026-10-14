@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-interface TopRankingItem {
+export interface TopRankingItem {
     id: string;
     title: string;
     subtitle?: string;

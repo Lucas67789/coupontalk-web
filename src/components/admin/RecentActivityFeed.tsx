@@ -4,7 +4,7 @@ import { Clock, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-interface ActivityItem {
+export interface ActivityItem {
     id: string;
     type: string; // 'coupon_click', 'code_copy', 'product_click'
     targetTitle: string;
