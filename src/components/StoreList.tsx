@@ -31,7 +31,7 @@ export default function StoreList({ initialStores, initialQuery = "", offers = [
                     브랜드·상품 <span className="text-blue-600">할인 검색</span>
                 </h1>
                 <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
-                    브랜드 이름이나 정확한 모델번호로 관련 쿠폰과 상품을 찾아보세요.
+                    브랜드 이름이나 정확한 모델번호로 쿠폰, 상품과 이용 가이드를 찾아보세요.
                 </p>
 
                 <div className="max-w-md mx-auto relative group">
@@ -49,11 +49,11 @@ export default function StoreList({ initialStores, initialQuery = "", offers = [
                 </div>
             </div>
 
-            {searchQuery.trim() && <section className="mb-8" aria-live="polite">
+            {searchQuery.trim() && matchingOffers.length > 0 && <section className="mb-8" aria-live="polite">
                 <h2 className="text-xl font-bold mb-4">관련 쿠폰·상품 {matchingOffers.length}개</h2>
                 <div className="grid gap-3">{matchingOffers.map(offer => <Link key={offer.id} href={offer.href} className="rounded-xl border border-gray-200 bg-white p-5 hover:border-blue-500"><p className="text-sm text-blue-700 mb-1">{offer.storeName} · {offer.discount}</p><h3 className="font-bold">{offer.title}</h3></Link>)}</div>
-                {!matchingOffers.length && <p className="text-gray-600">일치하는 활성 쿠폰·상품이 없습니다. 모델번호나 브랜드명으로 다시 검색해 주세요.</p>}
             </section>}
+            {searchQuery.trim() && filteredStores.length > 0 && <h2 className="text-xl font-bold mb-4" aria-live="polite">관련 스토어 {filteredStores.length}곳</h2>}
             {filteredStores.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
                     {filteredStores.map((store: StoreSummary) => (
