@@ -23,7 +23,7 @@ export default async function AllStoresPage({
     searchParams: Promise<{ q?: string }>;
 }) {
     // Note: We need to pull tags and description to allow search matching
-    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id,name,description,rating,tags,events,coupons(id,expiry,title)')
+    const { data: stores } = await fetchAllRows(supabase.from('stores').select('id,name,description,logo,rating,tags,events,coupons(id,expiry,title)')
         .not('id', 'in', ALIAS_STORE_FILTER).eq('coupons.status', 'published').lte('coupons.published_at', new Date().toISOString()));
     for (const store of stores || []) store.coupons = store.coupons.filter((coupon: { expiry: string; title: string }) => !isCouponExpired(coupon.expiry, coupon.title));
     const { q } = await searchParams;

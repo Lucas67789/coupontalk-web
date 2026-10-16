@@ -1,4 +1,5 @@
 "use client";
+import { safeAffiliateUrl } from '@/lib/affiliate';
 import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 
 import type { StoreRow } from '@/lib/models';
@@ -43,6 +44,10 @@ export default function AdminStores() {
             ? currentStore.tags.split(',').map((t: string) => t.trim())
             : currentStore.tags;
 
+        if (tagsArray?.includes('store-guide') && !safeAffiliateUrl(currentStore.website_url)) {
+            alert('상품·이용 가이드에는 유효한 HTTP(S) 제휴 링크가 필요합니다.');
+            return;
+        }
         const payload = {
             name: currentStore.name,
             description: currentStore.description,
@@ -155,12 +160,19 @@ export default function AdminStores() {
                                 <input type="text" value={currentStore?.website_url || ''} onChange={e => setCurrentStore({ ...currentStore, website_url: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div>
+                                <label className="flex items-center gap-2 mb-3 text-sm font-semibold">
+                                    <input type="checkbox" checked={(Array.isArray(currentStore?.tags) ? currentStore.tags : (currentStore?.tags || '').split(',').map(t => t.trim())).includes('store-guide')} onChange={e => {
+                                        const tags = (Array.isArray(currentStore?.tags) ? currentStore.tags : (currentStore?.tags || '').split(',').map(t => t.trim())).filter(t => t && t !== 'store-guide');
+                                        setCurrentStore({ ...currentStore, tags: e.target.checked ? [...tags, 'store-guide'] : tags });
+                                    }} /> 상품·이용 가이드 화면 사용
+                                </label>
+                                <p className="text-xs text-gray-500 mb-3">쿠폰 없이도 소개와 제휴 버튼을 표시합니다. 상세 안내의 첫 H2 제목을 검색 제목으로, 본문 이미지를 검색 이미지 후보로 사용합니다.</p>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">카테고리 태그 (쉼표로 구분. 예: travel, fashion, tech)</label>
                                 <input required type="text" value={Array.isArray(currentStore?.tags) ? currentStore.tags.join(', ') : currentStore?.tags || ''} onChange={e => setCurrentStore({ ...currentStore, tags: e.target.value })} className="w-full p-3 border rounded-xl bg-gray-50" />
                             </div>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">할인코드 적용 가이드 (에디터 지원)</label>
+                                    <label className="block text-sm font-medium text-gray-700">스토어 상세 안내 (첫 H2: 검색 제목)</label>
                                 </div>
                                 <RichTextEditor draftKey={`store-guide-${currentStore?.id || "new"}`}
                                     value={currentStore?.guide_content || ''}

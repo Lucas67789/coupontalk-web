@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { hasStoreGuide } from '@/lib/store-guide';
 import type { StoreSummary } from '@/lib/models';
 import { ChevronRight } from 'lucide-react';
 
@@ -25,16 +26,17 @@ const getGradientClass = (name: string) => {
 };
 
 export default function StoreCard({ store }: { store: StoreSummary }) {
-    const latestEventTitle = store.coupons?.length ? `${store.coupons.length}개의 할인 혜택` : '현재 등록된 활성 쿠폰 없음';
+    const latestEventTitle = store.coupons?.length ? `${store.coupons.length}개의 할인 혜택` : hasStoreGuide(store.tags) ? '상품·이용 가이드 보기' : '현재 등록된 활성 쿠폰 없음';
 
     return (
         <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
+            {hasStoreGuide(store.tags) && store.logo && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={800} loading="lazy" className="w-full aspect-[3/2] object-cover border-b border-slate-100" />}
             <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
+                {!hasStoreGuide(store.tags) && <div className="flex items-center justify-between mb-4">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
                         {store.name.charAt(0)}
                     </div>
-                </div>
+                </div>}
 
                 <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">
                     {store.name}

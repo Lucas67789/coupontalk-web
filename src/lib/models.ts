@@ -18,4 +18,4 @@ export type StoreRow = {
     coupons: CouponRow[]; products: ProductRow[];
 };
 
-export type StoreSummary = Pick<StoreRow, 'id' | 'name' | 'description' | 'rating' | 'tags' | 'events'> & { coupons: Pick<CouponRow, 'id' | 'title' | 'expiry'>[] };
+export type StoreSummary = Pick<StoreRow, 'id' | 'name' | 'description' | 'rating' | 'tags' | 'events'> & { logo?: string } & { coupons: Pick<CouponRow, 'id' | 'title' | 'expiry'>[] };

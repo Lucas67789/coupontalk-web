@@ -113,7 +113,7 @@ export default async function CategoryPage(props: { params: Promise<{ id: string
             {/* Stores Grid */}
             <div>
                 <div className="flex justify-between items-end mb-6">
-                    <h2 className="text-2xl font-bold">진행 중인 {category.name} 할인 ({storesList.length})</h2>
+                    <h2 className="text-2xl font-bold">{category.name} 스토어·혜택 ({storesList.length})</h2>
                 </div>
 
                 {storesList.length > 0 ? (
