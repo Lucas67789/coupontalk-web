@@ -24,6 +24,8 @@ export function couponExpiryTime(expiry?: string | null): number | null {
     return Number.isNaN(time) ? null : time;
 }
 export function isCouponExpired(expiry?: string | null, title?: string, now = Date.now()) {
+    // Explicit early termination wins over a future or missing deadline.
+    if (/^\s*\[종료\]/.test(title || "")) return true;
     const end = couponExpiryTime(expiry);
     if (end !== null) return end < now;
     if (/상시|무기한|소진/.test(expiry || '')) return false;

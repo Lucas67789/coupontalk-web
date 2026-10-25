@@ -63,14 +63,17 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
         defaultTitlePart2 = `${defaultTitlePart2} 할인`;
     }
 
-    const title = coupon.seo_title || [defaultTitlePart1, defaultTitlePart2, '쿠폰톡'].filter(Boolean).join(' | ');
+    const expired = isCouponExpired(coupon.expiry, coupon.title);
+    const originalTitle = coupon.seo_title || [defaultTitlePart1, defaultTitlePart2, '쿠폰톡'].filter(Boolean).join(' | ');
+
+    const title = expired && !originalTitle.startsWith("[종료]") ? `[종료] ${originalTitle}` : originalTitle;
 
     // Smart description generation
     let defaultDescPart1 = coupon.title;
     if (storeName && !defaultDescPart1.includes(storeName)) {
         defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
     }
-    const description = coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
+    const description = expired ? `종료된 프로모션 기록입니다. 현재 구매·예약에는 사용할 수 없습니다. ${storeName}의 최신 할인 혜택은 스토어 페이지에서 확인하세요.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
 
     return {
         title,
@@ -241,6 +244,14 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-6">
                     {h1Title}
                 </h1>
+
+                {expired && <aside className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="종료된 쿠폰 안내">
+                    <p className="font-bold text-amber-900">이 혜택은 종료되었습니다</p>
+                    <p className="mt-2 text-sm leading-6 text-amber-900">아래 내용은 지난 프로모션 기록으로 현재 구매·예약에 사용할 수 없습니다.</p>
+                    <Link href={`/store/${encodeURIComponent(storeId)}${validRelatedCoupons.length ? '#benefit-summary' : ''}`} className="mt-4 inline-flex rounded-lg bg-blue-600 px-5 py-3 font-bold text-white">
+                        {storeName} {validRelatedCoupons.length ? '최신 혜택 비교하기' : '현재 할인 정보 확인하기'} →
+                    </Link>
+                </aside>}
 
                 {/* Coupon CTA Section */}
                 <div className="mb-10">

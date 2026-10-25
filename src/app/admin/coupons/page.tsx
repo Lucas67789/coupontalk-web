@@ -281,6 +281,7 @@ export default function AdminCoupons() {
                                             <option value="draft">임시저장 (비공개)</option>
                                             <option value="published">공개 (예약 및 상시발행)</option>
                                         </select>
+                                        <p className="mt-2 text-xs leading-5 text-gray-500">기간 종료만으로 비공개로 바꾸지 마세요. 공개 상태에서 유효기간이 지나면 종료 안내와 최신 혜택 연결이 표시됩니다. 조기 종료는 제목 앞에 [종료]를 붙이세요.</p>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">발행 시점 <span className="text-blue-600">(예약발행 시 미래 지정)</span></label>

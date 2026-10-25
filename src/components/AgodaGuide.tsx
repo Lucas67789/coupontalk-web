@@ -1,4 +1,4 @@
-export const agodaGuideUpdatedAt = '2026-10-14T00:00:00+09:00';
+export const agodaGuideUpdatedAt = '2026-10-25T00:00:00+09:00';
 
 export const agodaFaqs = [
     { question: '아고다 할인코드는 어디에 입력하나요?', answer: '숙소와 객실을 선택한 뒤 예약·결제 화면에서 프로모션 코드 입력란을 확인하세요. 코드를 입력하고 결제를 완료하기 전에 요금 내역에 할인액이 반영됐는지 확인합니다. 전용 링크로 적용되는 혜택은 코드 입력이 필요하지 않을 수 있습니다.' },
@@ -24,6 +24,22 @@ export default function AgodaGuide() {
                     ].map(([title, text]) => <div key={title} className="rounded-xl border border-gray-200 p-5"><h3 className="font-bold text-gray-900 mb-2">{title}</h3><p className="text-sm leading-7 text-gray-600">{text}</p></div>)}
                 </div>
                 <p className="mt-4 text-sm leading-7 text-gray-600">할인율이 높아도 최대 할인액이나 대상 객실에 따라 결과가 달라집니다. 같은 날짜·객실·인원·취소 조건에서 세금과 수수료를 포함한 총액을 비교하세요.</p>
+            </section>
+            <section aria-labelledby="discount-example">
+                <h2 id="discount-example" className="text-2xl font-bold text-gray-900 mb-4">12%와 11% 할인, 예약 금액에 따라 비교하는 방법</h2>
+                <p className="text-sm leading-7 text-gray-600 mb-4">할인율보다 최대 할인액이 중요할 수 있습니다. 아래는 12%·최대 $30과 11%·최대 $100 조건을 비교한 계산 예시이며, 현재 적용 가능한 쿠폰을 보장하는 표가 아닙니다. 할인 대상 금액과 통화를 동일하게 가정하고 세금·수수료, 환율, 추가 결제 혜택은 제외했습니다.</p>
+                <div className="overflow-x-auto rounded-xl border border-gray-200">
+                    <table className="w-full text-sm text-left">
+                        <caption className="sr-only">동일한 할인 대상 금액에서 최대 할인액을 반영한 예시</caption>
+                        <thead className="bg-slate-50"><tr><th scope="col" className="p-4">할인 대상 금액</th><th scope="col" className="p-4">12% · 최대 $30</th><th scope="col" className="p-4">11% · 최대 $100</th></tr></thead>
+                        <tbody className="divide-y divide-gray-100">
+                            <tr><th scope="row" className="p-4">$100</th><td className="p-4">$12 할인</td><td className="p-4">$11 할인</td></tr>
+                            <tr><th scope="row" className="p-4">$300</th><td className="p-4">$30 할인</td><td className="p-4">$33 할인</td></tr>
+                            <tr><th scope="row" className="p-4">$500</th><td className="p-4">$30 할인</td><td className="p-4">$55 할인</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p className="mt-4 text-sm leading-7 text-gray-600">각 쿠폰의 대상 고객·국가·객실·결제수단 조건을 먼저 확인하세요. 전용 페이지별 객실 가격이 다르면 할인액이 더 커도 최종 결제액은 더 높을 수 있습니다.</p>
             </section>
             <section id="how-to-use" className="scroll-mt-24">
                 <h2 className="text-2xl font-bold text-gray-900 mb-5">아고다 할인코드 적용 방법</h2>

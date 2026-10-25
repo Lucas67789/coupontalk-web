@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {bookingDeadlineFromContent, couponExpiryTime} from '../src/lib/utils.ts';
+import {bookingDeadlineFromContent, couponExpiryTime, isCouponExpired} from '../src/lib/utils.ts';
 import {matchesSearch} from '../src/lib/search.ts';
 import {hasCouponCode} from '../src/lib/affiliate.ts';
 import {STORE_ALIASES} from '../src/lib/store-aliases.ts';
@@ -23,3 +23,10 @@ test('automatic link labels are not copied as coupon codes, exact real codes sta
     assert.equal(hasCouponCode('일본호텔15%KLK'), true);
     for (const target of Object.values(STORE_ALIASES)) assert.equal(STORE_ALIASES[target], undefined);
 });
+
+ test('ended archives never become usable even with a future or missing deadline', () => {
+    const now = Date.parse('2026-10-25T00:00:00+09:00');
+    assert.equal(isCouponExpired('2026.12.31', '[종료] 과거 할인', now), true);
+    assert.equal(isCouponExpired('', '[종료] 과거 할인', now), true);
+    assert.equal(isCouponExpired('2026.12.31', '현재 할인', now), false);
+ });
