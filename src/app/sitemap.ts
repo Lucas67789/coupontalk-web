@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
+import { latestGuideUpdatedAt } from '@/lib/latest-guide';
 import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
 
 export const dynamic = 'force-dynamic';
@@ -32,8 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const couponUrls = (coupons || []).map((coupon) => ({
         url: `${baseUrl}/store/${encodeURIComponent(coupon.store_id)}/coupon/${encodeURIComponent(coupon.id)}`,
-        images: contentImages(coupon.content_body),
-        lastModified: coupon.updated_at || coupon.published_at || coupon.created_at || undefined,
+        images: isCouponExpired(coupon.expiry, coupon.title) ? (coupons || []).filter(c => c.store_id === coupon.store_id && !isCouponExpired(c.expiry, c.title)).flatMap(c => contentImages(c.content_body)) : contentImages(coupon.content_body),
+        lastModified: isCouponExpired(coupon.expiry, coupon.title) ? [latestGuideUpdatedAt, coupon.updated_at || coupon.published_at || coupon.created_at, ...(coupons || []).filter(c => c.store_id === coupon.store_id).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1) : coupon.updated_at || coupon.published_at || coupon.created_at || undefined,
         changeFrequency: 'daily' as const,
         priority: 0.7,
     }));
