@@ -3,7 +3,7 @@
 import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
-import { isCouponExpired } from '@/lib/utils';
+import { isCouponExpired, couponStatus } from '@/lib/utils';
 import { hasCouponCode } from '@/lib/affiliate';
 
 interface CouponDetailClientProps {
@@ -14,6 +14,7 @@ interface CouponDetailClientProps {
         discount: string;
         condition: string;
         expiry: string;
+        content_body?: string;
         affiliate_url?: string;
     };
     storeName: string;
@@ -24,15 +25,17 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
     const { showToast } = useToast();
 
     const expired = isCouponExpired(coupon.expiry, coupon.title);
+    const upcoming = couponStatus(coupon, new Date().getTime()) === 'upcoming';
     const isNoCode = !hasCouponCode(coupon.code);
 
     const handleCopyAndRedirect = async () => {
-        if (expired) return;
+        if (expired || upcoming) return;
         showToast(await openCouponLink(coupon, affiliateUrl, storeName));
     };
 
     return (
         <div className="bg-white rounded-2xl border border-blue-200 p-4 md:p-6">
+            {upcoming && <p className="mb-4 rounded-lg bg-amber-50 p-4 text-amber-900">시작 예정 행사입니다. 시작일 이후 대상 상품과 할인 적용을 확인하세요.</p>}
             {expired && <p role="status" className="mb-4 rounded-lg bg-gray-100 p-4 text-gray-700">이 프로모션은 종료되었습니다. 다른 할인 혜택을 확인해주세요.</p>}
             <p className="text-2xl md:text-3xl font-bold text-blue-700 mb-3">{coupon.discount}</p>
             <p className="text-sm text-gray-700 leading-6 mb-3">{coupon.condition}</p>
@@ -50,17 +53,17 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
             {/* CTA Button */}
             <button
                 onClick={handleCopyAndRedirect}
-                disabled={expired}
+                disabled={expired || upcoming}
                 className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700 py-4 text-base font-bold disabled:bg-gray-300"
             >
-                {expired ? "기간 만료" : isNoCode ? (
+                {expired ? "기간 만료" : upcoming ? "행사 시작 전입니다" : isNoCode ? (
                     <>할인 페이지로 이동 <ExternalLink size={20} /></>
                 ) : (
                     <>코드 복사하고 할인 받기 <Copy size={20} /></>
                 )}
             </button>
 
-            {!expired && <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 md:hidden">
+            {!expired && !upcoming && <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 md:hidden">
                 <button onClick={handleCopyAndRedirect} className="w-full rounded-xl bg-blue-600 py-3 px-4 font-bold text-white">{isNoCode ? '할인 페이지로 이동' : '복사하고 할인받기'}</button>
             </div>}
         </div>

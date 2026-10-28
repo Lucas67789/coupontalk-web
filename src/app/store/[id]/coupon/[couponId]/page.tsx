@@ -13,7 +13,7 @@ import { hasCouponCode } from '@/lib/affiliate';
 import { agodaFaqs } from '@/components/AgodaGuide';
 import type { Metadata } from 'next';
 import LatestCouponGuide from '@/components/LatestCouponGuide';
-import { latestGuideTitle, latestGuideUpdatedAt } from '@/lib/latest-guide';
+import { uniqueGuideTitle, latestGuideUpdatedAt } from '@/lib/latest-guide';
 
 type RelatedCoupon = Pick<CouponRow, 'id' | 'title' | 'discount' | 'code' | 'store_id' | 'expiry' | 'published_at'>;
 
@@ -68,16 +68,17 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     const expired = isCouponExpired(coupon.expiry, coupon.title);
     const originalTitle = coupon.seo_title || [defaultTitlePart1, defaultTitlePart2, '쿠폰톡'].filter(Boolean).join(' | ');
 
-    const title = expired ? latestGuideTitle(storeName, coupon.title) : originalTitle;
+    let title = originalTitle;
 
     // Smart description generation
     let defaultDescPart1 = coupon.title;
     if (storeName && !defaultDescPart1.includes(storeName)) {
         defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
     }
-    const description = expired ? `${storeName}의 최신 할인·예정 행사, 대상 상품과 결제 조건을 확인하세요. 이 주소에서 새 혜택을 안내하며 종료된 이전 쿠폰은 별도 기록으로 구분합니다.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
+    const description = expired ? `${storeName} 최신 혜택과 대상 조건을 확인하세요. 이전 「${coupon.title.replace(/\[종료\]/g, "").trim()}」 행사의 후속 안내이며, 종료된 코드는 사용할 수 없습니다.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
 
-    const { data: latest } = expired ? await supabase.from('coupons').select('title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
+    const { data: latest } = expired ? await supabase.from('coupons').select('id, code, title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
+    if (expired) title = uniqueGuideTitle(storeName, coupon, latest || []);
     const guideOffers = (latest || []).filter(c => !isCouponExpired(c.expiry, c.title));
     const images = expired ? guideOffers.flatMap(c => contentImages(c.content_body)) : contentImages(coupon.content_body);
     const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(latest || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1);
@@ -162,8 +163,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         const offers = (allRelatedCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title));
         const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(allRelatedCoupons || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1)!;
         return <LatestCouponGuide coupon={coupon} offers={offers} storeName={storeName}
-            title={latestGuideTitle(storeName, coupon.title)}
-            description={`${storeName}의 최신 할인·예정 행사, 대상 상품과 결제 조건을 확인하세요. 이 주소에서 새 혜택을 안내하며 종료된 이전 쿠폰은 별도 기록으로 구분합니다.`}
+            title={uniqueGuideTitle(storeName, coupon, [coupon, ...(allRelatedCoupons || [])])}
+            description={`${storeName} 최신 혜택과 대상 조건을 확인하세요. 이전 「${coupon.title.replace(/\[종료\]/g, "").trim()}」 행사의 후속 안내이며, 종료된 코드는 사용할 수 없습니다.`}
             modified={modified} />;
     }
 
@@ -279,6 +280,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                             discount: coupon.discount,
                             condition: condText,
                             expiry: coupon.expiry,
+                            content_body: coupon.content_body,
                             affiliate_url: affUrl,
                         }}
                         storeName={storeName}

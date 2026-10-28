@@ -5,6 +5,8 @@ import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
+import { couponStatus } from '@/lib/utils';
+import { latestGuideTitle } from '@/lib/latest-guide';
 import Link from 'next/link';
 import Image from 'next/image';
 import { couponImages } from '@/lib/content-images';
@@ -34,6 +36,7 @@ const getStoreTheme = (name: string) => {
 
 export default function CouponCard({ coupon, storeName, storeId, isExpired }: { coupon: CouponRow, storeName: string, storeId?: string, isExpired?: boolean }) {
     const { showToast } = useToast();
+    const upcoming = couponStatus(coupon, new Date().getTime()) === 'upcoming';
     const [copied, setCopied] = useState(false);
     const theme = getStoreTheme(storeName);
 
@@ -68,7 +71,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     } catch (e) { }
 
     const handleCopyAndRedirect = async () => {
-        if (isExpired) return;
+        if (isExpired || upcoming) return;
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
@@ -79,7 +82,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     const cardContent = (
         <>
             <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-50">
-                <Image src={couponImages(coupon.content_body)[0]} alt={coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
+                <Image src={couponImages(coupon.content_body)[0]} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
             </div>
             {/* Decorative top accent */}
             <div className={`absolute left-0 top-0 right-0 h-1 ${isExpired ? 'bg-gray-300' : theme.accent}`}></div>
@@ -87,6 +90,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
             <div className="flex-1 flex flex-col">
                 <div>
                     <div className="flex items-center gap-2 mb-3 w-full min-w-0">
+                        {upcoming && <span className="rounded-md bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">시작 예정</span>}
                         {isExpired && (
                             <span className="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wider flex-shrink-0">
                                 만료
@@ -110,7 +114,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     </div>
 
                     <h3 className={`text-lg font-bold mb-3 leading-tight ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900'}`}>
-                        {detailHref ? <Link href={detailHref} className="hover:underline">{coupon.title}</Link> : coupon.title}
+                        {detailHref ? <Link href={detailHref} className="hover:underline">{isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title}</Link> : coupon.title}
                     </h3>
 
                     <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -136,8 +140,16 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
 
                 <button
-                    disabled={isExpired}
-                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleCopyAndRedirect(); }}
+                    disabled={(isExpired || upcoming) && !detailHref}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (isExpired || upcoming) {
+                            if (detailHref) window.location.href = detailHref;
+                            return;
+                        }
+                        handleCopyAndRedirect();
+                    }}
                     className={`w-full mt-2 justify-center py-3 text-sm sm:text-base whitespace-nowrap rounded-xl font-bold transition-colors flex items-center gap-2 ${
                         copied 
                         ? 'bg-green-600 hover:bg-green-700 text-white shadow-none' 
@@ -149,7 +161,9 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     {copied ? (
                         <>복사완료! 이동중...</>
                     ) : isExpired ? (
-                        <>만료된 혜택 보기 <ExternalLink size={18} /></>
+                        <>최신 혜택·이전 행사 기록 <ExternalLink size={18} /></>
+                    ) : upcoming ? (
+                        <>예정 행사 조건 보기 <ExternalLink size={18} /></>
                     ) : isNoCode ? (
                         <>할인 페이지로 이동 <ExternalLink size={18} /></>
                     ) : (
