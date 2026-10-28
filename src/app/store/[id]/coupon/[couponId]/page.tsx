@@ -75,7 +75,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     if (storeName && !defaultDescPart1.includes(storeName)) {
         defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
     }
-    const description = expired ? `이전 쿠폰은 종료되었습니다. ${storeName}의 새로 등록된 할인·예정 행사와 대상 상품, 사용 기간, 결제 조건을 이 페이지에서 확인하세요.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
+    const description = expired ? `${storeName}의 최신 할인·예정 행사, 대상 상품과 결제 조건을 확인하세요. 이 주소에서 새 혜택을 안내하며 종료된 이전 쿠폰은 별도 기록으로 구분합니다.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
 
     const { data: latest } = expired ? await supabase.from('coupons').select('title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
     const guideOffers = (latest || []).filter(c => !isCouponExpired(c.expiry, c.title));
@@ -163,7 +163,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(allRelatedCoupons || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1)!;
         return <LatestCouponGuide coupon={coupon} offers={offers} storeName={storeName}
             title={latestGuideTitle(storeName, coupon.title)}
-            description={`이전 쿠폰은 종료되었습니다. ${storeName}의 새로 등록된 할인·예정 행사와 대상 상품, 사용 기간, 결제 조건을 이 페이지에서 확인하세요.`}
+            description={`${storeName}의 최신 할인·예정 행사, 대상 상품과 결제 조건을 확인하세요. 이 주소에서 새 혜택을 안내하며 종료된 이전 쿠폰은 별도 기록으로 구분합니다.`}
             modified={modified} />;
     }
 
