@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import sharp from 'sharp';
 
-// Only our public image bucket is reachable; this is not a general URL proxy.
+// Only our public bucket and fixed-origin site assets are reachable; never proxy arbitrary URLs.
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
     const { path } = await params;
     if (!path.length || path.some(part => !/^[\p{L}\p{N}_ .-]+$/u.test(part) || part === '.' || part === '..') || !/\.(?:jpe?g|png|webp|gif|avif)$/i.test(path.at(-1)!)) {
@@ -11,7 +11,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (!storage) return new Response('Unavailable', { status: 503 });
     try {
         const storagePath = path.map(encodeURIComponent).join('/').replace(/\.svg\.png$/, '.svg');
-        const upstream = await fetch(`${storage}/storage/v1/object/public/images/${storagePath}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10000) });
+        const source = path[0] === '_site'
+            ? `https://coupontalk.kr/images/${path.slice(1).map(encodeURIComponent).join('/')}`
+            : `${storage}/storage/v1/object/public/images/${storagePath}`;
+        const upstream = await fetch(source, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10000) });
         if (!upstream.ok) return new Response('Image unavailable', { status: upstream.status === 404 ? 404 : 502 });
         const type = upstream.headers.get('content-type')?.split(';')[0] || '';
         if (_request.nextUrl.searchParams.get('fit') === 'square-v1') {

@@ -9,7 +9,7 @@ import { contentImages, publicContentImages, couponImages } from '../src/lib/con
 test('content images support Markdown and HTML, deduplicate and reject unsafe URLs', () => {
     assert.deepEqual(contentImages('![coupon](https://example.com/a.jpg) <img src="https://example.com/b.jpg?a=1&amp;b=2"> ![same](https://example.com/a.jpg) <img src="javascript:alert(1)"> <img src="https://user:pass@example.com/c.jpg">'), ['https://example.com/a.jpg', 'https://example.com/b.jpg?a=1&b=2']);
     assert.deepEqual(contentImages(null), []);
-    assert.deepEqual(contentImages('![상품](/images/product.jpg)'), ['https://coupontalk.kr/images/product.jpg']);
+    assert.deepEqual(contentImages('![상품](/images/product.jpg)'), ['https://coupontalk.kr/coupon-images/_site/product.jpg?fit=square-v1']);
     assert.deepEqual(contentImages('<img src="//unknown.example/a.jpg">'), []);
     const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://owned.supabase.co';
