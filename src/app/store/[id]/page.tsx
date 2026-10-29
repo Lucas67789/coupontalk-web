@@ -63,7 +63,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 상품·이용 안내` })) : [{ url: 'https://coupontalk.kr/og-image.png', alt: '쿠폰톡 할인 혜택 안내' }],
+            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 상품·이용 안내` })) : [{ url: 'https://coupontalk.kr/og-image.png?fit=square-v1', alt: '쿠폰톡 할인 혜택 안내' }],
         }
     };
 }
@@ -129,9 +129,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         description: guided ? store.description : `${store.name} 등록된 진행·예정 혜택 ${activeCoupons.length}개와 이용 조건 안내.`,
         datePublished: store.created_at || now,
         dateModified: dateModified,
-        image: offerImages.length ? offerImages : ['https://coupontalk.kr/og-image.png'],
+        image: offerImages.length ? offerImages : ['https://coupontalk.kr/og-image.png?fit=square-v1'],
         author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' },
-        publisher: { '@type': 'Organization', name: '쿠폰톡', logo: { '@type': 'ImageObject', url: 'https://coupontalk.kr/og-image.png' } },
+        publisher: { '@type': 'Organization', name: '쿠폰톡', logo: { '@type': 'ImageObject', url: 'https://coupontalk.kr/og-image.png?fit=square-v1' } },
         mainEntityOfPage: { '@type': 'WebPage', '@id': `https://coupontalk.kr/store/${encodeURIComponent(storeId)}` }
     };
 

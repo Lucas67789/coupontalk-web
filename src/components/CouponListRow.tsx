@@ -38,7 +38,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
 
     return (
         <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
-            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-5 block aspect-[3/2] overflow-hidden rounded-xl bg-slate-50">
+            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-5 block aspect-square overflow-hidden rounded-xl bg-slate-50">
                 <Image src={thumbnail} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
             </Link>}
             

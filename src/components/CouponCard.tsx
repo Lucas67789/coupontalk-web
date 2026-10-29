@@ -81,7 +81,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
 
     const cardContent = (
         <>
-            <div className="relative aspect-video overflow-hidden rounded-lg bg-slate-50">
+            <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-50">
                 <Image src={couponImages(coupon.content_body)[0]} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
             </div>
             {/* Decorative top accent */}

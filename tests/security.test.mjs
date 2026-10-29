@@ -14,10 +14,10 @@ test('content images support Markdown and HTML, deduplicate and reject unsafe UR
     const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://owned.supabase.co';
     try {
-        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/thumbnails/a.jpg)'), ['https://coupontalk.kr/coupon-images/thumbnails/a.jpg']);
-        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/a.svg)'), ['https://coupontalk.kr/coupon-images/a.svg.png']);
-        assert.equal(publicContentImages('<img src="https://owned.supabase.co/storage/v1/object/public/images/a.svg">'), '<img src="https://coupontalk.kr/coupon-images/a.svg.png">');
-        assert.deepEqual(couponImages(''), ['https://coupontalk.kr/og-image.png']);
+        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/thumbnails/a.jpg)'), ['https://coupontalk.kr/coupon-images/thumbnails/a.jpg?fit=square-v1']);
+        assert.deepEqual(contentImages('![coupon](https://owned.supabase.co/storage/v1/object/public/images/a.svg)'), ['https://coupontalk.kr/coupon-images/a.svg.png?fit=square-v1']);
+        assert.equal(publicContentImages('<img src="https://owned.supabase.co/storage/v1/object/public/images/a.svg">'), '<img src="https://coupontalk.kr/coupon-images/a.svg.png?fit=square-v1">');
+        assert.deepEqual(couponImages(''), ['https://coupontalk.kr/og-image.png?fit=square-v1']);
     } finally {
         if (previous === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
         else process.env.NEXT_PUBLIC_SUPABASE_URL = previous;

@@ -1,3 +1,15 @@
+// A versioned presentation URL keeps the original asset intact and avoids stale search thumbnails.
+export function squareThumbnail(src: string): string {
+    try {
+        const url = new URL(src);
+        if (url.origin === 'https://coupontalk.kr' && (url.pathname.startsWith('/coupon-images/') || url.pathname === '/og-image.png')) {
+            url.searchParams.set('fit', 'square-v1');
+            return url.href;
+        }
+    } catch { /* Leave other resources unchanged. */ }
+    return src;
+}
+
 // Extract actual content images, never tracking links or inline executable URLs.
 export function contentImages(content?: string | null): string[] {
     const images: string[] = [];
@@ -12,7 +24,8 @@ export function contentImages(content?: string | null): string[] {
             const imageUrl = url.origin === process.env.NEXT_PUBLIC_SUPABASE_URL && url.pathname.startsWith(storagePrefix)
                 ? `https://coupontalk.kr/coupon-images/${url.pathname.slice(storagePrefix.length)}${url.pathname.endsWith('.svg') ? '.png' : ''}`
                 : url.href;
-            if (!images.includes(imageUrl)) images.push(imageUrl);
+            const thumbnail = squareThumbnail(imageUrl);
+            if (!images.includes(thumbnail)) images.push(thumbnail);
         } catch { /* Invalid or relative image URLs are not SEO candidates. */ }
     }
     return images;
@@ -20,10 +33,11 @@ export function contentImages(content?: string | null): string[] {
 
 export function couponImages(content?: string | null): string[] {
     const images = contentImages(content);
-    return images.length ? images : ['https://coupontalk.kr/og-image.png'];
+    return images.length ? images : [squareThumbnail('https://coupontalk.kr/og-image.png')];
 }
 
 export function publicContentImages(content: string): string {
     const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/`;
-    return content.split(prefix).join('https://coupontalk.kr/coupon-images/').replace(/(https:\/\/coupontalk\.kr\/coupon-images\/[^\s"'<>)]*\.svg)(?=[\s"'<>)]|$)/g, '$1.png');
+    const publicContent = content.split(prefix).join('https://coupontalk.kr/coupon-images/').replace(/(https:\/\/coupontalk\.kr\/coupon-images\/[^\s"'<>)]*\.svg)(?=[\s"'<>)]|$)/g, '$1.png');
+    return publicContent.replace(/https:\/\/coupontalk\.kr\/(?:coupon-images\/[^\s"'<>)]*|og-image\.png)(?=[\s"'<>)]|$)/g, url => squareThumbnail(url.replace(/&amp;/g, '&')));
 }
