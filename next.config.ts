@@ -3,11 +3,16 @@ import { STORE_ALIASES } from './src/lib/store-aliases';
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
+    const aliCampaignRedirects = ['04', '08', '13', '19', '28', '45'].map(tier => ({
+      source: `/store/aliexpress/coupon/coupon-aliexpress-nov2026-ltik${tier}`,
+      destination: '/store/aliexpress/coupon/coupon-aliexpress-nov2026-1111',
+      statusCode: 301 as const,
+    }));
+    return [...aliCampaignRedirects, ...Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
       source: `/store/${encodeURIComponent(oldId)}/:path*`,
       destination: `/store/${id}/:path*`,
       permanent: true,
-    }));
+    }))];
   },
   images: {
     unoptimized: true,
