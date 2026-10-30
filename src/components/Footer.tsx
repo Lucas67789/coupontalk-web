@@ -30,6 +30,7 @@ export default function Footer() {
                             <li><Link href="/category/fashion" className="hover:text-blue-600">명품·패션</Link></li>
                             <li><Link href="/category/electronics" className="hover:text-blue-600">전자제품</Link></li>
                             <li><Link href="/category/health" className="hover:text-blue-600">건강식품</Link></li>
+                            <li><Link href="/subscriptions" className="hover:text-blue-600">구독 할인 비교</Link></li>
                         </ul>
                     </div>
 
