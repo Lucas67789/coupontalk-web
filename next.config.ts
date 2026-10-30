@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { STORE_ALIASES } from './src/lib/store-aliases';
+import couponRedirects from './src/lib/coupon-redirects.json';
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -8,7 +9,7 @@ const nextConfig: NextConfig = {
       destination: '/store/aliexpress/coupon/coupon-aliexpress-nov2026-1111',
       statusCode: 301 as const,
     }));
-    return [...aliCampaignRedirects, ...Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
+    return [...aliCampaignRedirects, ...couponRedirects.map(r => ({ ...r, statusCode: 301 as const })), ...Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
       source: `/store/${encodeURIComponent(oldId)}/:path*`,
       destination: `/store/${id}/:path*`,
       permanent: true,

@@ -1,0 +1,57 @@
+[
+  {
+    "source": "/store/klook/coupon/coupon-1790906619161-klook-oct-3000",
+    "destination": "/store/klook/coupon/coupon-1790906619160-klook-oct-2000",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/klook/coupon/coupon-1790906619162-klook-oct-7000",
+    "destination": "/store/klook/coupon/coupon-1790906619160-klook-oct-2000",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/kkday/coupon/coupon-1790947395894-kkday-oct-3k",
+    "destination": "/store/kkday/coupon/coupon-1790947395893-kkday-oct-30k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/kkday/coupon/coupon-1790947395892-kkday-oct-7k",
+    "destination": "/store/kkday/coupon/coupon-1790947395893-kkday-oct-30k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/kkday/coupon/coupon-1790947395895-kkday-oct-6k",
+    "destination": "/store/kkday/coupon/coupon-1790947395893-kkday-oct-30k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/myrealtrip/coupon/coupon-1790947545607-mrt-oct-3k",
+    "destination": "/store/myrealtrip/coupon/coupon-1790947545606-mrt-oct-2k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/myrealtrip/coupon/coupon-1790947545608-mrt-oct-6k",
+    "destination": "/store/myrealtrip/coupon/coupon-1790947545606-mrt-oct-2k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/myrealtrip/coupon/coupon-1790947668077-mrt-oct-stay3k",
+    "destination": "/store/myrealtrip/coupon/coupon-1790947668076-mrt-oct-stay1k",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/klook/coupon/coupon-1774971632526-j2qw3",
+    "destination": "/store/klook/coupon/coupon-1774971452652-28mxn",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/hotelskr/coupon/coupon-1780990743084-gs12g",
+    "destination": "/store/hotelskr/coupon/coupon-1781019903291-june15",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/agoda/coupon/coupon-1790644782875-agoda-sep-kr5",
+    "destination": "/store/agoda/coupon/coupon-agoda-lpkr10-sep2026-1787975408415",
+    "statusCode": 301
+  }
+]
