@@ -75,7 +75,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
                 onClick={handleCopyAndRedirect}
                 className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
-                {upcoming ? (isNoCode ? "할인 페이지 미리보기" : "코드 복사하고 미리보기") : isNoCode ? (
+                {isNoCode ? (
                     <>할인 페이지로 이동 <ExternalLink size={20} /></>
                 ) : (
                     <>복사하고 할인받기 <Copy size={20} /></>

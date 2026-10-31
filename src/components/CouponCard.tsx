@@ -162,8 +162,6 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                         <>복사완료! 이동중...</>
                     ) : isExpired ? (
                         <>최신 혜택·이전 행사 기록 <ExternalLink size={18} /></>
-                    ) : upcoming ? (
-                        <>{isNoCode ? "할인 페이지 미리보기" : "코드 복사하고 미리보기"} <ExternalLink size={18} /></>
                     ) : isNoCode ? (
                         <>할인 페이지로 이동 <ExternalLink size={18} /></>
                     ) : (
