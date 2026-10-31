@@ -1,3 +1,4 @@
+import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs } from '@/lib/faq';
 import { couponImages as contentImages, publicContentImages } from '@/lib/content-images';
@@ -80,7 +81,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     const { data: latest } = expired ? await supabase.from('coupons').select('id, code, title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
     if (expired) title = uniqueGuideTitle(storeName, coupon, latest || []);
     const guideOffers = (latest || []).filter(c => !isCouponExpired(c.expiry, c.title));
-    const images = expired ? guideOffers.flatMap(c => contentImages(c.content_body)) : contentImages(coupon.content_body);
+    const images = expired ? (guideOffers.length ? guideOffers.flatMap(c => contentImages(c.content_body)) : [storeCoverImages[storeId] || contentImages(coupon.content_body)[0]]) : contentImages(coupon.content_body);
     const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(latest || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1);
     return {
         title,

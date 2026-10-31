@@ -1,3 +1,4 @@
+import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, ProductRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs, parseFaqs } from '@/lib/faq';
 import { contentImages } from '@/lib/content-images';
@@ -63,7 +64,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
             type: 'article',
             locale: 'ko_KR',
             siteName: '쿠폰톡',
-            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 상품·이용 안내` })) : [{ url: 'https://coupontalk.kr/og-image.png?fit=square-v1', alt: '쿠폰톡 할인 혜택 안내' }],
+            images: previewImages.length ? previewImages.map(url => ({ url, alt: `${store.name} 상품·이용 안내` })) : [{ url: storeCoverImages[storeId] || 'https://coupontalk.kr/og-image.png?fit=square-v1', alt: `${store.name} 이용 안내` }],
         }
     };
 }

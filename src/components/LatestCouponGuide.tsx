@@ -1,3 +1,4 @@
+import { storeCoverImages } from '@/lib/store-cover-images';
 import Link from 'next/link';
 import type { CouponRow } from '@/lib/models';
 import { couponImages } from '@/lib/content-images';
@@ -8,6 +9,7 @@ import { MarkdownRenderer } from './MarkdownRenderer';
 export default function LatestCouponGuide({ coupon, offers, storeName, title, description, modified }: {
     coupon: CouponRow; offers: CouponRow[]; storeName: string; title: string; description: string; modified: string;
 }) {
+    const fallbackCover = storeCoverImages[coupon.store_id];
     const now = new Date().getTime();
     const matching = offers.filter(o => matchesGuideTopic(coupon.title, o.title));
     const other = offers.filter(o => !matching.includes(o));
@@ -18,6 +20,7 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
         <h1 className="mt-5 text-3xl font-bold">{title}</h1>
         <p className="mt-4 leading-7 text-gray-700">{description}</p>
         <p className="mt-3 text-sm text-gray-500">최근 안내 수정: {new Date(modified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</p>
+        {!offers.length && fallbackCover && <img src={fallbackCover} alt={`${storeName} 이용 안내`} width={1200} height={1200} className="mt-6 w-full max-w-md rounded-2xl" />}
         <section className="mt-8" aria-label="최신 할인 안내">
             <h2 className="text-2xl font-bold">{topics.length ? topics.join(" · ") : storeName} 관련 최신·예정 혜택</h2>
             <p className="mt-3 leading-7">이 페이지는 이전 ‘{coupon.title.replace(/\[종료\]/g, '').trim()}’ 행사를 찾는 분을 위한 후속 안내입니다. 이전 코드는 종료됐으며 아래 새 공지에서 대상 상품·옵션과 결제 조건을 확인하세요.</p>
@@ -50,6 +53,6 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
             <p className="my-3">이전 사용·예약 기간: {coupon.expiry}</p>
             <MarkdownRenderer content={coupon.content_body || ''} storeName={storeName} />
         </details>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: title, description, datePublished: coupon.published_at || coupon.created_at, dateModified: modified, mainEntityOfPage: url, image: offers.flatMap(o => couponImages(o.content_body)), author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' } }).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: title, description, datePublished: coupon.published_at || coupon.created_at, dateModified: modified, mainEntityOfPage: url, image: offers.length ? offers.flatMap(o => couponImages(o.content_body)) : [fallbackCover || couponImages(coupon.content_body)[0]], author: { '@type': 'Organization', name: '쿠폰톡', url: 'https://coupontalk.kr' } }).replace(/</g, '\\u003c') }} />
     </main>;
 }
