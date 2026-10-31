@@ -36,7 +36,7 @@ export default async function SubscriptionGuide({ params }: Props) {
       <Image src={`/subscription-images/${slug}.png`} alt={`${guide.service} 구독 할인 안내`} width={1200} height={1200} priority className="w-20 shrink-0 rounded-xl object-contain md:w-32" />
     </header>
     <GamsgoIntroduction service={guide.service} slug={slug} />
-    <nav aria-label="페이지 목차" className="mt-6 flex flex-wrap gap-3 text-sm"><a href="#compare" className="rounded-lg bg-gray-100 px-4 py-2">가격 비교</a><a href="#gamsgo" className="rounded-lg bg-gray-100 px-4 py-2">겜스고 소개·이용 방법</a><a href="#faq" className="rounded-lg bg-gray-100 px-4 py-2">자주 묻는 질문</a></nav>
+    <nav aria-label="페이지 목차" className="mt-6 flex flex-wrap gap-3 text-sm"><a href="#price-comparison" className="rounded-lg bg-gray-100 px-4 py-2">가격 비교</a><a href="#gamsgo" className="rounded-lg bg-gray-100 px-4 py-2">겜스고 소개·이용 방법</a><a href="#faq" className="rounded-lg bg-gray-100 px-4 py-2">자주 묻는 질문</a></nav>
     <p className="my-5 leading-8 text-gray-600">{guide.intro}</p><p className="my-5 rounded-xl bg-blue-50 p-5 font-medium leading-7 text-blue-950">{guide.takeaway}</p>
     <section id="compare" className="scroll-mt-28">
       <h2 className="mb-4 text-2xl font-bold">{guide.service} 가격과 이용 조건 비교</h2>
