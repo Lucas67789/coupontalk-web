@@ -1,11 +1,11 @@
-import { subscriptionImagePath } from '@/lib/subscription-image';
+import { subscriptionImagePaths, subscriptionVisualUpdatedAt } from '@/lib/subscription-image';
 import { MetadataRoute } from 'next';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { contentImages } from '@/lib/content-images';
 import { isCouponExpired } from '@/lib/utils';
 import { latestGuideUpdatedAt } from '@/lib/latest-guide';
 import { ALIAS_STORE_FILTER } from '@/lib/store-aliases';
-import { subscriptionGuides, subscriptionReviewedAt } from '@/lib/subscription-guides';
+import { subscriptionGuides } from '@/lib/subscription-guides';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,8 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.5,
         },
         ...categoryUrls,
-        { url: `${baseUrl}/subscriptions`, lastModified: subscriptionReviewedAt },
-        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: subscriptionReviewedAt, images: [`${baseUrl}${subscriptionImagePath(g.slug)}`] })),
+        { url: `${baseUrl}/subscriptions`, lastModified: subscriptionVisualUpdatedAt },
+        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: subscriptionVisualUpdatedAt, images: subscriptionImagePaths(g.slug).map(path => `${baseUrl}${path}`) })),
         ...['faq', 'contact', 'terms'].map(path => ({ url: `${baseUrl}/${path}` })),
         ...storeUrls,
         ...couponUrls,
