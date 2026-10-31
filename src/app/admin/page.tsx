@@ -27,8 +27,8 @@ type Report = {
   legacy: {
     totalViews: number;
     totalClicks: number;
-    pages: { name: string; count: number }[];
-    coupons: { name: string; count: number }[];
+    pages: { name: string; label?: string; count: number }[];
+    coupons: { name: string; label?: string; count: number }[];
   };
   updatedAt: string;
   range: { from: number; to: number; previousFrom: number; previousTo: number };
@@ -269,7 +269,7 @@ function LegacyOverview({
         <LegacyList
           key={String(title)}
           title={String(title)}
-          rows={rows as { name: string; count: number }[]}
+          rows={rows as { name: string; label?: string; count: number }[]}
         />
       ))}
       <p className="text-xs text-slate-500">
@@ -284,11 +284,11 @@ function LegacyList({
   rows,
 }: {
   title: string;
-  rows: { name: string; count: number }[];
+  rows: { name: string; label?: string; count: number }[];
 }) {
   const [search, setSearch] = useState("");
   const filtered = rows.filter((r) =>
-    r.name.toLowerCase().includes(search.toLowerCase()),
+    (r.label || r.name).toLowerCase().includes(search.toLowerCase()),
   );
   return (
     <section className="bg-white border rounded-2xl p-5">
@@ -316,7 +316,7 @@ function LegacyList({
           <tbody>
             {filtered.slice(0, 100).map((row) => (
               <tr className="border-t" key={row.name}>
-                <td className="p-3 break-all">{row.name}</td>
+                <td className="p-3 break-all">{row.label || row.name}</td>
                 <td className="text-right p-3 tabular-nums">
                   {fmt(row.count)}
                 </td>
@@ -538,7 +538,7 @@ export default function AdminDashboard() {
                     ? stamp(r.quality.firstEvent) + " 시작"
                     : "시작 대기"}
                   . 이전 날짜는 미수집 기간이며, 전후 증감은 수집 범위가 다를 수
-                  있습니다. 과거 기록은 ‘데이터 품질’에서 별도로 확인하세요.
+                  있습니다. 과거 기록은 상단 ‘기존 기록’에서 별도로 확인하세요.
                 </div>
               )}
               {tab === 0 && (
@@ -655,7 +655,13 @@ export default function AdminDashboard() {
                       )}
                     </div>
                   </section>
-                  <Table title="성과가 발생한 페이지" rows={groups.pages} />
+                  <Table title="선택한 할인·쿠폰" rows={groups.targets} />
+                  <p className="text-sm text-slate-500">
+                    안내 코드는 현재 등록 정보입니다. 코드 복사는 실제 복사 성공
+                    건수이며, 외부 결제에서의 코드 사용·구매 완료를 뜻하지
+                    않습니다.
+                  </p>
+                  <Table title="페이지별 방문·클릭 성과" rows={groups.pages} />
                   <p className="text-sm text-slate-500">
                     제휴 클릭은 구매가 아닙니다. 구매·수익은 제휴 플랫폼
                     리포트와 대조해야 합니다.

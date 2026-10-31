@@ -7,6 +7,9 @@ import {
   metrics,
   type AnalyticsEvent,
 } from "@/lib/analytics";
+import { analyticsLabels } from "@/lib/analytics-labels";
+import { subscriptionGuides } from "@/lib/subscription-guides";
+import { gamsgoPromoCode } from "@/lib/gamsgo-promotion";
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   if (!(await isAnalyticsAdmin(request)))
@@ -53,7 +56,7 @@ export async function GET(request: Request) {
     const [stores, coupons, oldViews, oldClicks, first, products] =
       await Promise.all([
         db.from("stores").select("id,name"),
-        db.from("coupons").select("id,title").limit(10000),
+        db.from("coupons").select("id,title,store_id,code").limit(10000),
         db
           .from("page_views")
           .select("id", { head: true, count: "exact" })
@@ -69,7 +72,7 @@ export async function GET(request: Request) {
           .select("created_at")
           .order("created_at")
           .limit(1),
-        db.from("products").select("id,title"),
+        db.from("products").select("id,title,store_id"),
       ]);
     for (const result of [
       stores,
@@ -80,36 +83,56 @@ export async function GET(request: Request) {
       products,
     ])
       if (result.error) throw result.error;
-    const names = new Map(stores.data?.map((s) => [s.id, s.name])),
-      titles = new Map(coupons.data?.map((c) => [c.id, c.title]));
-    const productTitles = new Map(products.data?.map((p) => [p.id, p.title]));
+    const labels = analyticsLabels(
+      stores.data || [],
+      coupons.data || [],
+      products.data || [],
+      subscriptionGuides,
+      gamsgoPromoCode,
+    );
+    const pageRows = (rows: ReturnType<typeof groupEvents>) =>
+      rows.map((r) => ({ ...r, label: labels.page(r.name) }));
     const groups = {
       products: groupEvents(current, (e) => e.product_id || "").map((r) => ({
         ...r,
-        label: productTitles.get(r.name) || r.name,
+        label: labels.product(r.name),
       })),
       sources: groupEvents(current, (e) => e.source),
-      landings: groupEvents(current, (e) => e.landing_path),
-      pages: groupEvents(current, (e) => e.path),
+      landings: pageRows(groupEvents(current, (e) => e.landing_path)),
+      pages: pageRows(groupEvents(current, (e) => e.path)),
       stores: groupEvents(current, (e) => e.store_id || "").map((r) => ({
         ...r,
-        label: names.get(r.name) || r.name,
+        label: labels.store(r.name),
       })),
       coupons: groupEvents(current, (e) => e.coupon_id || "").map((r) => ({
         ...r,
-        label: titles.get(r.name) || r.name,
+        label: labels.coupon(r.name),
       })),
-      subscriptions: groupEvents(current, (e) => e.subscription_slug || ""),
+      subscriptions: groupEvents(current, (e) => e.subscription_slug || "").map(
+        (r) => ({ ...r, label: labels.subscription(r.name) }),
+      ),
+      targets: groupEvents(
+        current.filter((e) => e.event_name !== "page_view"),
+        (e) => labels.target(e),
+      ),
       buttons: groupEvents(
         current.filter((e) => e.event_name !== "page_view"),
         (e) => [e.path, e.button_label || "이름 없는 버튼"].join(" → "),
-      ),
+      ).map((r) => {
+        const [path, button] = r.name.split(" → ");
+        return { ...r, label: labels.page(path) + " · " + button };
+      }),
       keywords: groupEvents(current, (e) => e.keyword || ""),
       devices: groupEvents(current, (e) => e.device || "미확인"),
-      journeys: groupEvents(current, (e) => e.source + " → " + e.landing_path),
-      tests: groupEvents(
-        all.filter((e) => e.is_test),
-        (e) => e.path,
+      journeys: groupEvents(
+        current,
+        (e) => e.source + " → " + labels.page(e.landing_path),
+      ),
+      tests: pageRows(
+        groupEvents(
+          all.filter((e) => e.is_test),
+          (e) => e.path,
+        ),
       ),
     };
     const snapshot = new Date(range.to).toISOString();
@@ -159,10 +182,10 @@ export async function GET(request: Request) {
       totalViews: totalViews.count || 0,
       totalClicks: totalClicks.count || 0,
       pages: [...legacyPages]
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, count]) => ({ name, label: labels.page(name), count }))
         .sort((a, b) => b.count - a.count),
       coupons: [...legacyCoupons]
-        .map(([name, count]) => ({ name: titles.get(name) || name, count }))
+        .map(([name, count]) => ({ name, label: labels.coupon(name), count }))
         .sort((a, b) => b.count - a.count),
     };
     return NextResponse.json(
@@ -189,9 +212,11 @@ export async function GET(request: Request) {
         },
         storeDetails: groups.stores.map((s) => ({
           id: s.name,
-          pages: groupEvents(
-            current.filter((e) => e.store_id === s.name),
-            (e) => e.path,
+          pages: pageRows(
+            groupEvents(
+              current.filter((e) => e.store_id === s.name),
+              (e) => e.path,
+            ),
           ),
         })),
       },
