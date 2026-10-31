@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import { subscriptionPrices, subscriptionPriceCheckedAt, priceDifference, won } from '../src/lib/subscription-prices.ts';
+import { subscriptionImagePath } from '../src/lib/subscription-image.ts';
 
 // Native SVG infographic sources: prices come from the same verified data as the page.
 // No third-party logos, simulated checkout screens or copied competitor artwork.
@@ -29,15 +30,6 @@ const themes = {
 };
 function shell(q, accent, body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"><rect width="1200" height="1200" fill="#0b1019"/><rect x="72" y="72" width="68" height="9" rx="4" fill="${accent}"/>${text('쿠폰톡 / 구독 가이드',165,91,29,'#d5deeb',600)}${body}<path d="M72 1113H1128" stroke="#344052"/>${text('COUPONTALK',72,1160,26,'#8493a7',700)}${text('독립적인 구독 비교 · 제휴 링크 포함',660,1160,23,'#8493a7')}</svg>`;
-}
-function cover(q, accent, category) {
-  const title = q.service === '유튜브 프리미엄' ? '유튜브' : q.service;
-  const subtitle = q.service === '유튜브 프리미엄' ? '프리미엄 싸게' : ['수노','미드저니','젠스파크','캡컷','캔바'].includes(q.service) ? '구독료 비교' : '구독 할인';
-  const symbol = category === 'VIDEO' || category === 'EDIT'
-    ? `<rect x="820" y="207" width="260" height="184" rx="24" fill="none" stroke="${accent}" stroke-width="10"/><path d="M920 250L995 300L920 349Z" fill="${accent}"/>`
-    : category === 'MUSIC' ? [0,1,2,3,4].map((i)=>`<rect x="${835+i*48}" y="${235+[32,0,45,10,32][i]}" width="22" height="${150-[64,0,90,20,64][i]}" rx="11" fill="${accent}"/>`).join('')
-    : `<rect x="820" y="210" width="245" height="180" rx="28" fill="none" stroke="${accent}" stroke-width="8"/>${text(category,850,324,58,accent,800)}`;
-  return shell(q,accent,`${text(category+' / SUBSCRIPTION',72,180,28,accent,700)}${symbol}${text(title,72,510,title.length>6?114:142,'#fff',900)}${text(subtitle,72,680,112,accent,900)}${text('요금제부터 이용 방법까지',78,772,43,'#cad5e5',600)}${panel(72,840,1056,205)}${text('01  가격',112,911,34,'#fff',700)}${text('02  이용 조건',460,911,34,'#fff',700)}${text('03  시작 방법',830,911,34,'#fff',700)}${text(q.soldOut?'확인 옵션 품절 · 대체 상품 조건 확인':'내게 맞는 구독, 결제 전에 비교하세요',112,990,34,accent,600)}`);
 }
 function price(q, accent) {
   const difference = q.official ? priceDifference(q.official.total,q.total) : undefined;
@@ -70,8 +62,10 @@ function how(q, accent) {
 await fs.mkdir(output,{recursive:true});
 const manifest = [];
 for (const [slug,q] of Object.entries(subscriptionPrices)) {
-  const [accent,category] = themes[slug];
-  for (const [kind,svg] of [['cover',cover(q,accent,category)],['price',price(q,accent)],['how',how(q,accent)]]) {
+  const [accent] = themes[slug];
+  // Illustrated covers are authored separately; regenerating prices must preserve them.
+  manifest.push({slug,kind:'cover',path:subscriptionImagePath(slug),total:q.total,months:q.months,checkedAt:subscriptionPriceCheckedAt});
+  for (const [kind,svg] of [['price',price(q,accent)],['how',how(q,accent)]]) {
     await fs.writeFile(new URL(`${slug}-${kind}.svg`,output),svg);
     const name = `${slug}-${kind}.png`;
     await sharp(Buffer.from(svg)).png().toFile(new URL(name,output).pathname.replace(/^\/(\w:)/,'$1'));

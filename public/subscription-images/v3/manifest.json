@@ -2,7 +2,7 @@
   {
     "slug": "chatgpt-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/chatgpt-discount-cover.png",
+    "path": "/subscription-images/v4/chatgpt-discount-cover.png",
     "total": 6613,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -26,7 +26,7 @@
   {
     "slug": "netflix-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/netflix-discount-cover.png",
+    "path": "/subscription-images/v4/netflix-discount-cover.png",
     "total": 4657,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -50,7 +50,7 @@
   {
     "slug": "tving-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/tving-discount-cover.png",
+    "path": "/subscription-images/v4/tving-discount-cover.png",
     "total": 22161,
     "months": 3,
     "checkedAt": "2026-10-31"
@@ -74,7 +74,7 @@
   {
     "slug": "disney-plus-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/disney-plus-discount-cover.png",
+    "path": "/subscription-images/v4/disney-plus-discount-cover.png",
     "total": 18227,
     "months": 3,
     "checkedAt": "2026-10-31"
@@ -98,7 +98,7 @@
   {
     "slug": "youtube-premium-cheap",
     "kind": "cover",
-    "path": "/subscription-images/v3/youtube-premium-cheap-cover.png",
+    "path": "/subscription-images/v4/youtube-premium-cheap-cover.png",
     "total": 63324,
     "months": 12,
     "checkedAt": "2026-10-31"
@@ -122,7 +122,7 @@
   {
     "slug": "spotify-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/spotify-discount-cover.png",
+    "path": "/subscription-images/v4/spotify-discount-cover.png",
     "total": 48123,
     "months": 12,
     "checkedAt": "2026-10-31"
@@ -146,7 +146,7 @@
   {
     "slug": "gemini-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/gemini-discount-cover.png",
+    "path": "/subscription-images/v4/gemini-discount-cover.png",
     "total": 31655,
     "months": 12,
     "checkedAt": "2026-10-31"
@@ -170,7 +170,7 @@
   {
     "slug": "claude-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/claude-discount-cover.png",
+    "path": "/subscription-images/v4/claude-discount-cover.png",
     "total": 9328,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -194,7 +194,7 @@
   {
     "slug": "suno-plans",
     "kind": "cover",
-    "path": "/subscription-images/v3/suno-plans-cover.png",
+    "path": "/subscription-images/v4/suno-plans-cover.png",
     "total": 6320,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -218,7 +218,7 @@
   {
     "slug": "midjourney-pricing",
     "kind": "cover",
-    "path": "/subscription-images/v3/midjourney-pricing-cover.png",
+    "path": "/subscription-images/v4/midjourney-pricing-cover.png",
     "total": 31655,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -242,7 +242,7 @@
   {
     "slug": "genspark-pricing",
     "kind": "cover",
-    "path": "/subscription-images/v3/genspark-pricing-cover.png",
+    "path": "/subscription-images/v4/genspark-pricing-cover.png",
     "total": 61323,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -266,7 +266,7 @@
   {
     "slug": "adobe-discount",
     "kind": "cover",
-    "path": "/subscription-images/v3/adobe-discount-cover.png",
+    "path": "/subscription-images/v4/adobe-discount-cover.png",
     "total": 62817,
     "months": 3,
     "checkedAt": "2026-10-31"
@@ -290,7 +290,7 @@
   {
     "slug": "capcut-pricing",
     "kind": "cover",
-    "path": "/subscription-images/v3/capcut-pricing-cover.png",
+    "path": "/subscription-images/v4/capcut-pricing-cover.png",
     "total": 9493,
     "months": 1,
     "checkedAt": "2026-10-31"
@@ -314,7 +314,7 @@
   {
     "slug": "canva-subscription",
     "kind": "cover",
-    "path": "/subscription-images/v3/canva-subscription-cover.png",
+    "path": "/subscription-images/v4/canva-subscription-cover.png",
     "total": 45589,
     "months": 12,
     "checkedAt": "2026-10-31"
@@ -338,7 +338,7 @@
   {
     "slug": "duolingo-discount-code",
     "kind": "cover",
-    "path": "/subscription-images/v3/duolingo-discount-code-cover.png",
+    "path": "/subscription-images/v4/duolingo-discount-code-cover.png",
     "total": 25321,
     "months": 12,
     "checkedAt": "2026-10-31"

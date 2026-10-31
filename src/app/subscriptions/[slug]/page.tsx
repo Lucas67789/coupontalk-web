@@ -29,13 +29,15 @@ export default async function SubscriptionGuide({ params }: Props) {
   const url = `https://coupontalk.kr/subscriptions/${slug}`;
   return <article className="mx-auto max-w-6xl px-4">
     <nav aria-label="현재 위치" className="mb-6 text-sm text-gray-500"><Link href="/">홈</Link> / <Link href="/subscriptions">구독 할인</Link> / {guide.service}</nav>
-    <header className="flex items-center justify-between gap-4 rounded-2xl bg-white py-4 md:py-6">
+    <header className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-white py-4 sm:flex-row md:py-6">
       <div>
         <p className="mb-2 text-xs font-bold text-blue-700">겜스고 · 영상·AI 구독 할인 플랫폼</p>
         <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">{guide.title}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">공식 사이트에서 직접 구독할까, 겜스고 할인 상품을 고를까? <br className="hidden md:block"/>가격부터 계정 방식까지, 차이를 먼저 확인하세요.</p>
       </div>
-      <Image src={subscriptionImagePath(slug)} alt={`${guide.service} 구독 할인 안내`} width={1200} height={1200} priority className="w-20 shrink-0 rounded-xl object-contain md:w-32" />
+      <a href={subscriptionImagePath(slug)} target="_blank" rel="noopener noreferrer" aria-label={`${guide.service} 대표 이미지 크게 보기`} className="block w-full max-w-80 shrink-0 sm:w-56 lg:w-72">
+        <Image src={subscriptionImagePath(slug)} alt={`${guide.service} 구독 할인 안내`} width={1200} height={1200} sizes="(max-width: 639px) 320px, (max-width: 1023px) 224px, 288px" priority className="h-auto w-full rounded-2xl object-contain" />
+      </a>
     </header>
     <GamsgoIntroduction service={guide.service} slug={slug} />
     <nav aria-label="페이지 목차" className="mt-6 flex flex-wrap gap-3 text-sm"><a href="#price-comparison" className="rounded-lg bg-gray-100 px-4 py-2">가격 비교</a><a href="#gamsgo-purchase" className="rounded-lg bg-gray-100 px-4 py-2">할인코드·구매</a><a href="#visual-guide" className="rounded-lg bg-gray-100 px-4 py-2">이미지 안내</a><a href="#faq" className="rounded-lg bg-gray-100 px-4 py-2">자주 묻는 질문</a></nav>
