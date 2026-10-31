@@ -59,10 +59,12 @@ function Table({
   title,
   rows,
   onRow,
+  actionsOnly = false,
 }: {
   title: string;
   rows: Row[];
   onRow?: (r: Row) => void;
+  actionsOnly?: boolean;
 }) {
   const [query, setQuery] = useState(""),
     [sort, setSort] = useState("sessions");
@@ -73,23 +75,27 @@ function Table({
     .sort(
       (a, b) => Number(b[sort as keyof Row]) - Number(a[sort as keyof Row]),
     );
+  const columns = actionsOnly
+    ? [
+        ["sessions", "행동 세션"],
+        ["clicks", "제휴 클릭"],
+        ["copies", "코드 복사"],
+      ]
+    : [
+        ["sessions", "방문 세션"],
+        ["views", "조회"],
+        ["clicks", "제휴 클릭"],
+        ["copies", "코드 복사"],
+        ["rate", "클릭 세션 비율"],
+      ];
   function csv() {
     const values = [
-      [
-        "항목",
-        "방문 세션",
-        "조회",
-        "제휴 클릭",
-        "코드 복사",
-        "클릭 세션 비율(%)",
-      ],
+      ["항목", ...columns.map(([, label]) => label)],
       ...visible.map((r) => [
         r.label || r.name,
-        r.sessions,
-        r.views,
-        r.clicks,
-        r.copies,
-        r.rate.toFixed(1),
+        ...columns.map(([key]) =>
+          key === "rate" ? r.rate.toFixed(1) + "%" : r[key as keyof Row],
+        ),
       ]),
     ];
     const str =
@@ -151,13 +157,7 @@ function Table({
           <thead className="bg-slate-50 text-slate-500">
             <tr>
               <th className="p-4 text-left min-w-64">항목</th>
-              {[
-                ["sessions", "방문 세션"],
-                ["views", "조회"],
-                ["clicks", "제휴 클릭"],
-                ["copies", "코드 복사"],
-                ["rate", "클릭 세션 비율"],
-              ].map(([k, label]) => (
+              {columns.map(([k, label]) => (
                 <th key={k} className="px-4 py-3 whitespace-nowrap text-right">
                   <button onClick={() => setSort(k)}>
                     {label}
@@ -182,14 +182,13 @@ function Table({
                     r.label || r.name
                   )}
                 </td>
-                {[r.sessions, r.views, r.clicks, r.copies].map((v, i) => (
-                  <td key={i} className="p-4 text-right tabular-nums">
-                    {fmt(v)}
+                {columns.map(([key]) => (
+                  <td key={key} className="p-4 text-right tabular-nums">
+                    {key === "rate"
+                      ? r.rate.toFixed(1) + "%"
+                      : fmt(Number(r[key as keyof Row]))}
                   </td>
                 ))}
-                <td className="p-4 text-right tabular-nums">
-                  {r.rate.toFixed(1)}%
-                </td>
               </tr>
             ))}
           </tbody>
@@ -655,7 +654,11 @@ export default function AdminDashboard() {
                       )}
                     </div>
                   </section>
-                  <Table title="선택한 할인·쿠폰" rows={groups.targets} />
+                  <Table
+                    title="선택한 할인·쿠폰"
+                    rows={groups.targets}
+                    actionsOnly
+                  />
                   <p className="text-sm text-slate-500">
                     안내 코드는 현재 등록 정보입니다. 코드 복사는 실제 복사 성공
                     건수이며, 외부 결제에서의 코드 사용·구매 완료를 뜻하지
