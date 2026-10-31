@@ -9,10 +9,6 @@ import {
   Download,
   RefreshCw,
   Search,
-  TrendingUp,
-  Users,
-  MousePointer2,
-  Eye,
 } from "lucide-react";
 type Row = {
   name: string;
@@ -47,11 +43,6 @@ type Report = {
 };
 const tabs = ["요약", "유입 분석", "스토어·쿠폰", "구독 서비스", "데이터 품질"];
 const fmt = (n: number) => n.toLocaleString("ko-KR");
-function change(n: number, p: number) {
-  return p
-    ? `${n >= p ? "+" : ""}${(((n - p) / p) * 100).toFixed(1)}%`
-    : "이전 기간 기준 없음";
-}
 function stamp(s: string | number) {
   return new Date(s).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
 }
@@ -460,10 +451,37 @@ export default function AnalyticsDashboard({ mode = "new" }: { mode?: "legacy" |
               </span>
             </div>
           </section>
+          {mode === "new" && r && <section aria-label="핵심 현황판" className="overflow-hidden rounded-3xl bg-slate-950 text-white shadow-xl">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-4 md:px-7">
+              <div><h2 className="text-xl font-extrabold">한눈에 보는 현황</h2><p className="mt-1 text-xs text-slate-300">{start} ~ {end} · 관리자·테스트 제외</p></div>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs text-slate-200">{new Date(r.updatedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" })} 갱신</span>
+            </div>
+            <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-5">
+              {([
+                ["방문 세션", fmt(r.summary.sessions), "30분 기준 방문 묶음", "text-white"],
+                ["페이지 조회", fmt(r.summary.views), "열람한 페이지 횟수", "text-sky-300"],
+                ["제휴 클릭", fmt(r.summary.clicks), "구매·할인 페이지로 이동", "text-emerald-300"],
+                ["코드 복사", fmt(r.summary.copies), "복사에 성공한 횟수", "text-amber-300"],
+                ["클릭률", r.summary.rate.toFixed(1) + "%", "클릭한 세션 ÷ 방문 세션", "text-violet-300"],
+              ] as const).map(([label, value, hint, color]) => <div key={label} className="bg-slate-950 px-5 py-6 md:px-7 last:col-span-2 lg:last:col-span-1">
+                <p className="text-sm font-semibold text-slate-300">{label}</p><p className={`my-3 text-4xl font-black tracking-tight tabular-nums xl:text-5xl ${color}`}>{value}</p><p className="text-xs leading-5 text-slate-400">{hint}</p>
+              </div>)}
+            </div>
+            <div className="grid gap-4 border-t border-white/10 bg-slate-900 px-5 py-4 md:grid-cols-2 md:px-7">
+              {([
+                ["가장 많이 들어온 경로", [...(r.groups.sources || [])].sort((a,b) => b.sessions-a.sessions).find(x => x.sessions > 0), "sessions", "세션", 1],
+                ["가장 많이 클릭한 혜택", [...(r.groups.targets || [])].sort((a,b) => b.clicks-a.clicks).find(x => x.clicks > 0), "clicks", "클릭", 0],
+              ] as const).map(([label, row, key, unit, targetTab]) => <button key={label} onClick={() => { setTab(targetTab); setDetail(null); document.getElementById("analytics-details")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="min-w-0 rounded-xl p-2 text-left hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-300">
+                <span className="block text-xs text-slate-400">{label}</span><span className="mt-1 block truncate text-sm font-semibold">{row ? `${row.label || row.name} · ${fmt(row[key])}${unit}` : "아직 기록 없음"}</span><span className="mt-1 block text-xs text-sky-300">상세 보기 →</span>
+              </button>)}
+            </div>
+            <p className="border-t border-white/10 px-5 py-3 text-xs text-slate-400 md:px-7">제휴 클릭과 코드 복사는 실제 구매 완료·수익과 다릅니다.</p>
+          </section>}
           {mode === "new" && (
             <nav
+              id="analytics-details"
               aria-label="통계 분류"
-              className="flex overflow-x-auto border-b gap-6"
+              className="flex scroll-mt-28 overflow-x-auto border-b gap-6"
             >
               {tabs.map((name, i) => (
                 <button
@@ -514,59 +532,6 @@ export default function AnalyticsDashboard({ mode = "new" }: { mode?: "legacy" |
               )}
               {tab === 0 && (
                 <>
-                  <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    {[
-                      {
-                        key: "sessions",
-                        label: "방문 세션",
-                        icon: Users,
-                        hint: "30분 동안 활동이 없으면 새 세션",
-                      },
-                      {
-                        key: "views",
-                        label: "페이지 조회",
-                        icon: Eye,
-                        hint: "페이지가 보인 횟수",
-                      },
-                      {
-                        key: "clicks",
-                        label: "제휴 링크 클릭",
-                        icon: MousePointer2,
-                        hint: "외부 할인·상품 링크를 누른 횟수",
-                      },
-                      {
-                        key: "rate",
-                        label: "클릭 세션 비율",
-                        icon: TrendingUp,
-                        hint: "제휴 클릭 세션 ÷ 전체 세션",
-                      },
-                    ].map((c) => (
-                      <article
-                        key={c.key}
-                        className="bg-white border rounded-2xl p-5"
-                      >
-                        <div className="flex justify-between text-slate-500 text-sm">
-                          <span>{c.label}</span>
-                          <c.icon size={18} />
-                        </div>
-                        <p className="text-3xl font-bold my-4 tabular-nums">
-                          {c.key === "rate"
-                            ? r.summary.rate.toFixed(1) + "%"
-                            : fmt(Number(r.summary[c.key as keyof Row]))}
-                        </p>
-                        <p className="text-xs text-blue-700">
-                          {change(
-                            Number(r.summary[c.key as keyof Row]),
-                            Number(r.previous[c.key as keyof Row]),
-                          )}{" "}
-                          <span className="text-slate-400">
-                            · 직전 동일 길이 기간 대비
-                          </span>
-                        </p>
-                        <p className="text-xs text-slate-500 mt-3">{c.hint}</p>
-                      </article>
-                    ))}
-                  </div>
                   <section className="bg-white border rounded-2xl p-5">
                     <h2 className="font-bold text-lg">일별 방문과 제휴 클릭</h2>
                     <p className="text-xs text-slate-500 mt-1">
