@@ -1,3 +1,4 @@
+import { gamsgoPromoCode } from './gamsgo-promotion';
 import { extraSubscriptionGuides } from './subscription-guides-extra';
 
 export const subscriptionAffiliateUrl = 'https://www.gamsgo.com/partner/rQT9a';
@@ -25,7 +26,7 @@ export const subscriptionGuides = [
     questions: [
       ['유튜브 프리미엄 싸게 이용하려면 무엇부터 비교하나요?', '필요한 기능, 현재 통신사에 포함된 혜택, 가입 경로별 청구액 순서로 비교하세요. 음악을 쓰지 않는다면 라이트도 비교 대상입니다.'],
       ['겜스고는 유튜브 공식 가입 페이지인가요?', '아닙니다. 겜스고는 별도의 판매 플랫폼입니다. 공식 직접 구독과 제공 방식·결제 주체·환불 창구가 다를 수 있습니다.'],
-      ['여기에 적힌 겜스고 전용 할인코드가 있나요?', '현재 이 페이지에서 별도로 검증한 입력 코드는 없습니다. 제휴 링크로 이동한 뒤 상품과 최종 결제 금액을 확인하세요.'],
+      ['여기에 적힌 겜스고 전용 할인코드가 있나요?', `겜스고 프로모션 코드 ${gamsgoPromoCode}를 안내합니다. 겜스고 결제 화면에 입력하고 대상 상품과 할인 적용 여부를 확인하세요. 유튜브 공식 결제용 코드는 아닙니다.`],
     ],
     sources: [{ label: 'YouTube 공식 블로그: 한국 Premium Lite 요금·기능 안내', url: 'https://blog.youtube/intl/ko-kr/news-and-events/yt-premium-lite-kr/' }],
     productSource: 'https://www.gamsgo.com/ko/details/youtube',

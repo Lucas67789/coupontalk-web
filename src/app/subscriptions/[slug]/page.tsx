@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import GamsgoPromoCode from '@/components/GamsgoPromoCode';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -47,7 +48,8 @@ export default async function SubscriptionGuide({ params }: Props) {
     <div className="my-10 grid gap-6 md:grid-cols-2">{guide.sections.map((section, i) => <section key={section.heading} className="rounded-2xl border border-gray-200 bg-white p-6"><p className="mb-3 text-sm font-bold" style={{ color: guide.color }}>0{i + 1}</p><h2 className="mb-3 text-xl font-bold leading-8">{section.heading}</h2><p className="leading-8 text-gray-600">{section.text}</p></section>)}</div>
     <section id="gamsgo" className="scroll-mt-28 rounded-3xl bg-slate-900 p-6 text-white md:p-9">
       <p className="text-sm text-slate-300">별도 판매 플랫폼 · 제휴 링크</p><h2 className="mt-2 text-2xl font-bold">겜스고에서 {guide.service} 조건 확인하기</h2>
-      <p className="mt-4 max-w-3xl leading-7 text-slate-200">겜스고 첫 화면으로 이동한 뒤 ‘{guide.service}’ 상품을 선택하세요. 구독 기간·계정 제공 방식·보장 옵션에 따른 최종 결제액을 확인할 수 있습니다. 별도로 확인된 쿠폰톡 입력 할인코드는 없으며, 링크 방문만으로 추가 할인을 보장하지 않습니다.</p>
+      <p className="mt-4 max-w-3xl leading-7 text-slate-200">겜스고 첫 화면으로 이동한 뒤 ‘{guide.service}’ 상품을 선택하세요. 구독 기간·계정 제공 방식·보장 옵션에 따른 최종 결제액을 확인할 수 있습니다. 아래 프로모션 코드를 결제 화면에 입력하고 할인 적용 여부를 확인하세요.</p>
+      <GamsgoPromoCode />
       <a href={subscriptionAffiliateUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-6 inline-flex rounded-xl bg-white px-6 py-4 font-bold text-slate-900">겜스고 상품·가격 확인 ↗</a>
       <p className="mt-4 text-sm leading-6 text-slate-300">장기 선결제, 계정 공유·충전 상품은 공식 직접 구독과 조건이 다를 수 있습니다. 서비스 약관과 중단 시 처리·환불 범위를 확인하세요.</p>
     </section>
