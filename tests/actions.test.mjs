@@ -19,7 +19,7 @@ test('coupon opens immediately even when statistics never respond', async () => 
     const events = [];
     const { openCouponLink } = load('../src/lib/coupon-action.ts', {
         './affiliate': affiliate,
-        './supabase': { supabase: { rpc: () => new Promise(() => {}) } },
+        './analytics-client': { trackEvent: () => new Promise(() => {}) },
     }, {
         window: { open: (...args) => events.push(['open', ...args]) },
         navigator: { clipboard: { writeText: code => { events.push(['copy', code]); return Promise.resolve(); } } },

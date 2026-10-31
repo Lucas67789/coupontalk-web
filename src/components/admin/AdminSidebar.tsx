@@ -16,13 +16,13 @@ export default function AdminSidebar() {
 
     const navItems = [
         { name: '종합 대시보드', href: '/admin', icon: Home },
-        { name: '호텔 리스트 관리', href: '/admin/stores', icon: Store },
+        { name: '스토어 관리', href: '/admin/stores', icon: Store },
         { name: '할인코드 관리', href: '/admin/coupons', icon: Ticket },
         { name: '명소/상품 관리', href: '/admin/products', icon: Package },
     ];
 
     return (
-        <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col min-h-screen">
+        <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col md:min-h-screen">
             <div className="p-6 border-b border-slate-800">
                 <Link href="/admin">
                     <h1 className="text-2xl font-black text-white flex items-center gap-2">
@@ -31,7 +31,7 @@ export default function AdminSidebar() {
                     </h1>
                 </Link>
             </div>
-            <nav className="flex-1 p-4 flex flex-col gap-2">
+            <nav className="flex-1 p-4 flex flex-row overflow-x-auto md:flex-col gap-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                     const isExactHome = item.href === '/admin' && pathname !== '/admin';
@@ -40,14 +40,14 @@ export default function AdminSidebar() {
                         : 'text-slate-300 hover:bg-slate-800 hover:text-white';
 
                     return (
-                        <Link key={item.name} href={item.href} className={`px-4 py-3 rounded-xl font-medium flex items-center gap-3 transition-colors ${activeClass}`}>
+                        <Link key={item.name} href={item.href} className={`whitespace-nowrap px-4 py-3 rounded-xl font-medium flex items-center gap-3 transition-colors ${activeClass}`}>
                             <item.icon size={18} />
                             {item.name}
                         </Link>
                     )
                 })}
                 <div className="h-px bg-slate-800 my-2"></div>
-                <Link href="/" target="_blank" className="px-4 py-3 rounded-xl font-medium flex items-center gap-3 transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Link href="/" target="_blank" className="whitespace-nowrap px-4 py-3 rounded-xl font-medium flex items-center gap-3 transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
                     <Home size={18} />
                     메인 페이지로
                 </Link>

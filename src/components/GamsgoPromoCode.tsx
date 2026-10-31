@@ -1,5 +1,6 @@
 'use client';
 
+import { trackEvent } from '@/lib/analytics-client';
 import { useState } from 'react';
 import { gamsgoPromoCode } from '@/lib/gamsgo-promotion';
 
@@ -9,6 +10,7 @@ export default function GamsgoPromoCode() {
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(gamsgoPromoCode);
+      void trackEvent('code_copy', { button_label: '겜스고 코드 복사' });
       setMessage('코드를 복사했습니다. 겜스고 결제 화면에 붙여넣으세요.');
     } catch {
       setMessage(`자동 복사가 되지 않았습니다. ${gamsgoPromoCode}를 직접 입력하세요.`);

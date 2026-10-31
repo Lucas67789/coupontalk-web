@@ -4,6 +4,7 @@ import type { ProductRow } from '@/lib/models';
 import SafeImage from './SafeImage';
 import { ExternalLink, ShoppingCart, CheckCircle2 } from 'lucide-react';
 import { safeAffiliateUrl } from '@/lib/affiliate';
+import { trackEvent } from '@/lib/analytics-client';
 import { useState } from 'react';
 
 export default function ProductCard({ product, storeName }: { product: ProductRow, storeName: string }) {
@@ -14,21 +15,7 @@ export default function ProductCard({ product, storeName }: { product: ProductRo
         if (!target) return;
         window.open(target, '_blank', 'noopener,noreferrer');
         setClicked(true);
-        try {
-            const sessionId = localStorage.getItem('ct_session_id');
-            void fetch('/api/track/click', {
-                method: 'POST', keepalive: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(sessionId ? { 'x-session-id': sessionId } : {})
-                },
-                body: JSON.stringify({
-                    type: 'product_click',
-                    product_id: product.id,
-                    target_url: product.affiliate_url
-                })
-            }).catch(() => {});
-        } catch (err) {}
+        void trackEvent('affiliate_click', { product_id: product.id, target_url: target, button_label: '상품 특가 보러가기' });
 
         setTimeout(() => setClicked(false), 2000);
     };
