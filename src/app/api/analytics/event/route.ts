@@ -53,14 +53,7 @@ export async function POST(request: Request) {
         return new Response(null, { status: 400 });
       }
     }
-    const db = analyticsDb();
-    const { count, error: ce } = await db
-      .from("analytics_events")
-      .select("id", { count: "exact", head: true })
-      .eq("session_id", b.session_id)
-      .gte("created_at", new Date(Date.now() - 300000).toISOString());
-    if (ce) throw ce;
-    if ((count || 0) > 300) return new Response(null, { status: 429 });
+    const db = analyticsDb(request);
     let store = text(b.store_id);
     const coupon =
         text(b.coupon_id) ||
@@ -104,10 +97,11 @@ export async function POST(request: Request) {
           new URL(request.url).hostname,
         ),
     };
-    const { error } = await db
-      .from("analytics_events")
-      .upsert(record, { onConflict: "id", ignoreDuplicates: true });
+    const { data: saved, error } = await db.rpc("record_analytics_event", {
+      payload: record,
+    });
     if (error) throw error;
+    if (!saved) return new Response(null, { status: 429 });
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Event not saved" }, { status: 500 });

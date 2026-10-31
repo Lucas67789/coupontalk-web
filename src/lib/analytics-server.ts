@@ -1,9 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
-export function analyticsDb() {
+export function analyticsDb(request?: Request) {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false },
+      global: {
+        headers: request?.headers.get("authorization")
+          ? { Authorization: request.headers.get("authorization")! }
+          : {},
+      },
+    },
   );
 }
 export async function isAnalyticsAdmin(request: Request) {

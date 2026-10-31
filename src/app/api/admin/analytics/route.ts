@@ -28,7 +28,7 @@ export async function GET(request: Request) {
         { status: 400 },
       );
     }
-    const db = analyticsDb(),
+    const db = analyticsDb(request),
       events: AnalyticsEvent[] = [];
     for (let offset = 0; ; offset += 1000) {
       const { data, error } = await db
