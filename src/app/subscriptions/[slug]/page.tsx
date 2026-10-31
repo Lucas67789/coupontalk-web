@@ -31,7 +31,7 @@ export default async function SubscriptionGuide({ params }: Props) {
       <div>
         <p className="mb-2 text-xs font-bold text-blue-700">겜스고 · 영상·AI 구독 할인 플랫폼</p>
         <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">{guide.title}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">공식 사이트에서 직접 구독할까, 겜스고 할인 상품을 고를까?<br className="hidden md:block"/>가격부터 계정 방식까지, 차이를 먼저 확인하세요.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">공식 사이트에서 직접 구독할까, 겜스고 할인 상품을 고를까? <br className="hidden md:block"/>가격부터 계정 방식까지, 차이를 먼저 확인하세요.</p>
       </div>
       <Image src={`/subscription-images/${slug}.png`} alt={`${guide.service} 구독 할인 안내`} width={1200} height={1200} priority className="w-20 shrink-0 rounded-xl object-contain md:w-32" />
     </header>

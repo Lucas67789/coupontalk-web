@@ -32,7 +32,7 @@ export default function GamsgoIntroduction({ service, slug }: { service?: string
         <Building2 aria-hidden="true" className="mb-3 h-7 w-7 text-slate-500" />
         <p className="text-xs font-semibold text-gray-500">서비스사에서 직접</p>
         <h3 className="mt-1 text-xl font-extrabold md:text-2xl">공식 구독</h3>
-        <div className="my-5 flex flex-wrap items-center gap-2 text-sm font-bold"><span className="rounded-lg bg-gray-100 px-3 py-2">나</span><ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" /><span className="rounded-lg bg-gray-100 px-3 py-2">공식 서비스</span></div>
+        <div className="my-5 flex flex-wrap items-center gap-2 text-sm font-bold"><span className="rounded-lg bg-gray-100 px-3 py-2">나</span><ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" /><span className="rounded-lg bg-gray-100 px-3 py-2">공식</span></div>
         <p className="font-bold text-gray-900">공식 요금제 선택</p><p className="mt-2 text-sm leading-6 text-gray-600">내 계정에서 플랜을 선택하고 직접 구독</p>
       </div>
       <div className="rounded-2xl border-2 border-blue-600 bg-blue-50 p-4 md:p-7">
