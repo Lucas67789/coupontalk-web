@@ -30,7 +30,7 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
 
     return (
         <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
-            {hasStoreGuide(store.tags) && store.logo && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={800} loading="lazy" className="w-full aspect-[3/2] object-cover border-b border-slate-100" />}
+            {hasStoreGuide(store.tags) && store.logo && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={1200} loading="lazy" className="w-full aspect-square object-contain border-b border-slate-100" />}
             <div className="p-6">
                 {!hasStoreGuide(store.tags) && <div className="flex items-center justify-between mb-4">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
