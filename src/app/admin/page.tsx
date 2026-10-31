@@ -24,6 +24,12 @@ type Row = {
   rate: number;
 };
 type Report = {
+  legacy: {
+    totalViews: number;
+    totalClicks: number;
+    pages: { name: string; count: number }[];
+    coupons: { name: string; count: number }[];
+  };
   updatedAt: string;
   range: { from: number; to: number; previousFrom: number; previousTo: number };
   summary: Row;
@@ -203,11 +209,136 @@ function Table({
     </section>
   );
 }
+function LegacyOverview({
+  report: r,
+  start,
+  end,
+}: {
+  report: Report;
+  start: string;
+  end: string;
+}) {
+  return (
+    <div className="space-y-5">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7">
+        <strong>기존 기록은 삭제되지 않았습니다.</strong> 이전 방식으로 수집한
+        기록입니다. 관리자·봇 방문과 코드 복사·링크 클릭이 섞일 수 있어 새
+        통계와 합산하거나 증감률을 비교하지 않습니다.
+      </div>
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="font-bold text-lg">기존 누적 기록</h2>
+        <p className="text-xs text-slate-500 mt-1">
+          최초 기록부터 선택 종료일({end})까지 · 시작일 필터와 무관
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+          {[
+            ["누적 페이지 조회", r.legacy.totalViews],
+            ["누적 클릭 기록", r.legacy.totalClicks],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl bg-slate-50 p-5">
+              <p className="text-sm text-slate-500">{label}</p>
+              <p className="mt-2 text-3xl font-bold">
+                {fmt(Number(value))}
+                <span className="text-sm font-normal ml-2">건</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="font-bold text-lg">선택 기간의 기존 기록</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          {start} ~ {end} · 한국 시간
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+          {[
+            ["페이지 조회", r.quality.legacyViews],
+            ["클릭 기록", r.quality.legacyClicks],
+          ].map(([label, value]) => (
+            <div key={label} className="p-4 rounded-xl bg-blue-50">
+              <p className="text-sm">{label}</p>
+              <p className="text-2xl font-bold mt-2">{fmt(Number(value))}건</p>
+            </div>
+          ))}
+        </div>
+      </section>
+      {[
+        ["페이지별 기존 조회", r.legacy.pages],
+        ["쿠폰별 기존 클릭 기록", r.legacy.coupons],
+      ].map(([title, rows]) => (
+        <LegacyList
+          key={String(title)}
+          title={String(title)}
+          rows={rows as { name: string; count: number }[]}
+        />
+      ))}
+      <p className="text-xs text-slate-500">
+        갱신 {stamp(r.updatedAt)} · 새 방문 분석은 상단 ‘개편 이후 통계’에서
+        확인하세요.
+      </p>
+    </div>
+  );
+}
+function LegacyList({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: { name: string; count: number }[];
+}) {
+  const [search, setSearch] = useState("");
+  const filtered = rows.filter((r) =>
+    r.name.toLowerCase().includes(search.toLowerCase()),
+  );
+  return (
+    <section className="bg-white border rounded-2xl p-5">
+      <div className="flex flex-wrap justify-between gap-3 mb-4">
+        <h2 className="font-bold">{title}</h2>
+        <input
+          aria-label={title + " 검색"}
+          placeholder="항목 검색"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        />
+      </div>
+      <p className="text-xs text-slate-500 mb-3">
+        {filtered.length}개 항목 · 건수 내림차순 · 상위 100개 표시
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-slate-500">
+              <th className="text-left p-3">항목</th>
+              <th className="text-right p-3 whitespace-nowrap">기록 건수</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.slice(0, 100).map((row) => (
+              <tr className="border-t" key={row.name}>
+                <td className="p-3 break-all">{row.name}</td>
+                <td className="text-right p-3 tabular-nums">
+                  {fmt(row.count)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!filtered.length && (
+          <p className="p-5 text-slate-500">
+            선택 기간에 해당 기록이 없습니다.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
 export default function AdminDashboard() {
   const router = useRouter(),
     [start, setStart] = useState(() => koreaDay(Date.now() - 6 * 86400000)),
     [end, setEnd] = useState(() => koreaDay()),
     [tab, setTab] = useState(0),
+    [mode, setMode] = useState<"legacy" | "new">("legacy"),
     [report, setReport] = useState<Report | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -331,23 +462,52 @@ export default function AdminDashboard() {
               </span>
             </div>
           </section>
-          <nav
-            aria-label="통계 분류"
-            className="flex overflow-x-auto border-b gap-6"
+          <div
+            className="grid sm:grid-cols-2 gap-3"
+            aria-label="통계 집계 방식"
           >
-            {tabs.map((name, i) => (
+            {(
+              [
+                ["legacy", "기존 기록", "누적 기록과 선택 기간의 조회·클릭"],
+                [
+                  "new",
+                  "개편 이후 통계",
+                  "관리자·테스트를 제외한 새 세션 분석",
+                ],
+              ] as const
+            ).map(([value, title, description]) => (
               <button
-                key={name}
-                onClick={() => {
-                  setTab(i);
-                  setDetail(null);
-                }}
-                className={`whitespace-nowrap pb-3 text-sm font-semibold border-b-2 ${tab === i ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500"}`}
+                key={value}
+                aria-pressed={mode === value}
+                onClick={() => setMode(value)}
+                className={`text-left rounded-xl border-2 p-4 ${mode === value ? "border-blue-600 bg-blue-50" : "border-slate-200 bg-white"}`}
               >
-                {name}
+                <strong>{title}</strong>
+                <span className="block mt-1 text-sm text-slate-500">
+                  {description}
+                </span>
               </button>
             ))}
-          </nav>
+          </div>
+          {mode === "new" && (
+            <nav
+              aria-label="통계 분류"
+              className="flex overflow-x-auto border-b gap-6"
+            >
+              {tabs.map((name, i) => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    setTab(i);
+                    setDetail(null);
+                  }}
+                  className={`whitespace-nowrap pb-3 text-sm font-semibold border-b-2 ${tab === i ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500"}`}
+                >
+                  {name}
+                </button>
+              ))}
+            </nav>
+          )}
           {error && (
             <div role="alert" className="p-5 rounded-xl bg-red-50 text-red-700">
               {error}
@@ -358,7 +518,10 @@ export default function AdminDashboard() {
               통계를 조회하고 있습니다…
             </p>
           )}
-          {r && groups && (
+          {r && mode === "legacy" && (
+            <LegacyOverview report={r} start={start} end={end} />
+          )}
+          {r && groups && mode === "new" && (
             <>
               <div className="flex flex-wrap justify-between gap-2 text-xs text-slate-500">
                 <p>관리자·테스트 이벤트 제외 · 갱신 {stamp(r.updatedAt)}</p>

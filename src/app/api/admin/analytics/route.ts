@@ -112,8 +112,62 @@ export async function GET(request: Request) {
         (e) => e.path,
       ),
     };
+    const snapshot = new Date(range.to).toISOString();
+    const [totalViews, totalClicks] = await Promise.all([
+      db
+        .from("page_views")
+        .select("id", { head: true, count: "exact" })
+        .lt("created_at", snapshot),
+      db
+        .from("click_events")
+        .select("id", { head: true, count: "exact" })
+        .lt("created_at", snapshot),
+    ]);
+    if (totalViews.error) throw totalViews.error;
+    if (totalClicks.error) throw totalClicks.error;
+    const legacyPages = new Map<string, number>(),
+      legacyCoupons = new Map<string, number>();
+    for (const table of ["page_views", "click_events"] as const) {
+      for (let offset = 0; ; offset += 1000) {
+        const { data, error } = await db
+          .from(table)
+          .select(
+            table === "page_views"
+              ? "id,path,created_at"
+              : "id,coupon_id,created_at",
+          )
+          .gte("created_at", new Date(range.from).toISOString())
+          .lt("created_at", snapshot)
+          .order("created_at")
+          .order("id")
+          .range(offset, offset + 999);
+        if (error) throw error;
+        for (const row of data) {
+          const value = row as unknown as { path?: string; coupon_id?: string };
+          const key =
+            table === "page_views"
+              ? value.path || "경로 미기록"
+              : value.coupon_id || "쿠폰 미연결";
+          const map = table === "page_views" ? legacyPages : legacyCoupons;
+          map.set(key, (map.get(key) || 0) + 1);
+        }
+        if (data.length < 1000) break;
+        if (offset >= 199000) throw Error("기간을 줄여주세요.");
+      }
+    }
+    const legacy = {
+      totalViews: totalViews.count || 0,
+      totalClicks: totalClicks.count || 0,
+      pages: [...legacyPages]
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count),
+      coupons: [...legacyCoupons]
+        .map(([name, count]) => ({ name: titles.get(name) || name, count }))
+        .sort((a, b) => b.count - a.count),
+    };
     return NextResponse.json(
       {
+        legacy,
         updatedAt: new Date().toISOString(),
         range,
         summary: metrics(current),
