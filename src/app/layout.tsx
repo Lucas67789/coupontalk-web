@@ -78,6 +78,9 @@ export default function RootLayout({
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1 pt-24 pb-12">
+              <p data-affiliate-disclosure className="mx-auto mb-6 w-full px-4 py-3 text-center text-sm leading-6 text-slate-800 bg-white border-y border-slate-200">
+                파트너스 활동으로 수수료를 지급받습니다.
+              </p>
               {children}
             </main>
             <Footer />

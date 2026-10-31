@@ -55,10 +55,6 @@ export default function Footer() {
 
                 <div className="mt-12 pt-8 border-t text-sm text-center" style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}>
                     <p>
-                        제휴 마케팅 링크가 포함될 수 있으며, 링크를 통해 구매 시 쿠폰톡이 일정액의 수수료를 제공받을 수 있습니다.<br />
-                        이러한 수수료는 더 나은 할인 정보를 제공하는 데 사용됩니다.
-                    </p>
-                    <p className="mt-4">
                         &copy; {new Date().getFullYear()} coupontalk. All rights reserved.
                     </p>
                 </div>

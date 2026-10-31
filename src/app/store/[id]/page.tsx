@@ -203,10 +203,6 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </p>
             </div>
 
-            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-600 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
-                이 포스팅은 제휴마케팅이 포함된 광고로 커미션을 지급 받습니다.
-            </div>
-
             {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
                 {storeUrl && <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-100 p-5 md:p-6">
                     <p className="font-bold text-lg text-slate-900">{store.name}에서 상품과 이용 조건 확인</p>

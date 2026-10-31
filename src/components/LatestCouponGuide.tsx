@@ -18,7 +18,6 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
         <h1 className="mt-5 text-3xl font-bold">{title}</h1>
         <p className="mt-4 leading-7 text-gray-700">{description}</p>
         <p className="mt-3 text-sm text-gray-500">최근 안내 수정: {new Date(modified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</p>
-        <p className="mt-3 text-sm text-gray-600">제휴 링크를 통해 구매하면 쿠폰톡이 수수료를 받을 수 있습니다.</p>
         <section className="mt-8" aria-label="최신 할인 안내">
             <h2 className="text-2xl font-bold">{topics.length ? topics.join(" · ") : storeName} 관련 최신·예정 혜택</h2>
             <p className="mt-3 leading-7">이 페이지는 이전 ‘{coupon.title.replace(/\[종료\]/g, '').trim()}’ 행사를 찾는 분을 위한 후속 안내입니다. 이전 코드는 종료됐으며 아래 새 공지에서 대상 상품·옵션과 결제 조건을 확인하세요.</p>

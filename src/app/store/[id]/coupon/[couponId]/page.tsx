@@ -251,11 +251,6 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
                 </nav>
             </div>
 
-            {/* Affiliate Disclosure (KFTC) */}
-            <div className="bg-gray-50/50 border-b px-6 py-3 text-xs text-gray-600 text-center font-medium" style={{ borderColor: 'var(--border-color)' }}>
-                이 포스팅은 제휴마케팅이 포함된 광고로 일정 커미션을 지급 받을 수 있습니다.
-            </div>
-
             {/* H1 Title */}
             <div className="p-5 md:p-8">
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-6">
