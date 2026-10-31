@@ -28,7 +28,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
 
     const handleCopyAndRedirect = async (e: React.MouseEvent) => {
         e.preventDefault(); e.stopPropagation();
-        if (isExpired || upcoming) return;
+        if (isExpired) return;
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
@@ -72,10 +72,10 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
             {/* Full Width Button */}
             {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
             {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : <button
-                onClick={upcoming ? () => { if (detailHref) window.location.href = detailHref; } : handleCopyAndRedirect}
+                onClick={handleCopyAndRedirect}
                 className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
-                {upcoming ? "예정 행사 조건 보기" : isNoCode ? (
+                {upcoming ? (isNoCode ? "할인 페이지 미리보기" : "코드 복사하고 미리보기") : isNoCode ? (
                     <>할인 페이지로 이동 <ExternalLink size={20} /></>
                 ) : (
                     <>복사하고 할인받기 <Copy size={20} /></>

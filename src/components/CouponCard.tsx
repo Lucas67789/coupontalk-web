@@ -71,7 +71,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     } catch (e) { }
 
     const handleCopyAndRedirect = async () => {
-        if (isExpired || upcoming) return;
+        if (isExpired) return;
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
@@ -140,11 +140,11 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
 
                 <button
-                    disabled={(isExpired || upcoming) && !detailHref}
+                    disabled={isExpired && !detailHref}
                     onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        if (isExpired || upcoming) {
+                        if (isExpired) {
                             if (detailHref) window.location.href = detailHref;
                             return;
                         }
@@ -163,7 +163,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     ) : isExpired ? (
                         <>최신 혜택·이전 행사 기록 <ExternalLink size={18} /></>
                     ) : upcoming ? (
-                        <>예정 행사 조건 보기 <ExternalLink size={18} /></>
+                        <>{isNoCode ? "할인 페이지 미리보기" : "코드 복사하고 미리보기"} <ExternalLink size={18} /></>
                     ) : isNoCode ? (
                         <>할인 페이지로 이동 <ExternalLink size={18} /></>
                     ) : (
