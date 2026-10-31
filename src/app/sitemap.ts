@@ -1,3 +1,4 @@
+import { subscriptionImagePath } from '@/lib/subscription-image';
 import { MetadataRoute } from 'next';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { contentImages } from '@/lib/content-images';
@@ -58,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
         ...categoryUrls,
         { url: `${baseUrl}/subscriptions`, lastModified: subscriptionReviewedAt },
-        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: subscriptionReviewedAt, images: [`${baseUrl}/subscription-images/${g.slug}.png`] })),
+        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: subscriptionReviewedAt, images: [`${baseUrl}${subscriptionImagePath(g.slug)}`] })),
         ...['faq', 'contact', 'terms'].map(path => ({ url: `${baseUrl}/${path}` })),
         ...storeUrls,
         ...couponUrls,
