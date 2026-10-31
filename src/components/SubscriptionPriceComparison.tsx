@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { subscriptionAffiliateUrl } from '@/lib/subscription-guides';
+import { gamsgoAffiliateLink } from '@/lib/gamsgo-links';
 import { priceDifference, subscriptionPrices, subscriptionPriceCheckedAt, won } from '@/lib/subscription-prices';
 
 export default function SubscriptionPriceComparison({ slug }: { slug?: string }) {
@@ -30,7 +30,7 @@ export default function SubscriptionPriceComparison({ slug }: { slug?: string })
       <p className="mt-4 text-sm font-semibold leading-6">{quote.conditions}</p>
       <p className="mt-2 text-sm leading-6 text-gray-600">{quote.difference}</p>
       {slug === 'chatgpt-discount' && <div className="mt-5 rounded-xl border p-4"><h3 className="font-bold">챗GPT 공유형, 자동 갱신에 따른 가격</h3><dl className="mt-3 space-y-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><dt>공유형 · 자동 갱신 ON · UXA7C</dt><dd className="font-bold">6,613원 / 1개월</dd></div><div className="flex flex-wrap justify-between gap-2"><dt>공유형 · 자동 갱신 OFF · UXA7C</dt><dd className="font-bold">9,040원 / 1개월</dd></div></dl><p className="mt-2 text-xs leading-6 text-gray-600">기본 5% 쿠폰이 UXA7C보다 저렴할 수 있습니다. 같은 옵션에서 쿠폰별 최종 결제액을 비교하세요. 공유형 가격을 개인형 할인으로 안내하지 않습니다.</p></div>}
-      <details className="mt-4 text-xs leading-6 text-gray-600"><summary className="cursor-pointer font-semibold">가격 출처·계산 기준</summary><p className="mt-2">확인 시점의 화면 표시액이며 실시간 가격이나 최저가 보장이 아닙니다. 월 환산 금액은 총액 ÷ 개월 수를 원 단위로 반올림했습니다. 카드 수수료·환율·선택 옵션·갱신 시점에 따라 실제 청구액이 달라질 수 있습니다. 기본 5% 쿠폰 가격을 UXA7C 혜택으로 계산하지 않았습니다.</p><div className="mt-2 flex flex-wrap gap-4">{quote.official && <a href={quote.official.source} target="_blank" rel="noopener noreferrer" className="underline">공식 가격 출처</a>}<a href={subscriptionAffiliateUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="underline">겜스고에서 현재 가격 확인 (제휴 링크)</a></div></details>
+      <details className="mt-4 text-xs leading-6 text-gray-600"><summary className="cursor-pointer font-semibold">가격 출처·계산 기준</summary><p className="mt-2">확인 시점의 화면 표시액이며 실시간 가격이나 최저가 보장이 아닙니다. 월 환산 금액은 총액 ÷ 개월 수를 원 단위로 반올림했습니다. 카드 수수료·환율·선택 옵션·갱신 시점에 따라 실제 청구액이 달라질 수 있습니다. 기본 5% 쿠폰 가격을 UXA7C 혜택으로 계산하지 않았습니다.</p><div className="mt-2 flex flex-wrap gap-4">{quote.official && <a href={quote.official.source} target="_blank" rel="noopener noreferrer" className="underline">공식 가격 출처</a>}<a href={gamsgoAffiliateLink(slug)} target="_blank" rel="sponsored nofollow noopener noreferrer" className="underline">겜스고에서 현재 가격 확인</a></div></details>
     </div>
   </section>;
 }
