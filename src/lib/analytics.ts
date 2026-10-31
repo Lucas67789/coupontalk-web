@@ -65,7 +65,8 @@ export function dateRange(start: string, end: string, now = Date.now()) {
   const until = Math.min(to, now),
     span = until - from;
   if (span <= 0) throw Error("미래 기간은 조회할 수 없습니다.");
-  return { from, to: until, previousFrom: from - span, previousTo: from };
+  const previousFrom = from - (to - from);
+  return { from, to: until, previousFrom, previousTo: previousFrom + span };
 }
 export function metrics(events: AnalyticsEvent[]) {
   const views = events.filter((e) => e.event_name === "page_view"),

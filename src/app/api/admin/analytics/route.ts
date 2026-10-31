@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     const all = events.filter((e) => Date.parse(e.created_at) >= range.from),
       current = all.filter((e) => !e.is_test),
       previous = events.filter(
-        (e) => !e.is_test && Date.parse(e.created_at) < range.from,
+        (e) => !e.is_test && Date.parse(e.created_at) < range.previousTo,
       );
     const [stores, coupons, oldViews, oldClicks, first, products] =
       await Promise.all([
