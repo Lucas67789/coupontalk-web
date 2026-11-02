@@ -1,0 +1,157 @@
+{
+  "names": {
+    "11st": "11번가",
+    "agoda": "아고다",
+    "airalo": "에어알로 (Airalo)",
+    "aliexpress": "알리익스프레스",
+    "antonioli": "안토니올리",
+    "auction": "옥션",
+    "charlesnk": "찰스앤키스",
+    "clubclio": "CLUBCLIO",
+    "coupang": "쿠팡",
+    "daesang": "대상웰라이프",
+    "dosirak1": "도시락이심",
+    "expedia": "EXPEDIA",
+    "gmarket": "G마켓",
+    "gocity": "고우시티 (Go City)",
+    "halfclub1": "하프클럽",
+    "hcombine2": "호텔스컴바인",
+    "himart": "하이마트쇼핑몰",
+    "hotelskr": "호텔스닷컴",
+    "iherb": "아이허브",
+    "kkday": "케이케이데이 (KKday)",
+    "klook": "클룩 (Klook)",
+    "lenovo": "레노버 (Lenovo)",
+    "lgecom": "LGE.COM",
+    "marshall": "마샬",
+    "mootoon": "무툰",
+    "myrealtrip": "마이리얼트립",
+    "naturerepublic": "네이처리퍼블릭",
+    "newper": "뉴퍼마켓",
+    "nordvpn2": "노드VPN (NordVPN)",
+    "qtoon": "큐툰",
+    "rakutentr": "라쿠텐 트래블",
+    "re4akor": "레일유럽",
+    "refurlab": "리퍼연구소",
+    "shokz": "샥즈",
+    "smk": "슈마커",
+    "snaps": "스냅스",
+    "surfshark": "서프샤크 (Surfshark)",
+    "toyotarent": "도요타렌트카",
+    "traveloka": "트래블로카",
+    "tripcom": "트립닷컴",
+    "ttangcheori": "땡처리닷컴",
+    "usimsa": "유심사",
+    "wconcept": "W컨셉",
+    "롯데온": "롯데온",
+    "베이비뵨": "베이비뵨",
+    "야놀자-nol": "야놀자 NOL",
+    "socar": "쏘카"
+  },
+  "groups": [
+    [
+      "같은 숙박 조건으로 비교하기",
+      "객실·인원·식사·취소 가능 기한을 맞춘 뒤 예약처별 안내를 비교하세요.",
+      [
+        "agoda",
+        "rakutentr",
+        "hotelskr",
+        "hcombine2",
+        "traveloka",
+        "expedia",
+        "tripcom",
+        "야놀자-nol"
+      ]
+    ],
+    [
+      "여행 일정에 맞는 이동·티켓 고르기",
+      "이동할 지역과 일정에 맞춰 차량·열차·티켓의 포함 항목을 확인하세요.",
+      [
+        "klook",
+        "socar",
+        "toyotarent",
+        "re4akor",
+        "myrealtrip",
+        "gocity",
+        "kkday",
+        "ttangcheori"
+      ]
+    ],
+    [
+      "해외 데이터 조건 비교하기",
+      "방문 국가·사용 일수·지원 기기를 같게 놓고 각 상품의 안내를 비교하세요.",
+      [
+        "usimsa",
+        "dosirak1",
+        "airalo"
+      ]
+    ],
+    [
+      "패션 상품의 구매 조건 비교하기",
+      "같은 제품과 옵션인지 확인하고 배송·교환 비용까지 비교하세요.",
+      [
+        "charlesnk",
+        "wconcept",
+        "halfclub1",
+        "antonioli",
+        "smk"
+      ]
+    ],
+    [
+      "제품 모델과 구매 조건 비교하기",
+      "정확한 모델번호와 배송·설치·보증 조건을 확인하세요.",
+      [
+        "shokz",
+        "marshall",
+        "himart",
+        "lgecom",
+        "lenovo"
+      ]
+    ],
+    [
+      "상품 구성과 판매 조건 비교하기",
+      "상품 옵션·판매자·배송료·반품 조건을 함께 확인하세요.",
+      [
+        "coupang",
+        "11st",
+        "gmarket",
+        "auction",
+        "롯데온",
+        "베이비뵨",
+        "refurlab"
+      ]
+    ],
+    [
+      "뷰티 회원 혜택 비교하기",
+      "신규회원 대상과 적용 제외 상품, 배송비를 각각 확인하세요.",
+      [
+        "clubclio",
+        "naturerepublic"
+      ]
+    ],
+    [
+      "용량·구성과 구매 조건 확인하기",
+      "같은 용량과 수량으로 비교하고 배송과 정기구매 여부를 확인하세요.",
+      [
+        "iherb",
+        "daesang"
+      ]
+    ],
+    [
+      "VPN 구독 조건 비교하기",
+      "최초 총 결제금액과 갱신 요금, 지원 기기를 확인하세요.",
+      [
+        "nordvpn2",
+        "surfshark"
+      ]
+    ],
+    [
+      "작품 이용 조건 비교하기",
+      "읽을 작품의 회차 가격·열람 기간과 코인 사용 기한을 확인하세요.",
+      [
+        "mootoon",
+        "qtoon"
+      ]
+    ]
+  ]
+}

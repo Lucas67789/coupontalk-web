@@ -1,5 +1,6 @@
 // Brand guide artwork, without time-limited discount claims.
 export const storeCoverImages: Record<string, string> = {
+  "socar": "https://coupontalk.kr/coupon-images/thumbnails/socar-20261102.png",
   "daesang": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/daesang-v1.webp",
   "shokz": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/shokz-v1.webp",
   "snaps": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/snaps-v1.webp",

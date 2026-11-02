@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
       destination: '/store/aliexpress/coupon/coupon-aliexpress-nov2026-1111',
       statusCode: 301 as const,
     }));
-    return [...aliCampaignRedirects, ...couponRedirects.map(r => ({ ...r, statusCode: 301 as const })), ...Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
+    const legacyLandings = [
+      { source: '/agoda', destination: '/store/agoda' },
+      { source: '/%EC%95%84%EC%9D%B4%ED%97%88%EB%B8%8C', destination: '/store/iherb' },
+      { source: '/coupon-agoda-np-sep2026', destination: '/store/agoda/coupon/coupon-agoda-np-sep2026' },
+    ].map(r => ({ ...r, statusCode: 301 as const }));
+    return [...legacyLandings, ...aliCampaignRedirects, ...couponRedirects.map(r => ({ ...r, statusCode: 301 as const })), ...Object.entries(STORE_ALIASES).map(([oldId, id]) => ({
       source: `/store/${encodeURIComponent(oldId)}/:path*`,
       destination: `/store/${id}/:path*`,
       permanent: true,

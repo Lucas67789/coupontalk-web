@@ -2,7 +2,7 @@
 import type { CouponRow } from '@/lib/models';
 import { Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
-import { openCouponLink } from '@/lib/coupon-action';
+import { copyCouponCode, openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
 import { latestGuideTitle } from '@/lib/latest-guide';
@@ -29,7 +29,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     const handleCopyAndRedirect = async (e: React.MouseEvent) => {
         e.preventDefault(); e.stopPropagation();
         if (isExpired) return;
-        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
+        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName, false));
     };
 
     const isNoCode = !hasCouponCode(coupon.code);
@@ -38,7 +38,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
 
     return (
         <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
-            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-5 block aspect-square overflow-hidden rounded-xl bg-slate-50">
+            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-6 block w-24 md:w-auto aspect-square overflow-hidden rounded-xl bg-slate-50">
                 <Image src={thumbnail} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
             </Link>}
             
@@ -71,15 +71,12 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
 
             {/* Full Width Button */}
             {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
-            {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : <button
+            {!isNoCode && !isExpired && !upcoming && <button type="button" onClick={async () => showToast(await copyCouponCode(coupon))} className="mb-3 min-h-12 w-full rounded-lg border border-blue-600 px-4 py-3 font-bold text-blue-700 flex items-center justify-center gap-2">코드 복사 <Copy size={20} /></button>}
+            {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : upcoming ? <Link href={detailHref} className="block rounded-lg bg-amber-50 px-4 py-3 text-center font-bold text-amber-900">시작일·적용 조건 확인</Link> : <button
                 onClick={handleCopyAndRedirect}
                 className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
-                {isNoCode ? (
-                    <>할인 페이지로 이동 <ExternalLink size={20} /></>
-                ) : (
-                    <>복사하고 할인받기 <Copy size={20} /></>
-                )}
+                <>할인 페이지로 이동 <ExternalLink size={20} /></>
             </button>}
         </article>
     );

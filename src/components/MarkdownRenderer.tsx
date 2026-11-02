@@ -63,14 +63,14 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
                             finalAlt = storeName ? `${storeName} 관련 이미지` : '쿠폰 혜택 이미지';
                         }
                         return (
-                            <div className="my-6">
+                            <span className="my-6 block">
                                 <img
                                     src={String(src || '')} 
                                     alt={finalAlt} 
                                     className="rounded-xl border border-gray-100 max-w-full h-auto shadow-sm" 
                                     loading="lazy"
                                 />
-                            </div>
+                            </span>
                         );
                     }
                 }}

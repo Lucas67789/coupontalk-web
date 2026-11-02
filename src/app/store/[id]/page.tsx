@@ -17,6 +17,7 @@ import StoreGuide from '@/components/StoreGuide';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
+import RelatedStores from '@/components/RelatedStores';
 
 export const dynamic = 'force-dynamic';
 
@@ -193,7 +194,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
                 <p className="mt-3 text-sm text-gray-600 leading-6">{guided ? store.description : "적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요."}</p>
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
-                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [["#benefit-summary", "혜택 비교표"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [["#coupons", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
@@ -208,7 +209,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 {storeUrl && <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-100 p-5 md:p-6">
                     <p className="font-bold text-lg text-slate-900">{store.name}에서 상품과 이용 조건 확인</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">판매처의 상품·요금·예약 조건은 변경될 수 있습니다. 최종 조건은 이동한 사이트에서 확인하세요.</p>
-                    <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-4 inline-flex items-center justify-center min-h-12 rounded-xl bg-blue-600 text-white px-6 py-3 font-bold hover:bg-blue-700">{store.name} 상품·서비스 보기 ↗</a>
+                    <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-4 inline-flex items-center justify-center min-h-12 rounded-xl bg-blue-600 text-white px-6 py-3 font-bold hover:bg-blue-700">{storeId === 'socar' ? '쏘카 앱에서 쿠폰·예약 확인' : `${store.name} 상품·서비스 보기`} ↗</a>
                     <p className="mt-2 text-xs text-slate-500">제휴 링크 · 새 창에서 열립니다</p>
                 </div>}
                 <MarkdownRenderer content={store.guide_content || ''} storeName={store.name} />
@@ -216,7 +217,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </section>}
 
             {activeCoupons.length > 0 && (
-                <div id="benefit-summary" className="p-5 md:p-6 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
+                <div id="benefit-summary" className="hidden md:block p-5 md:p-6 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 혜택 요약표</h2>
                     <p className="text-sm text-gray-600 leading-6 mb-4">등록된 사용·예약 마감일이 지나지 않은 혜택입니다. 대상 고객·상품과 실제 적용 여부는 각 프로모션 조건을 확인하세요.</p>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
@@ -360,7 +361,8 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <p className="mt-3 text-sm text-gray-500">지난 프로모션 기록입니다. 현재 구매·예약에는 사용할 수 없습니다.</p>
                 <ul className="mt-4 divide-y divide-gray-100">{expiredCoupons.map((coupon: CouponRow) => <li key={coupon.id} className="py-3"><Link className="text-sm text-gray-600 hover:underline" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{coupon.title}</Link><p className="mt-1 text-xs text-gray-500">{coupon.expiry}</p></li>)}</ul>
             </details>}
-            {!guided && activeCoupons.length > 0 && <div className="fixed bottom-0 left-0 w-full z-40 p-3 bg-white border-t border-gray-200 md:hidden"><a href="#benefit-summary" className="flex justify-center rounded-xl bg-blue-600 p-3 font-bold text-white">{store.name} 쿠폰 {activeCoupons.length}개 비교하기</a></div>}
+            <RelatedStores storeId={storeId} />
+            {!guided && activeCoupons.length > 0 && <div className="fixed bottom-0 left-0 w-full z-40 p-3 bg-white border-t border-gray-200 md:hidden"><a href="#coupons" className="flex justify-center rounded-xl bg-blue-600 p-3 font-bold text-white">{store.name} 쿠폰 {activeCoupons.length}개 비교하기</a></div>}
 
         </div>
     );
