@@ -43,7 +43,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
         .order('published_at', { ascending: false });
 
     const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title));
-    const guided = hasStoreGuide(store.tags);
+    const guided = storeId !== 'usimsa' && hasStoreGuide(store.tags);
     const previewImages = [...new Set([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap(c => contentImages(c.content_body))])].slice(0, 8);
 
     const title = guided ? storeGuideTitle(store.name, store.guide_content) : activeCoupons.length ? `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교` : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
@@ -103,7 +103,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const activeCoupons = tableCoupons.filter((c: CouponRow) => !c.isExpired);
     const ongoingCount = activeCoupons.filter((c: CouponRow) => couponStatus(c, new Date(now).getTime()) === 'active').length;
     const upcomingCount = activeCoupons.length - ongoingCount;
-    const guided = hasStoreGuide(store.tags);
+    const guided = storeId !== 'usimsa' && hasStoreGuide(store.tags);
     const guideTitle = storeGuideTitle(store.name, store.guide_content);
     const storeUrl = safeAffiliateUrl(store.website_url);
     const offerImages = [...new Set<string>([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap((c: CouponRow) => contentImages(c.content_body))])];
