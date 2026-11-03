@@ -349,7 +349,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </div>
 
             {/* Guide Content */}
-            {!guided && !['agoda', 'klook', 'hotelskr', 'lenovo'].includes(storeId) && store.guide_content && (
+            {!guided && !['agoda', 'klook', 'hotelskr', 'lenovo', 'usimsa'].includes(storeId) && store.guide_content && (
                 <div className="px-6 md:px-10 py-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 팁</h2>
                     <TableOfContents content={store.guide_content} />
