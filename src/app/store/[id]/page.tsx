@@ -196,7 +196,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
                 <p className="mt-3 text-sm text-gray-600 leading-6">{guided ? store.description : travelStoreIntros[storeId] || "적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요."}</p>
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
-                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [[travelStoreIntros[storeId] ? "#offer-picker" : "#benefit-summary", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [[travelStoreIntros[storeId] ? "#offer-picker" : "#coupons", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
