@@ -19,6 +19,11 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
         <Link className="text-blue-700 underline" href={`/store/${coupon.store_id}`}>{storeName} 전체 혜택</Link>
         <h1 className="mt-5 text-3xl font-bold">{title}</h1>
         <p className="mt-4 leading-7 text-gray-700">{description}</p>
+        {['klook', 'hotelskr'].includes(coupon.store_id) && <aside className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <p className="font-bold text-amber-900">이전 행사는 종료되었습니다</p>
+            <p className="mt-2 text-sm leading-6">같은 코드 이름이어도 예약 기간·대상 상품·이용 조건은 달라질 수 있습니다. 현재 공지의 조건을 다시 확인하세요.</p>
+            <Link href={`/store/${coupon.store_id}#offer-picker`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-5 py-3 font-bold text-white">{storeName} 현재 혜택 비교하기 →</Link>
+        </aside>}
         <p className="mt-3 text-sm text-gray-500">최근 안내 수정: {new Date(modified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</p>
         {!offers.length && fallbackCover && <img src={fallbackCover} alt={`${storeName} 이용 안내`} width={1200} height={1200} className="mt-6 w-full max-w-md rounded-2xl" />}
         <section className="mt-8" aria-label="최신 할인 안내">

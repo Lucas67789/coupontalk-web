@@ -18,6 +18,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
 import RelatedStores from '@/components/RelatedStores';
+import TravelOfferGuide, { travelStoreIntros, travelGuideUpdatedAt } from '@/components/TravelOfferGuide';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,9 +47,9 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const previewImages = [...new Set([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap(c => contentImages(c.content_body))])].slice(0, 8);
 
     const title = guided ? storeGuideTitle(store.name, store.guide_content) : activeCoupons.length ? `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교` : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
-    const description = guided ? store.description : activeCoupons.length
+    const description = guided ? store.description : travelStoreIntros[storeId] || (activeCoupons.length
         ? `${store.name} 할인 혜택 ${activeCoupons.length}개. ${activeCoupons.slice(0, 2).map(c => c.discount).join(', ')}. 쿠폰별 적용 대상과 할인 한도, 사용 기간을 비교하세요.`
-        : `${store.name}의 현재 등록된 활성 쿠폰은 없습니다. 지난 프로모션과 이용 시 확인할 조건을 안내하며, 새 혜택이 등록되면 이 페이지에서 확인할 수 있습니다.`;
+        : `${store.name}의 현재 등록된 활성 쿠폰은 없습니다. 지난 프로모션과 이용 시 확인할 조건을 안내하며, 새 혜택이 등록되면 이 페이지에서 확인할 수 있습니다.`);
 
 
     return {
@@ -118,6 +119,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         .map(row => Date.parse(row.updated_at || row.published_at || row.created_at || ''))
         .filter(Number.isFinite);
     if (isAgoda) updateTimes.push(Date.parse(agodaGuideUpdatedAt));
+    if (travelStoreIntros[storeId]) updateTimes.push(Date.parse(travelGuideUpdatedAt));
     const dateModified = updateTimes.length ? new Date(Math.max(...updateTimes)).toISOString() : undefined;
 
     // 우선순위 3: 동적 FAQ 생성 로직 (DB에 없으면 기본 템플릿 사용)
@@ -192,9 +194,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
                 <p className="text-sm font-semibold text-blue-700 mb-3">{guided ? "상품·이용 가이드" : activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 진행 기간 내 ${ongoingCount}개 · 예정 ${upcomingCount}개` : "현재 등록된 활성 쿠폰 없음"}</p>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
-                <p className="mt-3 text-sm text-gray-600 leading-6">{guided ? store.description : "적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요."}</p>
+                <p className="mt-3 text-sm text-gray-600 leading-6">{guided ? store.description : travelStoreIntros[storeId] || "적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요."}</p>
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
-                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [["#coupons", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [[travelStoreIntros[storeId] ? "#offer-picker" : "#benefit-summary", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={href} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
@@ -204,6 +206,8 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                     {dateModified ? <>최근 내용 수정: <span className="text-gray-900 font-bold">{new Date(dateModified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</span></> : '쿠폰별 유효기간과 적용 조건을 확인하세요.'}
                 </p>
             </div>
+
+            <TravelOfferGuide storeId={storeId} offers={activeCoupons} />
 
             {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
                 {storeUrl && <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-100 p-5 md:p-6">
@@ -323,7 +327,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             )}
 
             {/* 우선순위 3: 콘텐츠 대폭 확장 (4단계 적용 가이드, 결제수단별 혜택, 예약 꿀팁, 브랜드 안내) */}
-            {!guided && (isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={store.tags?.includes("travel")} storeId={storeId} />)}
+            {!guided && (isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={Boolean(travelStoreIntros[storeId]) || store.tags?.includes("travel")} storeId={storeId} />)}
 
             {/* FAQs */}
             <div id="faq" className="p-6 md:p-10 border-t scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
@@ -345,7 +349,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </div>
 
             {/* Guide Content */}
-            {!guided && !['agoda', 'klook', 'lenovo'].includes(storeId) && store.guide_content && (
+            {!guided && !['agoda', 'klook', 'hotelskr', 'lenovo'].includes(storeId) && store.guide_content && (
                 <div className="px-6 md:px-10 py-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 팁</h2>
                     <TableOfContents content={store.guide_content} />
