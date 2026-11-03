@@ -325,7 +325,7 @@ function LegacyList({
 }
 export default function AnalyticsDashboard({ mode = "new" }: { mode?: "legacy" | "new" }) {
   const router = useRouter(),
-    [start, setStart] = useState(() => koreaDay(Date.now() - 6 * 86400000)),
+    [start, setStart] = useState(() => koreaDay()),
     [end, setEnd] = useState(() => koreaDay()),
     [tab, setTab] = useState(0),
     [report, setReport] = useState<Report | null>(null),
