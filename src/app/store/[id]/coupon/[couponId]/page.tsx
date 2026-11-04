@@ -165,7 +165,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(allRelatedCoupons || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1)!;
         return <LatestCouponGuide coupon={coupon} offers={offers} storeName={storeName}
             title={uniqueGuideTitle(storeName, coupon, [coupon, ...(allRelatedCoupons || [])])}
-            description={`${storeName} 최신 혜택과 대상 조건을 확인하세요. 이전 「${coupon.title.replace(/\[종료\]/g, "").trim()}」 행사의 후속 안내이며, 종료된 코드는 사용할 수 없습니다.`}
+            description={latestGuideDescription(storeName, coupon)}
             modified={modified} />;
     }
 
