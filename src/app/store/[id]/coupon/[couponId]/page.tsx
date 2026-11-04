@@ -14,7 +14,7 @@ import { hasCouponCode } from '@/lib/affiliate';
 import { agodaFaqs } from '@/components/AgodaGuide';
 import type { Metadata } from 'next';
 import LatestCouponGuide from '@/components/LatestCouponGuide';
-import { uniqueGuideTitle, latestGuideUpdatedAt } from '@/lib/latest-guide';
+import { uniqueGuideTitle, latestGuideUpdatedAt, latestGuideDescription } from '@/lib/latest-guide';
 
 type RelatedCoupon = Pick<CouponRow, 'id' | 'title' | 'discount' | 'code' | 'store_id' | 'expiry' | 'published_at'>;
 
@@ -76,7 +76,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     if (storeName && !defaultDescPart1.includes(storeName)) {
         defaultDescPart1 = `${storeName} ${defaultDescPart1}`;
     }
-    const description = expired ? `${storeName} 최신 혜택과 대상 조건을 확인하세요. 이전 「${coupon.title.replace(/\[종료\]/g, "").trim()}」 행사의 후속 안내이며, 종료된 코드는 사용할 수 없습니다.` : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
+    const description = expired ? latestGuideDescription(storeName, coupon) : coupon.seo_description || `${defaultDescPart1}. ${defaultTitlePart2} 혜택의 적용 조건과 유효기간, 이용 방법을 확인하세요.`;
 
     const { data: latest } = expired ? await supabase.from('coupons').select('id, code, title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
     if (expired) title = uniqueGuideTitle(storeName, coupon, latest || []);

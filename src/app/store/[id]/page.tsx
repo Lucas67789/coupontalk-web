@@ -46,7 +46,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const guided = storeId !== 'usimsa' && hasStoreGuide(store.tags);
     const previewImages = [...new Set([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap(c => contentImages(c.content_body))])].slice(0, 8);
 
-    const title = guided ? storeGuideTitle(store.name, store.guide_content) : activeCoupons.length ? `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교` : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
+    const title = guided ? storeGuideTitle(store.name, store.guide_content) : activeCoupons.length ? (storeId === 'hotelskr' ? '호텔스닷컴 할인코드' : `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교`) : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
     const description = guided ? store.description : travelStoreIntros[storeId] || (activeCoupons.length
         ? `${store.name} 할인 혜택 ${activeCoupons.length}개. ${activeCoupons.slice(0, 2).map(c => c.discount).join(', ')}. 쿠폰별 적용 대상과 할인 한도, 사용 기간을 비교하세요.`
         : `${store.name}의 현재 등록된 활성 쿠폰은 없습니다. 지난 프로모션과 이용 시 확인할 조건을 안내하며, 새 혜택이 등록되면 이 페이지에서 확인할 수 있습니다.`);

@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {couponStatus} from '../src/lib/utils.ts';
-import {matchesGuideTopic, uniqueGuideTitle} from '../src/lib/latest-guide.ts';
+import {matchesGuideTopic, uniqueGuideTitle, latestGuideDescription} from '../src/lib/latest-guide.ts';
 import {xmlText,cdata} from '../src/lib/rss.ts';
 test('promotion status distinguishes future, ongoing and explicit early termination',()=>{
  const c={title:'행사',expiry:'2026.11.12',content_body:'| 행사 기간 | 2026.10.30 ~ 2026.11.12 |'};
@@ -21,4 +21,12 @@ test('recommendations require explicit model, payment and destination match',()=
 test('RSS preserves XML validity for merchant text and CDATA closing sequences',()=>{
  assert.equal(xmlText('A&B <sale>'),'A&amp;B &lt;sale&gt;');
  assert.equal(cdata('a]]>b'),'<![CDATA[a]]]]><![CDATA[>b]]>');
+});
+
+test('expired guide descriptions distinguish recurring campaigns and never promise expired codes',()=>{
+ const a={title:'[종료] 아고다 국내 5% 할인',expiry:'2026.08.31'};
+ const b={...a,expiry:'2026.09.30'};
+ assert.notEqual(latestGuideDescription('아고다',a),latestGuideDescription('아고다',b));
+ assert.match(latestGuideDescription('아고다',a),/^「아고다 국내 5% 할인」/);
+ assert.match(latestGuideDescription('아고다',a),/종료 코드는 사용할 수 없으며/);
 });

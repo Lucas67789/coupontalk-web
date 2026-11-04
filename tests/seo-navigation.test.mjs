@@ -22,6 +22,7 @@ test('automatic link labels are not copied as coupon codes, exact real codes sta
     assert.equal(hasCouponCode('금액별 상이 (본문 참고)'), false);
     assert.equal(hasCouponCode('일본호텔15%KLK'), true);
     for (const target of Object.values(STORE_ALIASES)) assert.equal(STORE_ALIASES[target], undefined);
+    assert.equal(STORE_ALIASES.ctrip, 'tripcom');
 });
 
  test('ended archives never become usable even with a future or missing deadline', () => {

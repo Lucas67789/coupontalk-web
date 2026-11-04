@@ -1,5 +1,10 @@
 
-export const latestGuideUpdatedAt = '2026-10-28T17:36:10+09:00';
+export const latestGuideUpdatedAt = '2026-11-04T00:00:00+09:00';
+
+export function latestGuideDescription(storeName: string, coupon: { title: string; expiry?: string | null }) {
+    const subject = coupon.title.replace(/\[종료\]/g, '').replace(/\s+/g, ' ').trim();
+    return `「${subject}」 이후의 ${storeName} 혜택 안내. 이전 행사 기한: ${coupon.expiry || '본문 기록 참고'}. 종료 코드는 사용할 수 없으며, 현재 등록된 혜택과 적용 조건을 비교하세요.`;
+}
 
 export function latestGuideTitle(storeName: string, title: string) {
     const subject = title.replace(/\[종료\]|\[[^\]]*할인[^\]]*\]/g, '').split(/\d+(?:\.\d+)?\s*%|할인코드|할인쿠폰|할인|프로모션|특가|혜택/)[0]

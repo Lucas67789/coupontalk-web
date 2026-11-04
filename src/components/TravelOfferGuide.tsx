@@ -6,7 +6,7 @@ export const travelGuideUpdatedAt = '2026-11-03T00:00:00+09:00';
 export const travelStoreIntros: Record<string, string> = {
     usimsa: '유심사 할인쿠폰은 여행 국가·사용일수·데이터 용량을 고른 뒤 적용하세요. eSIM 지원 기기, 개통 시작 기준과 구매 후 유효기간을 함께 확인하세요.',
     klook: '렌터카·일본 호텔·투어와 입장권은 적용되는 쿠폰이 다릅니다. 예약할 상품을 먼저 고른 뒤 최소 결제금액, 할인 한도와 이용일을 확인하세요.',
-    hotelskr: '할인코드와 호텔 기획전 요금을 비교하세요. 예약 마감일과 투숙 가능일, 대상 객실·결제 통화·취소 조건을 함께 확인해야 합니다.',
+    hotelskr: '호텔스닷컴 할인코드를 복사하고 대상 숙소의 결제 화면에서 적용하세요. 코드별 할인율·한도와 기획전 요금을 비교하고, 예약 마감일·투숙 가능일·취소 조건을 함께 확인하세요.',
 };
 
 export default function TravelOfferGuide({ storeId, offers }: { storeId: string; offers: CouponRow[] }) {
