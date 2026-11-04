@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from '@/lib/affiliate';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -35,6 +36,10 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw, rehypeSanitize]}
                 components={{
+                    a: ({ href, children, title }) => {
+                        const target = safeNavigationUrl(href);
+                        return target ? <a href={target} title={title} rel="sponsored nofollow noopener noreferrer">{children}</a> : <span>{children}</span>;
+                    },
                     // 주의: DB에 저장된 guide_content/content_body 안에 "# 제목"(H1)이 하나라도 섞여 있으면,
                     // 이 페이지에는 이미 <h1>(스토어명/쿠폰 제목)이 따로 있기 때문에 페이지에 <h1>이
                     // 2개가 되어버립니다(네이버 서치어드바이저 "사이트 진단"에서 실제로 잡힌 문제).

@@ -8,6 +8,7 @@ import { trackEvent } from '@/lib/analytics-client';
 import { useState } from 'react';
 
 export default function ProductCard({ product, storeName }: { product: ProductRow, storeName: string }) {
+    const linkReady = !!safeAffiliateUrl(product.affiliate_url);
     const [clicked, setClicked] = useState(false);
 
     const handleRedirect = async () => {
@@ -77,6 +78,7 @@ export default function ProductCard({ product, storeName }: { product: ProductRo
 
             {/* Full Width CTA */}
             <button
+                disabled={!linkReady}
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleRedirect(); }}
                 className={`w-full py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
                     clicked 
@@ -84,7 +86,7 @@ export default function ProductCard({ product, storeName }: { product: ProductRo
                         : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200 hover:shadow-xl hover:-translate-y-1'
                 }`}
             >
-                {clicked ? (
+                {!linkReady ? "링크 확인 중" : clicked ? (
                     '이동 중...'
                 ) : (
                     <>특가 보러가기 <ExternalLink size={20} /></>

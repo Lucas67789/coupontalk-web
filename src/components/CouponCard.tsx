@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
-import { hasCouponCode } from '@/lib/affiliate';
+import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
 import { latestGuideTitle } from '@/lib/latest-guide';
 import Link from 'next/link';
@@ -75,6 +75,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
         showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
+    const linkReady = !!safeAffiliateUrl(parsedAffiliateUrl);
     const isNoCode = !hasCouponCode(coupon.code);
 
     const detailHref = storeId ? `/store/${storeId}/coupon/${coupon.id}` : undefined;
@@ -140,7 +141,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
 
                 <button
-                    disabled={isExpired && !detailHref}
+                    disabled={isExpired ? !detailHref : !linkReady}
                     onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -162,7 +163,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                         <>복사완료! 이동중...</>
                     ) : isExpired ? (
                         <>최신 혜택·이전 행사 기록 <ExternalLink size={18} /></>
-                    ) : isNoCode ? (
+                    ) : !linkReady ? (<>링크 확인 중</>) : isNoCode ? (
                         <>할인 페이지로 이동 <ExternalLink size={18} /></>
                     ) : (
                         <>복사하고 할인받기 <Copy size={18} /></>

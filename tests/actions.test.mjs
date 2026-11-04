@@ -26,9 +26,9 @@ test('coupon opens immediately even when statistics never respond', async () => 
         localStorage: { getItem: () => 'session' },
         fetch: () => new Promise(() => {}),
     });
-    const result = openCouponLink({ id: 'coupon', code: 'SAVE10' }, 'https://example.com/?aff=owner', 'Store');
+    const result = openCouponLink({ id: 'coupon', code: 'SAVE10' }, 'https://www.gamsgo.com/partner/rQT9a', 'Store');
     assert.equal(events[0][0], 'copy');
-    assert.deepEqual(events[1], ['open', 'https://example.com/?aff=owner', '_blank', 'noopener,noreferrer']);
+    assert.deepEqual(events[1], ['open', 'https://www.gamsgo.com/partner/rQT9a', '_blank', 'noopener,noreferrer']);
     assert.match(await result, /복사 완료/);
     const count = events.length;
     await openCouponLink({ id: 'coupon', code: 'SAVE10' }, 'javascript:alert(1)', 'Store');

@@ -46,7 +46,7 @@ test('JSON-LD data cannot close its HTML script element', () => {
 });
 test('affiliate URLs only allow absolute HTTP(S) links without credentials', () => {
     for (const value of ['javascript:alert(1)', 'data:text/html,test', '//evil.test', 'https://user:password@example.com', '', undefined]) assert.equal(safeAffiliateUrl(value), null);
-    assert.equal(safeAffiliateUrl('https://example.com/?aff=owner'), 'https://example.com/?aff=owner');
+    assert.equal(safeAffiliateUrl('https://www.gamsgo.com/partner/rQT9a'), 'https://www.gamsgo.com/partner/rQT9a');
     assert.equal(hasCouponCode('전용링크 자동적용'), false);
     assert.equal(hasCouponCode('LKP10'), true);
 });

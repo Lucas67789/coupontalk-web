@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from './affiliate.ts';
 import sanitizeHtml from 'sanitize-html';
 
 export function sanitizeContent(content: string) {
@@ -30,7 +31,10 @@ export function sanitizeContent(content: string) {
         } },
         transformTags: {
             h1: 'h2',
-            a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer sponsored' }),
+            a: (_tagName, attribs) => {
+                const href = safeNavigationUrl(attribs.href);
+                return href ? { tagName: 'a', attribs: { ...attribs, href, rel: 'noopener noreferrer sponsored nofollow' } } : { tagName: 'span', attribs: {} };
+            },
         },
     });
 }

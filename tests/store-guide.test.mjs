@@ -15,7 +15,7 @@ test('store guides are opt-in and accept editable markdown or HTML headings',()=
 });
 
 test('store affiliate link preserves merchant, media and attribution parameters',()=>{
-    const link='https://linkmoa.kr/click.php?m=gmarket&a=A100703639&l=0000';
+    const link='https://newtip.net/click.php?m=agoda&a=A100703639&l=0000';
     assert.equal(safeAffiliateUrl(link),link);
     assert.equal(safeAffiliateUrl('javascript:alert(1)'),null);
     assert.equal(safeAffiliateUrl('https://user:password@example.com'),null);

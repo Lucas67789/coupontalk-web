@@ -56,8 +56,8 @@ export default function AgodaGuide() {
                 <h2 className="text-xl font-bold text-gray-900 mb-3">예약 전 확인할 조건과 공식 안내</h2>
                 <p className="text-sm leading-7 text-gray-600">목록은 등록된 예약 마감일을 기준으로 분류합니다. 실시간 잔여 수량이나 모든 객실의 적용 성공을 보장하는 표시는 아닙니다. 예약·숙박 기간과 대상 고객을 확인하고, 세부 조건은 각 혜택의 프로모션 페이지를 우선해 주세요.</p>
                 <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-blue-700">
-                    <a href="https://www.agoda.com/ko-kr/deals" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">아고다 공식 할인 안내 ↗</a>
-                    <a href="https://www.agoda.com/info/termsofuse.html" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">아고다 이용약관·프로모션 조건 ↗</a>
+                    <span>아고다 공식 할인 안내</span>
+                    <span>아고다 이용약관·프로모션 조건</span>
                 </div>
                 <p className="mt-3 text-xs text-gray-500">공식 안내 확인: 2026. 10. 14. · 개별 할인율은 각 프로모션 조건을 확인하세요.</p>
             </section>

@@ -4,7 +4,7 @@ import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
 import { isCouponExpired } from '@/lib/utils';
-import { hasCouponCode } from '@/lib/affiliate';
+import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
 
 interface CouponDetailClientProps {
     coupon: {
@@ -25,6 +25,7 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
     const { showToast } = useToast();
 
     const expired = isCouponExpired(coupon.expiry, coupon.title);
+    const linkReady = !!safeAffiliateUrl(affiliateUrl);
     const isNoCode = !hasCouponCode(coupon.code);
 
     const handleCopyAndRedirect = async () => {
@@ -51,17 +52,17 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
             {/* CTA Button */}
             <button
                 onClick={handleCopyAndRedirect}
-                disabled={expired}
+                disabled={expired || !linkReady}
                 className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700 py-4 text-base font-bold disabled:bg-gray-300"
             >
-                {expired ? "기간 만료" : isNoCode ? (
+                {expired ? "기간 만료" : !linkReady ? "링크 확인 중" : isNoCode ? (
                     <>할인 페이지로 이동 <ExternalLink size={20} /></>
                 ) : (
                     <>코드 복사하고 할인 받기 <Copy size={20} /></>
                 )}
             </button>
 
-            {!expired && <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 md:hidden">
+            {!expired && linkReady && <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 md:hidden">
                 <button onClick={handleCopyAndRedirect} className="w-full rounded-xl bg-blue-600 py-3 px-4 font-bold text-white">{isNoCode ? '할인 페이지로 이동' : '복사하고 할인받기'}</button>
             </div>}
         </div>
