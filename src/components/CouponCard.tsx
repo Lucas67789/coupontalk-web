@@ -1,8 +1,7 @@
 "use client";
-import AliCouponTiers from './AliCouponTiers';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import type { CouponRow } from '@/lib/models';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
@@ -41,6 +40,10 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     const upcoming = couponStatus(coupon, new Date().getTime()) === 'upcoming';
     const [copied, setCopied] = useState(false);
     const theme = getStoreTheme(storeName);
+    const tiers = aliCouponTiers(coupon);
+    const [selectedCode, setSelectedCode] = useState('');
+    const selectedTier = tiers.find(t => t.code === selectedCode) || tiers[0];
+    const actionCoupon = selectedTier ? { ...coupon, code: selectedTier.code } : coupon;
 
     // Parse packed JSON condition
     const parsedConditionText = React.useMemo(() => {
@@ -74,15 +77,17 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
 
     const handleCopyAndRedirect = async () => {
         if (isExpired) return;
-        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
+        const message = await openCouponLink(actionCoupon, parsedAffiliateUrl, storeName);
+        setCopied(message.includes('복사 완료'));
+        showToast(message);
     };
 
     const linkReady = !!safeAffiliateUrl(parsedAffiliateUrl);
-    const isNoCode = !hasCouponCode(coupon.code);
+    const isNoCode = !hasCouponCode(actionCoupon.code);
 
     const detailHref = storeId ? `/store/${storeId}/coupon/${coupon.id}` : undefined;
 
-    if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} compact /></div>;
+
 
     const cardContent = (
         <>
@@ -92,7 +97,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
             {/* Decorative top accent */}
             <div className={`absolute left-0 top-0 right-0 h-1 ${isExpired ? 'bg-gray-300' : theme.accent}`}></div>
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex flex-col">
                 <div>
                     <div className="flex items-center gap-2 mb-3 w-full min-w-0">
                         {upcoming && <span className="rounded-md bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">시작 예정</span>}
@@ -126,12 +131,17 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
             </div>
 
-            <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex flex-col gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
                     <p className={`text-xs font-medium mb-1 uppercase tracking-wider ${isExpired ? 'text-gray-300' : 'text-gray-400'}`}>프로모션 코드</p>
+                    {selectedTier && !isExpired && <label className="mb-3 block text-left text-sm font-semibold text-gray-700">구매 금액 선택
+                        <select aria-label="알리 구매 금액별 할인코드" value={selectedTier.code} onChange={e => { setSelectedCode(e.target.value); setCopied(false); }} className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900">
+                            {tiers.map(t => <option key={t.code} value={t.code}>US${t.minimum} 이상 → ${t.discount} 할인</option>)}
+                        </select>
+                    </label>}
                     <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono text-lg text-center tracking-wider bg-gray-50 w-full ${isExpired ? 'text-gray-400 border-gray-200' : isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
-                        {isNoCode ? '코드 필요없음' : coupon.code}
+                        {isNoCode ? '코드 필요없음' : actionCoupon.code}
                     </div>
                 </div>
 
@@ -155,7 +165,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     }`}
                 >
                     {copied ? (
-                        <>복사완료! 이동중...</>
+                        <>복사 완료 · 다시 열기</>
                     ) : isExpired ? (
                         <>최신 혜택·이전 행사 기록 <ExternalLink size={18} /></>
                     ) : !linkReady ? (<>링크 확인 중</>) : isNoCode ? (
@@ -179,7 +189,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     );
 
     return (
-        <div className="card p-5 flex flex-col gap-4 relative overflow-hidden h-full">
+        <div className="card p-5 flex flex-col gap-4 relative overflow-hidden self-start">
             {cardContent}
         </div>
     );
