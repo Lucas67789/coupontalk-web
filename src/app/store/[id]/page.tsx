@@ -185,19 +185,19 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         <div className="container mx-auto max-w-5xl border-x min-h-screen bg-white shadow-sm pb-28" style={{ borderColor: 'var(--border-color)' }}>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
 
-            <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="hidden md:block px-5 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors">
                     <ArrowLeft size={16} /> 전체 목록으로
                 </Link>
             </div>
 
-            <header className="p-5 md:p-6 border-b border-gray-200">
+            <header className="p-4 md:p-6 border-b border-gray-200">
 
                 <p className="text-sm font-semibold text-blue-700 mb-3">{guided ? "상품·이용 가이드" : activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 진행 기간 내 ${ongoingCount}개 · 예정 ${upcomingCount}개` : "현재 등록된 활성 쿠폰 없음"}</p>
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
+                <h1 className="text-2xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
                 <p className="mt-3 text-sm text-gray-600 leading-6">{activeCoupons.length ? "쿠폰을 선택하고 버튼 한 번으로 할인 페이지를 여세요." : "상품과 이용 조건을 판매처에서 확인하세요."}</p>
-                <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
-                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [["#store-guide", "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                <nav aria-label={`${store.name} 페이지 목차`} className="mt-3 flex gap-2 overflow-x-auto md:flex-wrap">
+                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [["#store-guide", "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`shrink-0 rounded-lg px-3 py-2 text-xs md:text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
@@ -210,7 +210,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
             {(!guided || activeCoupons.length > 0) && (
                 <div id="coupons" className="p-4 md:p-6 bg-slate-50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-6 flex items-center gap-2">
                         할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
                     </h2>
                     <div className="grid grid-cols-1 gap-4">
@@ -311,7 +311,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
             {publishedProducts.length > 0 && (
                 <div id="products" className="p-6 md:p-10 bg-white border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-6 flex items-center gap-2">
                         🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
                     </h2>
                     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -335,7 +335,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
             {/* FAQs */}
             <div id="faq" className="p-6 md:p-10 border-t scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-6 flex items-center gap-2">
                     <HelpCircle size={24} className="text-blue-600" /> {store.name} 자주 묻는 질문 (FAQ)
                 </h2>
                 <div className="flex flex-col gap-4">
