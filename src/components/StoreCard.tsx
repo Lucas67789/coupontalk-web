@@ -29,7 +29,7 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
     const latestEventTitle = store.coupons?.length ? `${store.coupons.length}개의 할인 혜택` : hasStoreGuide(store.tags) ? '상품·이용 가이드 보기' : '현재 등록된 활성 쿠폰 없음';
 
     return (
-        <Link href={`/store/${store.id}`} className="card block overflow-hidden group">
+        <Link href={`/store/${store.id}`} className="card block min-w-0 self-start overflow-hidden group">
             {hasStoreGuide(store.tags) && store.logo && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={1200} loading="lazy" className="w-full aspect-square object-contain border-b border-slate-100" />}
             <div className="p-6">
                 {!hasStoreGuide(store.tags) && <div className="flex items-center justify-between mb-4">
@@ -38,7 +38,7 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
                     </div>
                 </div>}
 
-                <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-xl font-bold mb-2 break-words group-hover:text-blue-600 transition-colors">
                     {store.name}
                 </h3>
 
