@@ -1,4 +1,4 @@
-export default function StoreGuide({ name, travel, storeId }: { name: string; travel: boolean; storeId?: string }) {
+export default function StoreGuide({ name, travel, storeId, showHowTo = true }: { name: string; travel: boolean; storeId?: string; showHowTo?: boolean }) {
     const specific = storeId === 'usimsa' ? [
         ['사용 지역과 데이터', '목적지·경유지와 사용일수, 하루 제공량·총량, 소진 후 속도를 확인하세요. 할인율이 높아도 여행 일정에 맞지 않으면 유리하지 않습니다.'],
         ['기기와 개통 조건', 'eSIM 지원 모델인지 확인하고 설치와 개통 시점, 환불 조건을 읽어두세요. 상품 유효기간과 실제 데이터 사용기간은 다릅니다.'],
@@ -33,7 +33,7 @@ export default function StoreGuide({ name, travel, storeId }: { name: string; tr
                 ].map(([title, text]) => <div key={title} className="rounded-xl border border-gray-200 p-5"><h3 className="font-bold mb-2">{title}</h3><p className="text-sm leading-7 text-gray-600">{text}</p></div>)}
             </div>
         </section>
-        <section id="how-to-use" className="scroll-mt-24">
+        {showHowTo && <section id="how-to-use" className="scroll-mt-24">
             <h2 className="text-2xl font-bold mb-5">{name} 할인코드 사용 방법</h2>
             <ol className="space-y-4 list-decimal pl-5 text-gray-700 leading-7">
                 <li>위 쿠폰에서 유효기간과 대상 조건을 확인하고 상세 페이지를 엽니다.</li>
@@ -42,6 +42,6 @@ export default function StoreGuide({ name, travel, storeId }: { name: string; tr
                 <li>할인액과 추가 비용, 취소·환불 조건을 확인한 후 결제합니다.</li>
             </ol>
             <p className="mt-5 text-sm leading-7 text-gray-500">쿠폰별 상세 조건과 연결된 프로모션 페이지의 안내를 우선해 주세요. 목록은 등록된 마감일을 기준으로 분류하며 실시간 잔여 수량이나 적용 성공을 보장하지 않습니다.</p>
-        </section>
+        </section>}
     </div>;
 }

@@ -38,7 +38,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     const thumbnail = contentImages(coupon.content_body)[0];
     const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
 
-    if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} /></div>;
+    if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-2 sm:p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} /></div>;
 
     return (
         <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
@@ -47,7 +47,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
             </Link>}
             
             {/* Top: Badges */}
-            <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
                 {upcoming && <span className="rounded-md bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">시작 예정</span>}
                         {isExpired && (
                     <span className="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-md text-sm font-black tracking-wide">
@@ -63,24 +63,20 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
             </div>
 
             {/* Title */}
-            <h3 className={`text-base font-bold leading-snug transition-colors mb-4 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 hover:text-blue-700'}`}>
+            <h3 className={`text-base font-bold leading-snug transition-colors mb-2 ${isExpired ? 'text-gray-500 line-through group-hover:text-gray-900 group-hover:no-underline' : 'text-gray-900 hover:text-blue-700'}`}>
                 <Link href={detailHref} className="hover:underline">{isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title}</Link>
             </h3>
 
             {/* Full Width Button */}
-            {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
+            {!isNoCode && !isExpired && <p className="mb-2 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
 
             {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : upcoming ? <Link href={detailHref} className="block rounded-lg bg-amber-50 px-4 py-3 text-center font-bold text-amber-900">시작일·적용 조건 확인</Link> : <button
                 disabled={!safeAffiliateUrl(parsedAffiliateUrl)} onClick={handleCopyAndRedirect}
-                className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
                 {safeAffiliateUrl(parsedAffiliateUrl) ? <>{isNoCode ? '할인 페이지로 이동' : '코드 복사하고 할인 받기'} <ExternalLink size={20} /></> : "링크 확인 중"}
             </button>}
-            {/* Condition Bullet */}
-            <div className={`flex items-start gap-2 text-sm mb-3 p-3 rounded-xl ${isExpired ? 'text-gray-400 bg-gray-50/50' : 'text-gray-700 bg-gray-50'}`}>
-                <CheckCircle2 size={20} className={`${isExpired ? 'text-gray-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
-                <span className="font-medium whitespace-pre-wrap leading-relaxed">{parsedConditionText}</span>
-            </div>
+            <details className="mt-3 text-sm text-gray-600"><summary className="cursor-pointer font-medium">적용 조건 보기</summary><p className="mt-2 whitespace-pre-wrap break-words leading-relaxed">{parsedConditionText}</p></details>
 
         </article>
     );
