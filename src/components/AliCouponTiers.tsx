@@ -18,7 +18,7 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
   const expired = isCouponExpired(coupon.expiry, coupon.title);
   const ready = !!safeAffiliateUrl(affiliateUrl);
   return <section aria-label="알리 금액별 할인코드" className="min-w-0">
-    <div className="mb-4">
+    <div className="mb-2 sm:mb-4">
       <p className="hidden sm:block text-sm font-bold text-red-600">알리익스프레스 광군제</p>
       <h2 className="mt-1 text-base sm:text-2xl font-extrabold text-slate-900">내 구매 금액에 맞는 쿠폰 선택</h2>
       <p className="hidden sm:block mt-2 text-sm text-slate-600">버튼 한 번으로 코드 복사 + 알리 새 창 열기</p>
@@ -46,3 +46,4 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
     <AliCouponHowTo code={copied || tiers[0]?.code} compact={compact} />
   </section>;
 }
+
