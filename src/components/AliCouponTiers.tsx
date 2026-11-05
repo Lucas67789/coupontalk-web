@@ -1,4 +1,5 @@
 "use client";
+import AliCouponHowTo from './AliCouponHowTo';
 import { useState } from 'react';
 import { Copy, ArrowUpRight, Ticket } from 'lucide-react';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
@@ -42,5 +43,6 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
         </div>
       </article>)}
     </div>
+    <AliCouponHowTo code={copied || tiers[0]?.code} compact={compact} />
   </section>;
 }
