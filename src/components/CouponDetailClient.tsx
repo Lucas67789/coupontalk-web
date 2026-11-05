@@ -1,5 +1,7 @@
 "use client";
 
+import AliCouponTiers from './AliCouponTiers';
+import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import { openCouponLink } from '@/lib/coupon-action';
@@ -32,6 +34,8 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
         if (expired) return;
         showToast(await openCouponLink(coupon, affiliateUrl, storeName));
     };
+
+    if (aliCouponTiers(coupon).length) return <AliCouponTiers coupon={coupon} affiliateUrl={affiliateUrl} />;
 
     return (
         <div className="bg-white rounded-2xl border border-blue-200 p-4 md:p-6">

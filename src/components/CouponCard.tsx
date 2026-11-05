@@ -1,4 +1,6 @@
 "use client";
+import AliCouponTiers from './AliCouponTiers';
+import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import type { CouponRow } from '@/lib/models';
 import React, { useState, useMemo } from 'react';
 import { Copy, ExternalLink, Calendar, CheckCircle2 } from 'lucide-react';
@@ -79,6 +81,8 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     const isNoCode = !hasCouponCode(coupon.code);
 
     const detailHref = storeId ? `/store/${storeId}/coupon/${coupon.id}` : undefined;
+
+    if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} compact /></div>;
 
     const cardContent = (
         <>

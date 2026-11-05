@@ -48,3 +48,15 @@ test('admin errors keep the editor open; successful writes pass the token to cac
     assert.deepEqual(tokens, ['test-token']);
     assert.equal(messages.length, 2);
 });
+import { aliCouponTiers, aliCouponDetails } from '../src/lib/ali-coupon-tiers.ts';
+test('all six Ali tiers copy only the selected code and open the user affiliate URL once', async () => {
+ const body = '| 코드 | 최소 구매 금액 | 할인 금액 |\n| --- | --- | --- |\n' + [['04',27,4],['08',58,8],['13',98,13],['19',148,19],['28',225,28],['45',375,45]].map(([c,m,d])=>`| LTIK${c} | US$${m} 이상 | US$${d} |`).join('\n');
+ const tiers = aliCouponTiers({id:'coupon-aliexpress-nov2026-1111',content_body:body});
+ assert.equal(tiers.length,6);assert.deepEqual(tiers.map(t=>t.discount),[4,8,13,19,28,45]);
+ const opens=[],copies=[],events=[];
+ const {openCouponLink}=load('../src/lib/coupon-action.ts',{'./affiliate':affiliate,'./analytics-client':{trackEvent:(...a)=>events.push(a)}},{window:{open:(url)=>opens.push(url)},navigator:{clipboard:{writeText:async c=>copies.push(c)}}});
+ for(const tier of tiers) await openCouponLink({id:'coupon-aliexpress-nov2026-1111',code:tier.code},'http://app.ac/xtnq6XM23','알리익스프레스');
+ assert.deepEqual(copies,tiers.map(t=>t.code));assert.deepEqual(opens,Array(6).fill('http://app.ac/xtnq6XM23'));assert.equal(events.filter(e=>e[0]==='affiliate_click').length,6);
+ assert.deepEqual(aliCouponTiers({id:'unrelated',content_body:body}),[]);
+ assert.equal(aliCouponDetails('old table\n### 알리 광군제 할인코드 입력 방법\nsteps'),'### 알리 광군제 할인코드 입력 방법\nsteps');
+});

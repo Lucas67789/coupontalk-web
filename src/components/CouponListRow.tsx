@@ -1,4 +1,6 @@
 "use client";
+import AliCouponTiers from './AliCouponTiers';
+import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import type { CouponRow } from '@/lib/models';
 import { Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
@@ -35,6 +37,8 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     const isNoCode = !hasCouponCode(coupon.code);
     const thumbnail = contentImages(coupon.content_body)[0];
     const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
+
+    if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} /></div>;
 
     return (
         <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>

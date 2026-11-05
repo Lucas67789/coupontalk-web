@@ -1,3 +1,4 @@
+import { aliCouponTiers, aliCouponDetails } from '@/lib/ali-coupon-tiers';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs } from '@/lib/faq';
@@ -186,6 +187,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         // Remove only the first matched image from the content
         remainingContent = remainingContent.replace(imgMatch[0], '').trim();
     }
+
+    if (aliCouponTiers(coupon).length) remainingContent = aliCouponDetails(remainingContent);
 
     // JSON-LD structured data
     const jsonLd = {
