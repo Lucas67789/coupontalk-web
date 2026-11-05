@@ -1,5 +1,6 @@
 // Brand guide artwork, without time-limited discount claims.
 export const storeCoverImages: Record<string, string> = {
+  "야놀자-nol": "https://coupontalk.kr/coupon-images/thumbnails/nol-europe-hotel-coupon-20261105-v1.webp",
   "socar": "https://coupontalk.kr/coupon-images/thumbnails/socar-20261102.png",
   "daesang": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/daesang-v1.webp",
   "shokz": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/shokz-v1.webp",
