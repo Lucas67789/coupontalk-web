@@ -1,3 +1,7 @@
+// Inspection tools can execute JavaScript without identifying themselves as a bot.
+export function isInspectionAgent(ua: string) {
+  return /bot|crawler|spider|headless|playwright|Google-InspectionTool|GoogleOther|Lighthouse|Chrome-Lighthouse|PageSpeed|GTmetrix|Pingdom|facebookexternalhit|kakaotalk-scrap/i.test(ua);
+}
 export const SESSION_TIMEOUT = 30 * 60 * 1000;
 export type AnalyticsEvent = {
   id: string;
@@ -73,7 +77,15 @@ export function metrics(events: AnalyticsEvent[]) {
     sessions = new Set(events.map((e) => e.session_id)),
     clicks = events.filter((e) => e.event_name === "affiliate_click"),
     clicked = new Set(clicks.map((e) => e.session_id));
+  const visitorKey = (e: AnalyticsEvent) => e.visitor_id || e.session_id;
+  const visitors = new Set(events.map(visitorKey));
+  const clickedVisitors = new Set(clicks.map(visitorKey));
+  const uniquePageViews = new Set(views.map(e => JSON.stringify([visitorKey(e), e.path])));
   return {
+    visitors: visitors.size,
+    clickedVisitors: clickedVisitors.size,
+    repeatViews: views.length - uniquePageViews.size,
+    visitorClickRate: visitors.size ? 100 * clickedVisitors.size / visitors.size : 0,
     sessions: sessions.size,
     views: views.length,
     clicks: clicks.length,
@@ -97,4 +109,27 @@ export function groupEvents(
   return [...groups]
     .map(([name, rows]) => ({ name, ...metrics(rows) }))
     .sort((a, b) => b.sessions - a.sessions || b.clicks - a.clicks);
+}
+
+// A paired mobile/desktop probe is a review signal, not proof of a bot.
+// Keep these records in totals; never delete or silently exclude real visitors.
+export function possibleInspectionVisitors(events: AnalyticsEvent[]) {
+  const counts = new Map<string, number>();
+  for (const e of events) counts.set(e.visitor_id, (counts.get(e.visitor_id) || 0) + 1);
+  const pages = new Map<string, AnalyticsEvent[]>();
+  for (const e of events) {
+    if (e.event_name !== 'page_view' || e.source !== '직접/출처 불명' || counts.get(e.visitor_id) !== 1) continue;
+    const rows = pages.get(e.path) || []; rows.push(e); pages.set(e.path, rows);
+  }
+  const suspects = new Set<string>();
+  for (const rows of pages.values()) {
+    rows.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+    for (let i = 1; i < rows.length; i++) {
+      const a = rows[i - 1], b = rows[i];
+      if (a.device && b.device && a.device !== b.device && a.visitor_id !== b.visitor_id && Date.parse(b.created_at) - Date.parse(a.created_at) <= 1500) {
+        suspects.add(a.visitor_id); suspects.add(b.visitor_id);
+      }
+    }
+  }
+  return suspects.size;
 }

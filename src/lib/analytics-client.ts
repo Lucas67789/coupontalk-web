@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { attribution, SESSION_TIMEOUT } from "./analytics";
+import { attribution, SESSION_TIMEOUT, isInspectionAgent } from "./analytics";
 type Session = {
   id: string;
   visitor: string;
@@ -36,7 +36,14 @@ export async function trackEvent(
   details: Record<string, string | undefined> = {},
 ) {
   try {
-    if (location.pathname.startsWith("/admin")) return;
+    if (location.pathname.startsWith("/admin")) {
+      try { localStorage.setItem("ct_analytics_test", "1"); } catch {}
+      return;
+    }
+    if (isInspectionAgent(navigator.userAgent) || navigator.webdriver === true) return;
+    try {
+      if (new URLSearchParams(location.search || '').get('ct_test') === '1') localStorage.setItem('ct_analytics_test', '1');
+    } catch {}
     const fingerprint =
         event_name + location.pathname + JSON.stringify(details),
       now = Date.now();

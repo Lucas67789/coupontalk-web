@@ -13,6 +13,10 @@ import {
 type Row = {
   name: string;
   label?: string;
+  visitors: number;
+  clickedVisitors: number;
+  repeatViews: number;
+  visitorClickRate: number;
   sessions: number;
   views: number;
   clicks: number;
@@ -33,6 +37,7 @@ type Report = {
   daily: Row[];
   groups: Record<string, Row[]>;
   quality: {
+    possibleInspectionVisitors: number;
     testEvents: number;
     missingKeywordSessions: number;
     legacyViews: number;
@@ -68,11 +73,15 @@ function Table({
     );
   const columns = actionsOnly
     ? [
-        ["sessions", "행동 세션"],
+        ["visitors", "행동 방문자"],
+        ["clickedVisitors", "클릭 방문자"],
         ["clicks", "제휴 클릭"],
         ["copies", "코드 복사"],
       ]
     : [
+        ["visitors", "방문자(브라우저)"],
+        ["repeatViews", "반복 조회"],
+        ["clickedVisitors", "클릭 방문자"],
         ["sessions", "방문 세션"],
         ["views", "조회"],
         ["clicks", "제휴 클릭"],
@@ -456,13 +465,14 @@ export default function AnalyticsDashboard({ mode = "new" }: { mode?: "legacy" |
               <div><h2 className="text-xl font-extrabold">한눈에 보는 현황</h2><p className="mt-1 text-xs text-slate-300">{start} ~ {end} · 관리자·테스트 제외</p></div>
               <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs text-slate-200">{new Date(r.updatedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" })} 갱신</span>
             </div>
-            <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-3">
               {([
-                ["방문 세션", fmt(r.summary.sessions), "30분 기준 방문 묶음", "text-white"],
-                ["페이지 조회", fmt(r.summary.views), "열람한 페이지 횟수", "text-sky-300"],
-                ["제휴 클릭", fmt(r.summary.clicks), "구매·할인 페이지로 이동", "text-emerald-300"],
-                ["코드 복사", fmt(r.summary.copies), "복사에 성공한 횟수", "text-amber-300"],
-                ["클릭률", r.summary.rate.toFixed(1) + "%", "클릭한 세션 ÷ 방문 세션", "text-violet-300"],
+                ["방문자", fmt(r.summary.visitors), "점검 제외 · 브라우저별 중복 제거", "text-white"],
+                ["반복 조회", fmt(r.summary.repeatViews), "같은 방문자가 같은 페이지를 다시 조회", "text-amber-300"],
+                ["제휴 클릭 방문자", fmt(r.summary.clickedVisitors), "여러 번 클릭해도 방문자당 1회", "text-emerald-300"],
+                ["전체 조회", fmt(r.summary.views), "반복 조회 포함 · 페이지 열람 횟수", "text-sky-300"],
+                ["제휴 클릭 횟수", fmt(r.summary.clicks), "동일 방문자의 반복 클릭 포함", "text-emerald-300"],
+                ["방문자 클릭률", r.summary.visitorClickRate.toFixed(1) + "%", "클릭 방문자 ÷ 전체 방문자", "text-violet-300"],
               ] as const).map(([label, value, hint, color]) => <div key={label} className="bg-slate-950 px-5 py-6 md:px-7 last:col-span-2 lg:last:col-span-1">
                 <p className="text-sm font-semibold text-slate-300">{label}</p><p className={`my-3 text-4xl font-black tracking-tight tabular-nums xl:text-5xl ${color}`}>{value}</p><p className="text-xs leading-5 text-slate-400">{hint}</p>
               </div>)}
@@ -475,8 +485,9 @@ export default function AnalyticsDashboard({ mode = "new" }: { mode?: "legacy" |
                 <span className="block text-xs text-slate-400">{label}</span><span className="mt-1 block truncate text-sm font-semibold">{row ? `${row.label || row.name} · ${fmt(row[key])}${unit}` : "아직 기록 없음"}</span><span className="mt-1 block text-xs text-sky-300">상세 보기 →</span>
               </button>)}
             </div>
-            <p className="border-t border-white/10 px-5 py-3 text-xs text-slate-400 md:px-7">제휴 클릭과 코드 복사는 실제 구매 완료·수익과 다릅니다.</p>
+            <p className="border-t border-white/10 px-5 py-3 text-xs text-slate-400 md:px-7">방문자는 브라우저 저장 식별자 기준이며 실제 사람 수와 다를 수 있습니다. 반복 조회는 선택 기간 내 동일 방문자·동일 페이지의 두 번째 조회부터입니다. 관리자·표시된 테스트와 식별 가능한 검사 도구는 제외합니다. 과거 출처 불명 방문은 검사 여부를 확정할 수 없어 유지합니다. 제휴 클릭은 구매 완료·수익이 아닙니다.</p>
           </section>}
+          {mode === "new" && r && r.quality.possibleInspectionVisitors > 0 && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">검사 의심 방문자 {r.quality.possibleInspectionVisitors}개: 출처 불명 PC·모바일 방문이 1.5초 이내에 짝으로 기록됐습니다. 검사 여부를 확정할 수 없어 위 수치에 포함되어 있습니다. 실제 고객 수로 단정하지 마세요.</p>}
           {mode === "new" && (
             <nav
               id="analytics-details"

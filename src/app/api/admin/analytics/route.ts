@@ -5,6 +5,7 @@ import {
   groupEvents,
   koreaDay,
   metrics,
+  possibleInspectionVisitors,
   type AnalyticsEvent,
 } from "@/lib/analytics";
 import { analyticsLabels } from "@/lib/analytics-labels";
@@ -200,6 +201,7 @@ export async function GET(request: Request) {
         ).sort((a, b) => a.name.localeCompare(b.name)),
         groups,
         quality: {
+          possibleInspectionVisitors: possibleInspectionVisitors(current),
           testEvents: all.length - current.length,
           missingKeywordSessions: metrics(
             current.filter(

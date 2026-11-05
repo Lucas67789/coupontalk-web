@@ -5,7 +5,10 @@ import { trackEvent } from "@/lib/analytics-client";
 export default function PageViewTracker() {
   const pathname = usePathname();
   useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
+    if (pathname.startsWith("/admin")) {
+      try { localStorage.setItem("ct_analytics_test", "1"); } catch {}
+      return;
+    }
     const view = () => {
       if (document.visibilityState === "visible") void trackEvent("page_view");
     };

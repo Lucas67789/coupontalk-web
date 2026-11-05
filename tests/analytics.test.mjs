@@ -18,3 +18,34 @@ test('Client session expires after 30 minutes and duplicate transport retries ke
  now+=1000;await exports.trackEvent('affiliate_click');assert.equal(sent[2].session_id,sent[0].session_id);
  now+=31*60000;await exports.trackEvent('page_view');assert.notEqual(sent[3].session_id,sent[0].session_id);assert.equal(sent[3].visitor_id,sent[0].visitor_id);assert.equal(sent[3].keyword,null);
 });
+
+test('visitor metrics distinguish repeated page views, multiple pages and repeated clicks',()=>{
+ const rows=[
+ {event_name:'page_view',visitor_id:'a',session_id:'s1',path:'/one'},
+ {event_name:'page_view',visitor_id:'a',session_id:'s2',path:'/one'},
+ {event_name:'page_view',visitor_id:'a',session_id:'s2',path:'/two'},
+ {event_name:'page_view',visitor_id:'b',session_id:'s3',path:'/one'},
+ {event_name:'affiliate_click',visitor_id:'a',session_id:'s1',path:'/one'},
+ {event_name:'affiliate_click',visitor_id:'a',session_id:'s2',path:'/one'}];
+ const m=metrics(rows);assert.equal(m.visitors,2);assert.equal(m.sessions,3);assert.equal(m.repeatViews,1);assert.equal(m.clickedVisitors,1);assert.equal(m.clicks,2);assert.equal(m.visitorClickRate,50);
+ assert.equal(metrics([]).visitorClickRate,0);
+});
+test('Google inspection and synthetic audits are detected without excluding normal browsers',()=>{
+ for(const ua of ['Mozilla/5.0 Google-InspectionTool/1.0','GoogleOther','Chrome-Lighthouse','HeadlessChrome','Googlebot','Yeti crawler'])assert.equal(analytics.isInspectionAgent(ua),true);
+ assert.equal(analytics.isInspectionAgent('Mozilla/5.0 Chrome/130.0 Safari/537.36'),false);
+});
+
+test('inspection browser sends no events; an admin visit persists test mode',async()=>{
+ const saved=new Map(),sent=[];const exports={};const source=ts.transpile(readFileSync(new URL('../src/lib/analytics-client.ts',import.meta.url),'utf8'),{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022});
+ const location={pathname:'/store/charlesnk',hostname:'coupontalk.kr',search:''};const navigator={userAgent:'Google-InspectionTool/1.0',webdriver:false};
+ runInNewContext(source,{exports,require:n=>n==='./analytics'?analytics:{supabase:{auth:{getSession:async()=>({data:{session:null}})}}},Date,URLSearchParams,crypto:{randomUUID},localStorage:{getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v)},location,document:{referrer:''},navigator,fetch:async(_,o)=>{sent.push(JSON.parse(o.body));return{ok:true,status:200};}});
+ await exports.trackEvent('page_view');assert.equal(sent.length,0);
+ navigator.userAgent='Chrome';navigator.webdriver=true;await exports.trackEvent('page_view');assert.equal(sent.length,0);
+ navigator.webdriver=false;location.pathname='/admin';await exports.trackEvent('page_view');assert.equal(saved.get('ct_analytics_test'),'1');
+ location.pathname='/store/charlesnk';await exports.trackEvent('page_view');assert.equal(sent[0].is_test,true);
+});
+test('paired probes are flagged but not silently removed, and engaged visitors are not flagged',()=>{
+ const rows=[{event_name:'page_view',visitor_id:'a',session_id:'1',path:'/p',source:'직접/출처 불명',device:'desktop',created_at:'2026-11-05T01:00:00Z'},{event_name:'page_view',visitor_id:'b',session_id:'2',path:'/p',source:'직접/출처 불명',device:'mobile',created_at:'2026-11-05T01:00:01Z'}];
+ assert.equal(analytics.possibleInspectionVisitors(rows),2);assert.equal(metrics(rows).visitors,2);
+ assert.equal(analytics.possibleInspectionVisitors([...rows,{...rows[0],event_name:'affiliate_click'}]),0);
+});

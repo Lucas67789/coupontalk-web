@@ -1,3 +1,4 @@
+import { isInspectionAgent } from '@/lib/analytics';
 import { NextResponse } from "next/server";
 import { analyticsDb, isAnalyticsAdmin } from "@/lib/analytics-server";
 export async function POST(request: Request) {
@@ -6,7 +7,7 @@ export async function POST(request: Request) {
     if (!origin || origin !== new URL(request.url).origin)
       return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     if (
-      /bot|crawler|spider|headless|playwright/i.test(
+      isInspectionAgent(
         request.headers.get("user-agent") || "",
       )
     )
