@@ -1,3 +1,4 @@
+import CouponHowTo from '@/components/CouponHowTo';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, ProductRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs, parseFaqs } from '@/lib/faq';
@@ -194,9 +195,9 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
                 <p className="text-sm font-semibold text-blue-700 mb-3">{guided ? "상품·이용 가이드" : activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 진행 기간 내 ${ongoingCount}개 · 예정 ${upcomingCount}개` : "현재 등록된 활성 쿠폰 없음"}</p>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
-                <p className="mt-3 text-sm text-gray-600 leading-6">{guided ? store.description : travelStoreIntros[storeId] || "적용 대상 · 할인 한도 · 사용 기간을 비교하고 내게 맞는 혜택을 선택하세요."}</p>
+                <p className="mt-3 text-sm text-gray-600 leading-6">{activeCoupons.length ? "쿠폰을 선택하고 버튼 한 번으로 할인 페이지를 여세요." : "상품과 이용 조건을 판매처에서 확인하세요."}</p>
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-4 flex flex-wrap gap-2">
-                    {(guided ? [["#store-guide", "상품·이용 안내"], ...(activeCoupons.length ? [["#coupons", "쿠폰·혜택"]] : []), ["#faq", "자주 묻는 질문"]] : [...(activeCoupons.length ? [[travelStoreIntros[storeId] ? "#offer-picker" : "#coupons", "혜택·조건 비교"]] : []), ["#coupons", "할인 혜택 보기"], ["#choose-offer", "내게 맞는 혜택"], ["#how-to-use", "사용 방법"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [["#store-guide", "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`rounded-lg px-4 py-3 text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
@@ -207,6 +208,23 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 </p>
             </div>
 
+            {(!guided || activeCoupons.length > 0) && (
+                <div id="coupons" className="p-4 md:p-6 bg-slate-50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        {activeCoupons.map((coupon: CouponRow) => (
+                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
+                        ))}
+                    </div>
+                    {activeCoupons.length === 0 && <p className="text-gray-600">현재 등록된 활성 쿠폰이 없습니다. 새로운 프로모션이 등록되면 이곳에서 확인할 수 있습니다.</p>}
+                </div>
+            )}
+
+            {activeCoupons.length > 0 && <div id="quick-how-to" className="px-4 pb-6 md:px-6 scroll-mt-24"><CouponHowTo storeName={store.name} hasCode={activeCoupons.some((c: CouponRow) => hasCouponCode(c.code))} /></div>}
+
+            <p className="px-5 pt-6 text-sm leading-7 text-slate-600">{guided ? store.description : travelStoreIntros[storeId]}</p>
             <TravelOfferGuide storeId={storeId} offers={activeCoupons} />
 
             {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
@@ -221,7 +239,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             </section>}
 
             {activeCoupons.length > 0 && (
-                <div id="benefit-summary" className="hidden md:block p-5 md:p-6 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
+                <div id="benefit-summary" className="p-5 md:p-6 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 혜택 요약표</h2>
                     <p className="text-sm text-gray-600 leading-6 mb-4">등록된 사용·예약 마감일이 지나지 않은 혜택입니다. 대상 고객·상품과 실제 적용 여부는 각 프로모션 조건을 확인하세요.</p>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
@@ -271,20 +289,6 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                             </tbody>
                         </table>
                     </div>
-                </div>
-            )}
-
-            {(!guided || activeCoupons.length > 0) && (
-                <div id="coupons" className="p-4 md:p-6 bg-slate-50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                        할인코드와 결제 혜택 <span className="text-blue-600">({activeCoupons.length})</span>
-                    </h2>
-                    <div className="grid grid-cols-1 gap-4">
-                        {activeCoupons.map((coupon: CouponRow) => (
-                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
-                        ))}
-                    </div>
-                    {activeCoupons.length === 0 && <p className="text-gray-600">현재 등록된 활성 쿠폰이 없습니다. 새로운 프로모션이 등록되면 이곳에서 확인할 수 있습니다.</p>}
                 </div>
             )}
 

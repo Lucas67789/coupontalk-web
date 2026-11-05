@@ -1,5 +1,6 @@
 "use client";
 
+import CouponHowTo from './CouponHowTo';
 import AliCouponTiers from './AliCouponTiers';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import { Copy, ExternalLink } from 'lucide-react';
@@ -41,7 +42,6 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
         <div className="bg-white rounded-2xl border border-blue-200 p-4 md:p-6">
             {expired && <p role="status" className="mb-4 rounded-lg bg-gray-100 p-4 text-gray-700">이 프로모션은 종료되었습니다. 다른 할인 혜택을 확인해주세요.</p>}
             <p className="text-2xl md:text-3xl font-bold text-blue-700 mb-3">{coupon.discount}</p>
-            <p className="text-sm text-gray-700 leading-6 mb-3">{coupon.condition}</p>
             <p className="text-sm text-gray-500 mb-4">사용·예약 기간: {coupon.expiry || '판매처에서 확인'}</p>
             {/* Coupon Code Display */}
             {!isNoCode && (
@@ -65,6 +65,9 @@ export default function CouponDetailClient({ coupon, storeName, affiliateUrl }: 
                     <>코드 복사하고 할인 받기 <Copy size={20} /></>
                 )}
             </button>
+
+            <p className="mt-4 text-sm text-gray-700 leading-6">{coupon.condition}</p>
+            {!expired && <CouponHowTo storeName={storeName} hasCode={!isNoCode} />}
 
             {!expired && linkReady && <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 md:hidden">
                 <button onClick={handleCopyAndRedirect} className="w-full rounded-xl bg-blue-600 py-3 px-4 font-bold text-white">{isNoCode ? '할인 페이지로 이동' : '복사하고 할인받기'}</button>

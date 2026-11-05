@@ -122,16 +122,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                         {detailHref ? <Link href={detailHref} className="hover:underline">{isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title}</Link> : coupon.title}
                     </h3>
 
-                    <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 size={16} className={`${isExpired ? 'text-gray-400' : 'text-green-500'} flex-shrink-0 mt-0.5`} />
-                            <span className="leading-6">조건: <strong>{parsedConditionText}</strong></span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <Calendar size={16} className="text-gray-400 flex-shrink-0" />
-                            <span className={isExpired ? 'line-through' : ''}>유효기간: {formattedExpiry || '판매처에서 확인'}</span>
-                        </li>
-                    </ul>
+
                 </div>
             </div>
 
@@ -173,6 +164,16 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                         <>복사하고 할인받기 <Copy size={18} /></>
                     )}
                 </button>
+                    <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle2 size={16} className={`${isExpired ? 'text-gray-400' : 'text-green-500'} flex-shrink-0 mt-0.5`} />
+                            <span className="leading-6">조건: <strong>{parsedConditionText}</strong></span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                            <Calendar size={16} className="text-gray-400 flex-shrink-0" />
+                            <span className={isExpired ? 'line-through' : ''}>유효기간: {formattedExpiry || '판매처에서 확인'}</span>
+                        </li>
+                    </ul>
             </div>
         </>
     );

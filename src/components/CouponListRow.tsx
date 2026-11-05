@@ -4,7 +4,7 @@ import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import type { CouponRow } from '@/lib/models';
 import { Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { useToast } from './ToastProvider';
-import { copyCouponCode, openCouponLink } from '@/lib/coupon-action';
+import { openCouponLink } from '@/lib/coupon-action';
 import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
 import { latestGuideTitle } from '@/lib/latest-guide';
@@ -31,7 +31,7 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     const handleCopyAndRedirect = async (e: React.MouseEvent) => {
         e.preventDefault(); e.stopPropagation();
         if (isExpired) return;
-        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName, false));
+        showToast(await openCouponLink(coupon, parsedAffiliateUrl, storeName));
     };
 
     const isNoCode = !hasCouponCode(coupon.code);
@@ -67,21 +67,21 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
                 <Link href={detailHref} className="hover:underline">{isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title}</Link>
             </h3>
 
+            {/* Full Width Button */}
+            {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
+
+            {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : upcoming ? <Link href={detailHref} className="block rounded-lg bg-amber-50 px-4 py-3 text-center font-bold text-amber-900">시작일·적용 조건 확인</Link> : <button
+                disabled={!safeAffiliateUrl(parsedAffiliateUrl)} onClick={handleCopyAndRedirect}
+                className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+                {safeAffiliateUrl(parsedAffiliateUrl) ? <>{isNoCode ? '할인 페이지로 이동' : '코드 복사하고 할인 받기'} <ExternalLink size={20} /></> : "링크 확인 중"}
+            </button>}
             {/* Condition Bullet */}
             <div className={`flex items-start gap-2 text-sm mb-3 p-3 rounded-xl ${isExpired ? 'text-gray-400 bg-gray-50/50' : 'text-gray-700 bg-gray-50'}`}>
                 <CheckCircle2 size={20} className={`${isExpired ? 'text-gray-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
                 <span className="font-medium whitespace-pre-wrap leading-relaxed">{parsedConditionText}</span>
             </div>
 
-            {/* Full Width Button */}
-            {!isNoCode && !isExpired && <p className="mb-4 break-all text-sm text-gray-600">할인코드 <strong className="font-mono text-blue-800">{coupon.code}</strong></p>}
-            {!isNoCode && !isExpired && !upcoming && <button type="button" onClick={async () => showToast(await copyCouponCode(coupon))} className="mb-3 min-h-12 w-full rounded-lg border border-blue-600 px-4 py-3 font-bold text-blue-700 flex items-center justify-center gap-2">코드 복사 <Copy size={20} /></button>}
-            {isExpired ? <Link href={detailHref} className="text-sm text-gray-600 underline">최신 혜택·이전 행사 기록</Link> : upcoming ? <Link href={detailHref} className="block rounded-lg bg-amber-50 px-4 py-3 text-center font-bold text-amber-900">시작일·적용 조건 확인</Link> : <button
-                disabled={!safeAffiliateUrl(parsedAffiliateUrl)} onClick={handleCopyAndRedirect}
-                className="mt-auto w-full py-3 rounded-lg font-bold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-                {safeAffiliateUrl(parsedAffiliateUrl) ? <>할인 페이지로 이동 <ExternalLink size={20} /></> : "링크 확인 중"}
-            </button>}
         </article>
     );
 }
