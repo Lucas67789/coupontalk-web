@@ -35,7 +35,7 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
 
     return (
         <Link href={`/store/${store.id}`} className="card block min-w-0 self-start overflow-hidden group">
-            {showCover && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={1200} loading="lazy" onError={() => setFailedLogo(store.logo || '')} className="w-full aspect-square object-contain border-b border-slate-100" />}
+            {showCover && <img src={store.logo} alt={`${store.name} 상품·이용 가이드`} width={1200} height={1200} loading="lazy" ref={image => { if (image?.complete && !image.naturalWidth) setFailedLogo(store.logo || ''); }} onError={() => setFailedLogo(store.logo || '')} className="w-full aspect-square object-contain border-b border-slate-100" />}
             <div className="p-6">
                 {!showCover && <div className="flex items-center justify-between mb-4">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
@@ -61,4 +61,3 @@ export default function StoreCard({ store }: { store: StoreSummary }) {
         </Link>
     );
 }
-
