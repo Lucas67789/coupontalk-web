@@ -1,3 +1,4 @@
+import SocarBenefits from '@/components/SocarBenefits';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import { storeEventStatus } from '@/lib/store-event-status';
 import CouponHowTo from '@/components/CouponHowTo';
@@ -201,7 +202,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <h1 className="text-2xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
                 <p className="hidden sm:block mt-3 text-sm text-gray-600 leading-6">{activeCoupons.length ? "쿠폰을 선택하고 버튼 한 번으로 할인 페이지를 여세요." : "상품과 이용 조건을 판매처에서 확인하세요."}</p>
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-2 flex gap-2 overflow-x-auto md:flex-wrap">
-                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [["#store-guide", "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`shrink-0 rounded-lg px-3 py-2 text-xs md:text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
+                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [[storeId === "socar" ? "#socar-benefits" : "#store-guide", storeId === "socar" ? "카드·쿠폰 비교" : "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`shrink-0 rounded-lg px-3 py-2 text-xs md:text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
             </header>
 
@@ -230,6 +231,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
 
             <p className="px-5 pt-6 text-sm leading-7 text-slate-600">{guided ? store.description : travelStoreIntros[storeId]}</p>
             <TravelOfferGuide storeId={storeId} offers={activeCoupons} />
+            {storeId === 'socar' && <SocarBenefits />}
 
             {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
                 {storeUrl && <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-100 p-5 md:p-6">
