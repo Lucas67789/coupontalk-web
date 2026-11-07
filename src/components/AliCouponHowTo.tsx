@@ -8,7 +8,7 @@ export default function AliCouponHowTo({ code = 'LTIK04', compact = false }: { c
     { title: '할인 확인', text: '코드를 적용하고 할인액을 확인한 뒤 결제하세요.', icon: BadgeCheck },
   ];
   return <section aria-label="알리 할인코드 적용 방법" className="mt-6 rounded-2xl bg-slate-50 p-4 sm:p-6">
-    <h2 className="text-xl font-extrabold text-slate-900">복사한 쿠폰, 이렇게 쓰세요</h2>
+    <h2 className="text-xl font-extrabold text-slate-900">알리 할인코드는 어디에 입력하나요?</h2>
     <ol className={`mt-4 grid gap-3 ${compact ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {steps.map(({title,text,icon:Icon},i)=><li key={title} className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
         <div className="mb-3 flex items-center justify-between"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">{i+1}</span><Icon size={25} className="text-red-500" aria-hidden="true" /></div>

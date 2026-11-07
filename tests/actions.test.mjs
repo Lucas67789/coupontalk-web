@@ -60,3 +60,12 @@ test('all six Ali tiers copy only the selected code and open the user affiliate 
  assert.deepEqual(aliCouponTiers({id:'unrelated',content_body:body}),[]);
  assert.equal(aliCouponDetails('old table\n### 알리 광군제 할인코드 입력 방법\nsteps'),'### 알리 광군제 할인코드 입력 방법\nsteps');
 });
+
+test('Ali browse and code buttons retain distinct labels without copying on browse', async () => {
+ const opens=[],copies=[],events=[];
+ const {openCouponLink}=load('../src/lib/coupon-action.ts',{'./affiliate':affiliate,'./analytics-client':{trackEvent:(...a)=>events.push(a)}},{window:{open:url=>opens.push(url)},navigator:{clipboard:{writeText:async c=>copies.push(c)}}});
+ await openCouponLink({id:'coupon-aliexpress-nov2026-1111',code:'LTIK45'},'http://app.ac/xtnq6XM23','알리익스프레스',false,'알리 상품 먼저 보기 · 상단');
+ assert.equal(copies.length,0);assert.equal(events.length,1);assert.equal(events[0][1].button_label,'알리 상품 먼저 보기 · 상단');
+ await openCouponLink({id:'coupon-aliexpress-nov2026-1111',code:'LTIK45'},'http://app.ac/xtnq6XM23','알리익스프레스',true,'알리 LTIK45 · 금액별 쿠폰');
+ assert.deepEqual(copies,['LTIK45']);assert.equal(opens.length,2);assert.equal(events[1][1].button_label,events[2][1].button_label);assert.equal(events[1][1].button_label,'알리 LTIK45 · 금액별 쿠폰');
+});

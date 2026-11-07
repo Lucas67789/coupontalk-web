@@ -1,4 +1,5 @@
 export default function StoreGuide({ name, travel, storeId, showHowTo = true }: { name: string; travel: boolean; storeId?: string; showHowTo?: boolean }) {
+    if (storeId === 'aliexpress') return null; // AliCouponTiers provides the store-specific guide.
     const specific = storeId === 'usimsa' ? [
         ['사용 지역과 데이터', '목적지·경유지와 사용일수, 하루 제공량·총량, 소진 후 속도를 확인하세요. 할인율이 높아도 여행 일정에 맞지 않으면 유리하지 않습니다.'],
         ['기기와 개통 조건', 'eSIM 지원 모델인지 확인하고 설치와 개통 시점, 환불 조건을 읽어두세요. 상품 유효기간과 실제 데이터 사용기간은 다릅니다.'],
