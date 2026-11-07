@@ -29,9 +29,8 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
       <p className="mt-1 text-xs text-slate-500">11월 1일 ~ {coupon.expiry} · 일부 상품 제외 · 결제 시 적용 확인</p>
     </div>
     <div className="mb-3 rounded-xl bg-orange-50 p-3 text-sm">
-      <p className="font-bold text-slate-900">구매 금액을 아나요? 아래에서 쿠폰을 고르세요.</p>
-      <button disabled={expired || !ready} onClick={() => browse('상단')} className="mt-2 flex min-h-11 items-center gap-1 font-bold text-red-700 underline underline-offset-4 disabled:text-slate-400">아직 모른다면 알리 상품 먼저 보기 <ArrowUpRight size={16} /></button>
-      <p className="text-xs text-slate-600">상품 먼저 보기는 코드 복사 없이 알리를 새 창으로 엽니다.</p>
+      <button disabled={expired || !ready} onClick={() => browse('상단')} className="flex min-h-11 items-center gap-1 font-bold text-red-700 underline underline-offset-4 disabled:text-slate-400">알리 상품 먼저 보기 <ArrowUpRight size={16} /></button>
+      <p className="text-xs text-slate-600">금액을 모를 때 · 코드 복사 없이 새 창 열기</p>
     </div>
     <div id="ali-code-options" className={`scroll-mt-24 grid gap-3 ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
       {tiers.map(tier => <article key={tier.code} className="grid grid-cols-[1fr_auto] items-center gap-x-3 p-3 min-w-0 overflow-hidden rounded-xl border border-orange-200 bg-white shadow-sm">
