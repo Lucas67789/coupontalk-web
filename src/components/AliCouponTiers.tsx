@@ -35,7 +35,7 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
     <div id="ali-code-options" className={`scroll-mt-24 grid gap-3 ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
       {tiers.map(tier => <article key={tier.code} className="grid grid-cols-[1fr_auto] items-center gap-x-3 p-3 min-w-0 overflow-hidden rounded-xl border border-orange-200 bg-white shadow-sm">
         <div className="min-w-0">
-          <div><p className="text-xs font-semibold text-slate-700">US${tier.minimum} 이상 구매 시</p><p className="mt-1 text-2xl font-black text-red-600">${tier.discount} 할인</p></div>
+          <div><p className="text-xs font-semibold text-slate-700">US${tier.minimum} 이상 구매 시</p><p className="mt-1 whitespace-nowrap text-xl sm:text-2xl font-black text-red-600">${tier.discount} 할인</p></div>
 
         </div>
         <div className="w-36 sm:w-44">
@@ -44,7 +44,7 @@ export default function AliCouponTiers({ coupon, affiliateUrl, compact = false }
             const message = await openCouponLink({ id: coupon.id, code: tier.code }, affiliateUrl, '알리익스프레스', true, `알리 ${tier.code} · 금액별 쿠폰`);
             if (message.includes('복사 완료')) setCopied(tier.code);
             showToast(message);
-          }} className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-2 py-3 text-xs font-bold text-white hover:bg-red-700 disabled:bg-slate-300">
+          }} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-2 py-3 text-xs font-bold text-white hover:bg-red-700 disabled:bg-slate-300">
             <Copy size={14} className="shrink-0" />{expired ? '기간 만료' : !ready ? '링크 확인 중' : '복사하고 알리 가기'}
           </button>
           {copied === tier.code && <p role="status" className="mt-2 text-center text-xs text-green-700">{tier.code} 복사 완료 · 결제창에 붙여넣으세요</p>}

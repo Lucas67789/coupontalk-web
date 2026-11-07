@@ -69,3 +69,8 @@ test('Ali browse and code buttons retain distinct labels without copying on brow
  await openCouponLink({id:'coupon-aliexpress-nov2026-1111',code:'LTIK45'},'http://app.ac/xtnq6XM23','알리익스프레스',true,'알리 LTIK45 · 금액별 쿠폰');
  assert.deepEqual(copies,['LTIK45']);assert.equal(opens.length,2);assert.equal(events[1][1].button_label,events[2][1].button_label);assert.equal(events[1][1].button_label,'알리 LTIK45 · 금액별 쿠폰');
 });
+
+test('Ali detail return links preserve the coupon route', () => {
+ const detail=aliCouponDetails('### 알리 광군제 할인코드 입력 방법\nsteps\n### 카드 할인\nconditions');
+ assert.ok(detail.includes('](/store/aliexpress/coupon/coupon-aliexpress-nov2026-1111#ali-code-options)'));
+});
