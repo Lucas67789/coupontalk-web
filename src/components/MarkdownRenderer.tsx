@@ -38,7 +38,7 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
                 components={{
                     a: ({ href, children, title }) => {
                         const target = safeNavigationUrl(href);
-                        return target ? <a href={target} title={title} rel="sponsored nofollow noopener noreferrer">{children}</a> : <span>{children}</span>;
+                        return target ? <a href={target} title={title} rel={target.startsWith('/') ? undefined : 'sponsored nofollow noopener noreferrer'}>{children}</a> : <span>{children}</span>;
                     },
                     // 주의: DB에 저장된 guide_content/content_body 안에 "# 제목"(H1)이 하나라도 섞여 있으면,
                     // 이 페이지에는 이미 <h1>(스토어명/쿠폰 제목)이 따로 있기 때문에 페이지에 <h1>이
