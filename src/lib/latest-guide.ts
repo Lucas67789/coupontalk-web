@@ -1,5 +1,5 @@
 
-export const latestGuideUpdatedAt = '2026-11-04T00:00:00+09:00';
+export const latestGuideUpdatedAt = '2026-11-09T00:00:00+09:00';
 
 export function latestGuideDescription(storeName: string, coupon: { title: string; expiry?: string | null }) {
     const subject = coupon.title.replace(/\[종료\]/g, '').replace(/\s+/g, ' ').trim();
@@ -30,11 +30,16 @@ export function matchesGuideTopic(source: string, target: string): boolean {
 
 type GuideRecord = { id: string; title: string; code?: string; expiry?: string };
 export function uniqueGuideTitle(storeName: string, coupon: GuideRecord, siblings: GuideRecord[]) {
-    const base = latestGuideTitle(storeName, coupon.title);
-    const same = siblings.filter(c => latestGuideTitle(storeName, c.title) === base);
+    // Never use a redemption code to distinguish search titles.
+    const cleanTitle = (record: GuideRecord) => {
+        const code = record.code?.trim();
+        return code ? record.title.split(code).join('').trim() : record.title;
+    };
+    const base = latestGuideTitle(storeName, cleanTitle(coupon));
+    const same = siblings.filter(c => latestGuideTitle(storeName, cleanTitle(c)) === base);
     if (!same.some(c => c.id !== coupon.id)) return base;
     const period = coupon.expiry?.match(/20\d{2}[.\-/년]\s*\d{1,2}[.\-/월]\s*\d{1,2}/)?.[0];
-    const code = coupon.code && !/NO_CODE|불필요|자동|없음|링크|상이/.test(coupon.code) ? coupon.code : '';
-    const detail = [period, code].filter(Boolean).join(' · ') || coupon.title.replace(/\[종료\]/g, '').trim();
-    return `${base} | 이전 ${detail} 행사`;
+    const benefit = cleanTitle(coupon).match(/(?:최대\s*)?(?:\$[\d,]+|[\d,]+(?:\.\d+)?\s*(?:%|달러|만원|원|코인))/)?.[0];
+    const detail = [period, benefit].filter(Boolean).join(' · ');
+    return detail ? `${base} | 이전 ${detail} 행사` : base;
 }
