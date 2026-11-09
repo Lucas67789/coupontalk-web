@@ -201,6 +201,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <p className="text-xs md:text-sm font-semibold text-blue-700 mb-1">{guided ? "상품·이용 가이드" : activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 행사 ${ongoingCount}개 · 할인코드 ${codeCount}종${upcomingCount ? ` · 예정 ${upcomingCount}개` : ""}` : "현재 등록된 활성 쿠폰 없음"}</p>
                 <h1 className="text-2xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
                 <p className="hidden sm:block mt-3 text-sm text-gray-600 leading-6">{activeCoupons.length ? "쿠폰을 선택하고 버튼 한 번으로 할인 페이지를 여세요." : "상품과 이용 조건을 판매처에서 확인하세요."}</p>
+                {storeUrl && <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-4 flex min-h-14 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-4 text-center text-base font-extrabold text-white shadow-sm hover:bg-blue-700 sm:w-fit sm:min-w-64">{storeId === 'socar' ? '쏘카 앱에서 쿠폰·예약 확인' : `${store.name} 상품·혜택 확인`} ↗</a>}
                 <nav aria-label={`${store.name} 페이지 목차`} className="mt-2 flex gap-2 overflow-x-auto md:flex-wrap">
                     {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [[storeId === "socar" ? "#socar-benefits" : "#store-guide", storeId === "socar" ? "카드·쿠폰 비교" : "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`shrink-0 rounded-lg px-3 py-2 text-xs md:text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
                 </nav>
@@ -234,12 +235,6 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
             {storeId === 'socar' && <SocarBenefits />}
 
             {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
-                {storeUrl && <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-100 p-5 md:p-6">
-                    <p className="font-bold text-lg text-slate-900">{store.name}에서 상품과 이용 조건 확인</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">판매처의 상품·요금·예약 조건은 변경될 수 있습니다. 최종 조건은 이동한 사이트에서 확인하세요.</p>
-                    <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-4 inline-flex items-center justify-center min-h-12 rounded-xl bg-blue-600 text-white px-6 py-3 font-bold hover:bg-blue-700">{storeId === 'socar' ? '쏘카 앱에서 쿠폰·예약 확인' : `${store.name} 상품·서비스 보기`} ↗</a>
-                    <p className="mt-2 text-xs text-slate-500">제휴 링크 · 새 창에서 열립니다</p>
-                </div>}
                 <MarkdownRenderer content={store.guide_content || ''} storeName={store.name} />
                 {storeUrl && <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-8 inline-flex rounded-xl border border-blue-600 px-6 py-3 font-bold text-blue-700">{store.name} 상품·서비스 확인 ↗</a>}
             </section>}
@@ -377,6 +372,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
                 <ul className="mt-4 divide-y divide-gray-100">{expiredCoupons.map((coupon: CouponRow) => <li key={coupon.id} className="py-3"><Link className="text-sm text-gray-600 hover:underline" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{coupon.title}</Link><p className="mt-1 text-xs text-gray-500">{coupon.expiry}</p></li>)}</ul>
             </details>}
             <RelatedStores storeId={storeId} />
+            {(guided || activeCoupons.length === 0) && storeUrl && <div className="fixed bottom-0 left-0 z-40 w-full border-t border-gray-200 bg-white p-3 md:hidden"><a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="flex min-h-12 items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-center font-bold text-white">{storeId === 'socar' ? '쏘카 쿠폰·예약 확인' : `${store.name} 상품·혜택 확인`} ↗</a></div>}
             {!guided && activeCoupons.length > 0 && <div className="fixed bottom-0 left-0 w-full z-40 p-3 bg-white border-t border-gray-200 md:hidden"><a href="#coupons" className="flex justify-center rounded-xl bg-blue-600 p-3 font-bold text-white">{store.name} {codeCount ? `할인코드 ${codeCount}종` : `혜택 ${activeCoupons.length}개`} 보기</a></div>}
 
         </div>
