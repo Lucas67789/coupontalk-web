@@ -2,6 +2,13 @@
 // Long URLs: owner checked 2026-11-04. Trip.com and GamsGo: user-supplied / owner dashboard.
 // New or changed URLs remain blocked until ownership is verified and this registry is updated.
 const verifiedAffiliateUrls = new Set([
+  // Verified in CouponTalk LinkPrice and Coupang Partners dashboards on 2026-11-09.
+  "https://lpweb.kr/click.php?m=clubclio&a=A100703639&l=0000",
+  "https://lpweb.kr/click.php?m=refurlab&a=A100703639&l=0000",
+  "https://link.coupang.com/a/iwRfhZFJ7s",
+  "https://link.coupang.com/a/iiBsQ3ICM8",
+  "https://link.coupang.com/a/iiBupunjEG",
+  "https://link.coupang.com/a/guAjAfbfFI",
   "http://app.ac/0AGz5W523",
   "http://app.ac/1AGAWJ543",
   "http://app.ac/1tVEwHM63",

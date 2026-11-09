@@ -1,3 +1,4 @@
+import { affiliateClickCapture } from '@/lib/affiliate-click-capture';
 import { jsonLd as serializeJsonLd } from '@/lib/content-safety';
 import type { Metadata } from "next";
 import "./globals.css";
@@ -57,6 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: affiliateClickCapture }} /></head>
       <body suppressHydrationWarning>
         
     <script

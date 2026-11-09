@@ -1,4 +1,3 @@
-import { supabase } from "./supabase";
 import { attribution, SESSION_TIMEOUT, isInspectionAgent } from "./analytics";
 type Session = {
   id: string;
@@ -33,7 +32,7 @@ function context(): Session {
 }
 export async function trackEvent(
   event_name: "page_view" | "affiliate_click" | "code_copy",
-  details: Record<string, string | undefined> = {},
+  details: Record<string, string | boolean | undefined> = {},
 ) {
   try {
     if (location.pathname.startsWith("/admin")) {
@@ -47,10 +46,10 @@ export async function trackEvent(
     const fingerprint =
         event_name + location.pathname + JSON.stringify(details),
       now = Date.now();
-    if (now - (recent.get(fingerprint) || 0) < 700) return;
+    if (!details.id && now - (recent.get(fingerprint) || 0) < 700) return true;
     recent.set(fingerprint, now);
     const s = context(),
-      id = crypto.randomUUID(),
+      id = typeof details.id === "string" ? details.id : crypto.randomUUID(),
       path = location.pathname;
     let isTest = !["coupontalk.kr", "www.coupontalk.kr"].includes(
       location.hostname,
@@ -58,9 +57,6 @@ export async function trackEvent(
     try {
       isTest ||= localStorage.getItem("ct_analytics_test") === "1";
     } catch {}
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
     const payload = {
       id,
       event_name,
@@ -71,13 +67,12 @@ export async function trackEvent(
       source: s.source,
       keyword: s.keyword,
       device: /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop",
-      is_test: isTest,
       ...details,
+      is_test: isTest || details.is_test === true,
     };
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    if (session) headers.Authorization = "Bearer " + session.access_token;
     // Retrying the same event ID is safe because the DB rejects duplicate IDs.
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -87,10 +82,12 @@ export async function trackEvent(
           headers,
           body: JSON.stringify(payload),
         });
-        if (r.ok || r.status < 500) return;
+        if (r.ok) return true;
+        if (r.status < 500) return false;
       } catch {}
     }
   } catch {
     /* Tracking must never block navigation. */
   }
+  return false;
 }

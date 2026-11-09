@@ -17,23 +17,25 @@ export default function PageViewTracker() {
     return () => document.removeEventListener("visibilitychange", view);
   }, [pathname]);
   useEffect(() => {
-    const click = (event: MouseEvent) => {
-      if (event.type === "auxclick" && event.button !== 1) return;
-      const a = (event.target as Element)?.closest?.(
-        'a[rel~="sponsored"]',
-      ) as HTMLAnchorElement | null;
-      if (a)
-        void trackEvent("affiliate_click", {
-          target_url: a.href,
-          store_id: a.dataset.storeAffiliate,
-          button_label: (a.textContent || "제휴 링크").trim().slice(0, 100),
-        });
+    type CapturedClick = { id: string; path: string; target_url: string; store_id?: string; button_label: string; is_test: boolean; time: number };
+    const capture = (window as Window & { __ctAffiliateClicks?: { pending(): CapturedClick[]; ack(id: string): void } }).__ctAffiliateClicks;
+    const sending = new Set<string>();
+    const flush = () => {
+      for (const click of capture?.pending() || []) {
+        if (sending.has(click.id)) continue;
+        sending.add(click.id);
+        const { time, ...details } = click;
+        void trackEvent('affiliate_click', details).then(saved => {
+          if (saved) capture?.ack(click.id);
+        }).finally(() => sending.delete(click.id));
+      }
     };
-    document.addEventListener("click", click);
-    document.addEventListener("auxclick", click);
+    window.addEventListener('ct:affiliate-click', flush);
+    window.addEventListener('online', flush);
+    flush();
     return () => {
-      document.removeEventListener("click", click);
-      document.removeEventListener("auxclick", click);
+      window.removeEventListener('ct:affiliate-click', flush);
+      window.removeEventListener('online', flush);
     };
   }, []);
   return null;
