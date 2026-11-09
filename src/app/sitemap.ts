@@ -59,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
         ...categoryUrls,
         { url: `${baseUrl}/subscriptions`, lastModified: subscriptionVisualUpdatedAt },
-        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: subscriptionVisualUpdatedAt, images: subscriptionImagePaths(g.slug).map(path => `${baseUrl}${path}`) })),
+        ...subscriptionGuides.map(g => ({ url: `${baseUrl}/subscriptions/${g.slug}`, lastModified: ['claude-discount', 'duolingo-discount-code'].includes(g.slug) ? '2026-11-09T00:00:00+09:00' : subscriptionVisualUpdatedAt, images: (['claude-discount', 'duolingo-discount-code'].includes(g.slug) ? subscriptionImagePaths(g.slug).slice(0, 1) : subscriptionImagePaths(g.slug)).map(path => `${baseUrl}${path}`) })),
         ...['faq', 'contact', 'terms'].map(path => ({ url: `${baseUrl}/${path}` })),
         ...storeUrls,
         ...couponUrls,
