@@ -1,8 +1,18 @@
 
-export const latestGuideUpdatedAt = '2026-11-09T00:00:00+09:00';
+export const latestGuideUpdatedAt = '2026-11-10T00:00:00+09:00';
 
-export function latestGuideDescription(storeName: string, coupon: { title: string; expiry?: string | null }) {
-    const subject = coupon.title.replace(/\[종료\]/g, '').replace(/\s+/g, ' ').trim();
+// These legacy records share a title; their saved event bodies identify different products.
+const archiveSubjects: Record<string, string> = {
+    'coupon-1785854835495-myrealtrip-za7j6': '마이리얼트립 8월 해외 숙소 프로모션 할인코드',
+    'coupon-1785854835312-myrealtrip-k57mv': '마이리얼트립 8월 해외 투어·티켓 프로모션 할인코드',
+};
+
+export function guideSubject(coupon: { id?: string; title: string }) {
+    return (archiveSubjects[coupon.id || ''] || coupon.title).replace(/\[종료\]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+export function latestGuideDescription(storeName: string, coupon: { id?: string; title: string; expiry?: string | null }) {
+    const subject = guideSubject(coupon);
     return `「${subject}」 이후의 ${storeName} 혜택 안내. 이전 행사 기한: ${coupon.expiry || '본문 기록 참고'}. 종료 코드는 사용할 수 없으며, 현재 등록된 혜택과 적용 조건을 비교하세요.`;
 }
 
@@ -33,7 +43,8 @@ export function uniqueGuideTitle(storeName: string, coupon: GuideRecord, sibling
     // Never use a redemption code to distinguish search titles.
     const cleanTitle = (record: GuideRecord) => {
         const code = record.code?.trim();
-        return code ? record.title.split(code).join('').trim() : record.title;
+        const subject = guideSubject(record);
+        return code ? subject.split(code).join('').trim() : subject;
     };
     const base = latestGuideTitle(storeName, cleanTitle(coupon));
     const same = siblings.filter(c => latestGuideTitle(storeName, cleanTitle(c)) === base);
