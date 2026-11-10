@@ -4,6 +4,16 @@ import CouponCard from '@/components/CouponCard';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { isCouponExpired } from '@/lib/utils';
 import { subscriptionGuides } from '@/lib/subscription-guides';
+import type { CouponRow } from '@/lib/models';
+
+// Homepage wording only; retain the stored offer, conditions and affiliate destination.
+function homepageCouponCopy<T extends CouponRow>(coupon: T): T {
+  return {
+    ...coupon,
+    title: coupon.title.replace('쿠팡 반품 마켓으로 정가보다 무조건 싸게 구매하자!', '쿠팡 반품 마켓 · 상품 상태와 가격 비교'),
+    discount: coupon.discount.replace('쿠팡 반품 마켓에서 싸게 득탬 하세요!', '상품별 가격·상태 확인'),
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -42,15 +52,15 @@ export default async function Home() {
   ]);
 
   // Filter out expired coupons from homepage lists
-  const newCoupons = (rawNewCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 6);
-  const popularCoupons = (rawPopularCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 6);
+  const newCoupons = (rawNewCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 6).map(homepageCouponCopy);
+  const popularCoupons = (rawPopularCoupons || []).filter((c) => !isCouponExpired(c.expiry, c.title)).slice(0, 6).map(homepageCouponCopy);
 
   return (
     <div className="container mx-auto px-4 pb-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({ '@context': 'https://schema.org', '@type': 'WebSite', name: '쿠폰톡', url: 'https://coupontalk.kr/', potentialAction: { '@type': 'SearchAction', target: 'https://coupontalk.kr/store?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
       <section className="rounded-3xl border border-blue-100 bg-white px-6 py-8 md:px-10 md:py-12 mb-8">
         <p className="text-sm font-semibold text-blue-700 mb-3">쿠폰톡 · 조건까지 비교하는 할인 정보</p>
-        <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">찾는 상품의 할인,<br className="sm:hidden" /> 여기서 확인하세요.</h1>
+        <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">쇼핑·여행 할인코드와 쿠폰,<br className="sm:hidden" /> 조건까지 확인하세요.</h1>
         <p className="mt-4 text-gray-600">호텔 예약부터 노트북까지. 브랜드·상품명·모델번호로 내게 맞는 혜택을 찾아보세요.</p>
         <form action="/store" role="search" className="mt-6 flex gap-2 max-w-2xl">
           <label htmlFor="coupon-search" className="sr-only">브랜드, 상품명, 모델번호 검색</label>
