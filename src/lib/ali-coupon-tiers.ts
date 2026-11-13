@@ -1,6 +1,6 @@
 export function aliCouponTiers(coupon: { id: string; content_body?: string | null }) {
   if (coupon.id !== 'coupon-aliexpress-nov2026-1111') return [];
-  return [...(coupon.content_body || '').matchAll(/^\|\s*(LTIK\d+)\s*\|\s*US\$(\d+) 이상\s*\|\s*US\$(\d+)\s*\|/gm)]
+  return [...(coupon.content_body || '').matchAll(/^\|\s*([A-Z][A-Z0-9]*\d+)\s*\|\s*US\$(\d+) 이상\s*\|\s*US\$(\d+)\s*\|/gm)]
     .map(m => ({ code: m[1], minimum: Number(m[2]), discount: Number(m[3]) }));
 }
 
