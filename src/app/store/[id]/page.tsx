@@ -1,4 +1,5 @@
 import SocarBenefits from '@/components/SocarBenefits';
+import AliStoreLanding from '@/components/AliStoreLanding';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import { storeEventStatus } from '@/lib/store-event-status';
 import CouponHowTo from '@/components/CouponHowTo';
@@ -49,7 +50,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     const activeCoupons = (topCoupons || []).filter(c => !isCouponExpired(c.expiry, c.title));
     const codeCount = activeCoupons.reduce((n: number, c: { id: string; code: string; content_body?: string | null }) => n + (aliCouponTiers(c).length || (hasCouponCode(c.code) ? c.code.split(/\r?\n/).filter(Boolean).length : 0)), 0);
     const guided = storeId !== 'usimsa' && hasStoreGuide(store.tags);
-    const previewImages = [...new Set([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap(c => contentImages(c.content_body))])].slice(0, 8);
+    const previewImages = [...new Set([...(storeId === 'aliexpress' ? ['https://coupontalk.kr/images/ali-store/campaign.webp', 'https://coupontalk.kr/images/ali-store/payment.webp', 'https://coupontalk.kr/images/ali-store/guide.webp'] : []), ...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap(c => contentImages(c.content_body))])].slice(0, 8);
 
     const title = guided ? storeGuideTitle(store.name, store.guide_content) : activeCoupons.length ? (storeId === 'hotelskr' ? '호텔스닷컴 할인코드' : `${store.name} 할인코드 | ${currentYear}년 ${currentMonth}월 혜택·조건 비교`) : `${store.name} 할인 정보 | 현재 등록된 활성 쿠폰 없음`;
     const description = guided ? store.description : travelStoreIntros[storeId] || (activeCoupons.length
@@ -112,7 +113,7 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
     const guided = storeId !== 'usimsa' && hasStoreGuide(store.tags);
     const guideTitle = storeGuideTitle(store.name, store.guide_content);
     const storeUrl = safeAffiliateUrl(store.website_url);
-    const offerImages = [...new Set<string>([...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap((c: CouponRow) => contentImages(c.content_body))])];
+    const offerImages = [...new Set<string>([...(storeId === 'aliexpress' ? ['https://coupontalk.kr/images/ali-store/campaign.webp', 'https://coupontalk.kr/images/ali-store/payment.webp', 'https://coupontalk.kr/images/ali-store/guide.webp'] : []), ...contentImages(guided ? store.guide_content : ''), ...activeCoupons.flatMap((c: CouponRow) => contentImages(c.content_body))])];
     const expiredCoupons = tableCoupons.filter((c: CouponRow) => c.isExpired);
     const isAgoda = storeId === 'agoda';
 
@@ -185,6 +186,11 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         '@context': 'https://schema.org',
         '@graph': [jsonLd, breadcrumbLd, faqLd, ...(itemListLd ? [itemListLd] : [])]
     };
+
+    if (storeId === 'aliexpress') return <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
+        <AliStoreLanding store={store} coupons={activeCoupons} expiredCoupons={expiredCoupons} products={publishedProducts} faqs={faqs} dateModified={dateModified} now={now} />
+    </>;
 
     return (
         <div className="container mx-auto max-w-5xl border-x min-h-screen bg-white shadow-sm pb-28" style={{ borderColor: 'var(--border-color)' }}>
