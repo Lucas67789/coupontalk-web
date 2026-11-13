@@ -42,5 +42,14 @@ export function couponImages(content?: string | null): string[] {
 export function publicContentImages(content: string): string {
     const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/`;
     const publicContent = content.replace(/(?<![\w/])\/images\/([^\s"'<>)]*)/g, 'https://coupontalk.kr/images/$1').split(prefix).join('https://coupontalk.kr/coupon-images/').replace(/(https:\/\/coupontalk\.kr\/coupon-images\/[^\s"'<>)]*\.svg)(?=[\s"'<>)]|$)/g, '$1.png');
-    return publicContent.replace(/https:\/\/coupontalk\.kr\/(?:(?:coupon-images|images)\/[^\s"'<>)]*|og-image\.png)(?=[\s"'<>)]|$)/g, url => squareThumbnail(url.replace(/&amp;/g, '&')));
+    // Body photos must retain their natural proportions. Square padding is only
+    // for thumbnail consumers (contentImages / squareThumbnail), never articles.
+    return publicContent.replace(/https:\/\/coupontalk\.kr\/(?:(?:coupon-images|images)\/[^\s"'<>)]*|og-image\.png)(?=[\s"'<>)]|$)/g, raw => {
+        const url = new URL(raw.replace(/&amp;/g, '&'));
+        if (url.pathname.startsWith('/images/')) {
+            url.pathname = '/coupon-images/_site/' + url.pathname.slice('/images/'.length);
+        }
+        if (url.searchParams.get('fit') === 'square-v1') url.searchParams.delete('fit');
+        return url.href;
+    });
 }
