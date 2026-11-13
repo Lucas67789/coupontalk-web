@@ -57,8 +57,8 @@ export function promotionStartsAt(content: string): number | null {
     const text = content.replace(/<[^>]+>/g, '\n').replace(/\*\*/g, '');
     for (const line of text.split('\n')) {
         if (!/(?:행사|예약|프로모션|사용|이벤트)\s*기간/.test(line)) continue;
-        const match = line.match(/(20\d{2})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})일?\s*[~～–—]/);
-        if (match) return Date.parse(`${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}T00:00:00+09:00`);
+        const match = line.match(/(20\d{2})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})일?(?:\s+(\d{1,2}):(\d{2}))?\s*[~～–—]/);
+        if (match) return Date.parse(`${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}T${(match[4] || '00').padStart(2, '0')}:${match[5] || '00'}:00+09:00`);
     }
     return null;
 }

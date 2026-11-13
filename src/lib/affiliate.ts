@@ -2,6 +2,8 @@
 // Long URLs: owner checked 2026-11-04. Trip.com and GamsGo: user-supplied / owner dashboard.
 // New or changed URLs remain blocked until ownership is verified and this registry is updated.
 const verifiedAffiliateUrls = new Set([
+  // User supplied for Farfetch Black Friday, 2026-11-13.
+  "http://app.ac/WqDcYZ243",
   "http://app.ac/uAVLA3503",
   // Verified in CouponTalk LinkPrice and Coupang Partners dashboards on 2026-11-09.
   "https://lpweb.kr/click.php?m=clubclio&a=A100703639&l=0000",
