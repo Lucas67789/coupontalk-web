@@ -37,9 +37,9 @@ export default function ProductCard({ product, storeName }: { product: ProductRo
             </div>
 
             {/* Thumbnail Area - Full Width in Blog Style */}
-            <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden mb-6">
+            <div className="relative w-full rounded-2xl overflow-hidden mb-6">
                 {product.image_url ? (
-                    <SafeImage src={product.image_url} alt={product.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <SafeImage natural src={product.image_url} alt={product.title} className="w-full" />
                 ) : (
                     <div className="text-gray-300">
                         <ShoppingCart size={48} />

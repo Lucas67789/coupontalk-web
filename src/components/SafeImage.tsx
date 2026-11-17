@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { sanitizeContent } from '@/lib/content-safety';
 import { publicContentImages } from '@/lib/content-images';
 
-export default function SafeImage({ src, alt, className, lazyLoad }: { src: string, alt: string, className?: string, lazyLoad?: boolean }) {
+export default function SafeImage({ src, alt, className, lazyLoad, natural = false }: { src: string, alt: string, className?: string, lazyLoad?: boolean, natural?: boolean }) {
     src = publicContentImages(src || '');
     const [error, setError] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -41,8 +41,8 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
 
     return (
         <>
-            <div className={`relative w-full h-full flex items-center justify-center ${className || ''}`}>
-                <Image 
+            <div className={`relative w-full ${natural ? '' : 'h-full'} flex items-center justify-center ${className || ''}`}>
+                {natural ? <img src={src} alt={alt} loading={lazyLoad ? 'lazy' : 'eager'} className="block w-full h-auto cursor-zoom-in" onError={() => setError(true)} onClick={() => setIsZoomed(true)} /> : <Image 
                     src={src} 
                     alt={alt} 
                     fill
@@ -51,7 +51,7 @@ export default function SafeImage({ src, alt, className, lazyLoad }: { src: stri
                     onError={() => setError(true)} 
                     onClick={() => setIsZoomed(true)}
                     priority={!lazyLoad}
-                />
+                />}
             </div>
             {isZoomed && (
                 <div 
