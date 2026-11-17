@@ -9,8 +9,9 @@ import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
 import { latestGuideTitle } from '@/lib/latest-guide';
 import Link from 'next/link';
-import Image from 'next/image';
-import { couponImages } from '@/lib/content-images';
+import CouponThumbnail from './CouponThumbnail';
+import { storeCoverImages } from '@/lib/store-cover-images';
+import { contentImages } from '@/lib/content-images';
 
 const getStoreTheme = (name: string) => {
     const themes = [
@@ -91,9 +92,9 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
 
     const cardContent = (
         <>
-            <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-50">
-                <Image src={couponImages(coupon.content_body)[0]} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
-            </div>
+            <CouponThumbnail src={contentImages(coupon.content_body)[0]}
+                fallback={storeCoverImages[storeId || coupon.store_id] || coupon.stores?.logo}
+                alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} />
             {/* Decorative top accent */}
             <div className={`absolute left-0 top-0 right-0 h-1 ${isExpired ? 'bg-gray-300' : theme.accent}`}></div>
 
@@ -131,7 +132,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
             </div>
 
-            <div className="flex flex-col gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
                     <p className={`text-xs font-medium mb-1 uppercase tracking-wider ${isExpired ? 'text-gray-300' : 'text-gray-400'}`}>프로모션 코드</p>
@@ -140,7 +141,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                             {tiers.map(t => <option key={t.code} value={t.code}>US${t.minimum} 이상 → ${t.discount} 할인</option>)}
                         </select>
                     </label>}
-                    <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono text-lg text-center tracking-wider bg-gray-50 w-full ${isExpired ? 'text-gray-400 border-gray-200' : isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
+                    <div className={`border-2 border-dashed py-3 px-4 rounded-lg font-mono break-all text-lg text-center tracking-wider bg-gray-50 w-full ${isExpired ? 'text-gray-400 border-gray-200' : isNoCode ? 'text-gray-400 border-gray-200' : 'text-gray-800 border-gray-300'}`}>
                         {isNoCode ? '코드 필요없음' : actionCoupon.code}
                     </div>
                 </div>
@@ -177,7 +178,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                     <ul className={`flex flex-col gap-2 mb-4 text-sm ${isExpired ? 'text-gray-400' : 'text-gray-600'}`}>
                         <li className="flex items-start gap-2">
                             <CheckCircle2 size={16} className={`${isExpired ? 'text-gray-400' : 'text-green-500'} flex-shrink-0 mt-0.5`} />
-                            <span className="leading-6">조건: <strong>{parsedConditionText}</strong></span>
+                            <span className="leading-6 min-w-0 break-words">조건: <strong>{parsedConditionText}</strong></span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Calendar size={16} className="text-gray-400 flex-shrink-0" />
@@ -189,7 +190,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     );
 
     return (
-        <div className="card p-5 flex flex-col gap-4 relative overflow-hidden self-start">
+        <div className="card p-4 sm:p-5 min-w-0 h-full flex flex-col gap-4 relative overflow-hidden">
             {cardContent}
         </div>
     );

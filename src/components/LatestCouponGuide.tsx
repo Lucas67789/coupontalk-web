@@ -1,3 +1,4 @@
+import CouponThumbnail from './CouponThumbnail';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import Link from 'next/link';
 import type { CouponRow } from '@/lib/models';
@@ -9,7 +10,7 @@ import { MarkdownRenderer } from './MarkdownRenderer';
 export default function LatestCouponGuide({ coupon, offers, storeName, title, description, modified }: {
     coupon: CouponRow; offers: CouponRow[]; storeName: string; title: string; description: string; modified: string;
 }) {
-    const fallbackCover = storeCoverImages[coupon.store_id];
+    const fallbackCover = storeCoverImages[coupon.store_id] || coupon.stores?.logo;
     const now = new Date().getTime();
     const subject = guideSubject(coupon);
     const matching = offers.filter(o => matchesGuideTopic(subject, `${o.title} ${o.seo_description || ''}`));
@@ -26,7 +27,9 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
             <Link href={`/store/${coupon.store_id}#offer-picker`} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-5 py-3 font-bold text-white">{storeName} 현재 혜택 비교하기 →</Link>
         </aside>}
         <p className="mt-3 text-sm text-gray-500">최근 안내 수정: {new Date(modified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</p>
-        {!offers.length && fallbackCover && <img src={fallbackCover} alt={`${storeName} 이용 안내`} width={1200} height={1200} className="mt-6 w-full max-w-md rounded-2xl" />}
+        <CouponThumbnail src={fallbackCover || couponImages((matching[0] || offers[0] || coupon).content_body)[0]}
+            fallback={couponImages((matching[0] || offers[0] || coupon).content_body)[0]}
+            alt={`${storeName} 할인 혜택 안내`} className="mt-6 mx-auto max-w-xl" />
         <section className="mt-8" aria-label="최신 할인 안내">
             <h2 className="text-2xl font-bold">{topics.length ? topics.join(" · ") : storeName} 관련 최신·예정 혜택</h2>
             <p className="mt-3 leading-7">이 페이지는 이전 ‘{subject}’ 행사를 찾는 분을 위한 후속 안내입니다. 이전 코드는 종료됐으며 아래 새 공지에서 대상 상품·옵션과 결제 조건을 확인하세요.</p>
@@ -40,7 +43,7 @@ export default function LatestCouponGuide({ coupon, offers, storeName, title, de
                     return <article key={offer.id} className="rounded-2xl border border-blue-100 p-5">
                         <p className="font-semibold text-blue-700">{upcoming ? `시작 예정 · ${new Date(start!).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}` : '진행 기간 내 · 실제 적용 조건 확인'}</p>
                         <Link href={`/store/${offer.store_id}/coupon/${offer.id}`} className="block">
-                            {image && <img src={image} alt={offer.title} className="mt-3 w-full max-w-md rounded-xl" />}
+                            <CouponThumbnail src={image} fallback={fallbackCover} alt={offer.title} className="mt-3 mx-auto max-w-xl" />
                             <h3 className="mt-3 text-xl font-bold text-blue-800">{offer.title}</h3>
                         </Link>
                         <p className="mt-2 font-semibold">{offer.discount}</p>

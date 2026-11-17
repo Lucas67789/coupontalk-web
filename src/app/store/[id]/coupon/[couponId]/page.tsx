@@ -1,3 +1,4 @@
+import CouponThumbnail from '@/components/CouponThumbnail';
 import { aliCouponTiers, aliCouponDetails } from '@/lib/ali-coupon-tiers';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, Faq } from '@/lib/models';
@@ -82,7 +83,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string; co
     const { data: latest } = expired ? await supabase.from('coupons').select('id, code, title, expiry, content_body, updated_at, published_at, created_at').eq('store_id', storeId).eq('status', 'published').lte('published_at', now).order('published_at', { ascending: false }) : { data: [] };
     if (expired) title = uniqueGuideTitle(storeName, coupon, latest || []);
     const guideOffers = (latest || []).filter(c => !isCouponExpired(c.expiry, c.title));
-    const images = expired ? (guideOffers.length ? guideOffers.flatMap(c => contentImages(c.content_body)) : [storeCoverImages[storeId] || contentImages(coupon.content_body)[0]]) : contentImages(coupon.content_body);
+    const images = expired ? (guideOffers.length ? guideOffers.flatMap(c => contentImages(c.content_body)) : [storeCoverImages[storeId] || contentImages(coupon.content_body, storeCoverImages[storeId] || coupon.stores?.logo)[0]]) : contentImages(coupon.content_body, storeCoverImages[storeId] || coupon.stores?.logo);
     const modified = [latestGuideUpdatedAt, coupon.updated_at || coupon.created_at, ...(latest || []).map(c => c.updated_at || c.published_at || c.created_at)].filter(Boolean).sort().at(-1);
     return {
         title,
@@ -174,7 +175,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
     const h1Title = coupon.seo_title || (coupon.title.includes(storeName) ? coupon.title : `${storeName} ${coupon.title}`);
 
     // Extract Hero Image from markdown
-    let mainImage: string | null = contentImages(coupon.content_body)[0];
+    let mainImage: string | null = contentImages(coupon.content_body, storeCoverImages[storeId] || coupon.stores?.logo)[0];
     let mainImageAlt = h1Title;
     let remainingContent = publicContentImages(coupon.content_body || '');
 
@@ -195,7 +196,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
         '@context': 'https://schema.org',
         '@type': 'Article',
         headline: h1Title,
-        image: contentImages(coupon.content_body),
+        image: contentImages(coupon.content_body, storeCoverImages[storeId] || coupon.stores?.logo),
         description: coupon.seo_description || `${storeName} ${coupon.title} - ${coupon.discount} 할인`,
         datePublished: new Date(coupon.published_at || coupon.created_at).toISOString(),
         dateModified: new Date(coupon.updated_at || coupon.published_at || coupon.created_at).toISOString(),
@@ -289,9 +290,8 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
                 {/* Hero Image Extracted from Markdown */}
                 {mainImage && (
-                    <div className="mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm relative w-full">
-                        <img src={mainImage} alt={mainImageAlt} className="w-full h-auto" />
-                    </div>
+                    <CouponThumbnail src={mainImage} fallback={storeCoverImages[storeId] || store.logo}
+                        alt={mainImageAlt} className="mb-8 mx-auto max-w-xl border border-gray-100" />
                 )}
 
 

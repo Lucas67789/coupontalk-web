@@ -34,9 +34,9 @@ export function contentImages(content?: string | null): string[] {
     return images;
 }
 
-export function couponImages(content?: string | null): string[] {
+export function couponImages(content?: string | null, fallback?: string): string[] {
     const images = contentImages(content);
-    return images.length ? images : [squareThumbnail('https://coupontalk.kr/og-image.png')];
+    return images.length ? images : [squareThumbnail(fallback ? new URL(fallback, 'https://coupontalk.kr').href : 'https://coupontalk.kr/og-image.png')];
 }
 
 export function publicContentImages(content: string): string {
