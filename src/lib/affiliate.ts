@@ -183,6 +183,19 @@ export function hasCouponCode(code?: string | null) {
     return !!code?.trim() && !['NO_CODE_REQUIRED', '없음', '코드 필요없음'].includes(code.trim()) && !/자동\s*적용|코드\s*(불필요|필요\s*없음)|본문\s*참고|금액별\s*상이/.test(code);
 }
 
+/** Validate before publishing, using the same destination policy as public buttons. */
+export function assertCouponPublishable(coupon: { status?: string | null; condition?: string | null; affiliate_url?: string | null; affiliateUrl?: string | null }) {
+    if (coupon.status !== 'published') return;
+    let url = coupon.affiliate_url || coupon.affiliateUrl || '';
+    try {
+        const parsed = JSON.parse(coupon.condition || '');
+        if (typeof parsed?.url === 'string' && parsed.url) url = parsed.url;
+    } catch { /* Plain text conditions are supported. */ }
+    if (!safeAffiliateUrl(url)) {
+        throw new Error('게시 검수 실패: 제휴 링크가 없거나 사이트 허용 목록에 없습니다. 링크 등록·배포 후 다시 게시하세요. 현재 상태에서는 구매 버튼이 비활성화됩니다.');
+    }
+}
+
 /** Internal navigation is allowed; unknown external references remain plain text. */
 export function safeNavigationUrl(value: unknown): string | null {
     if (typeof value !== 'string' || /[\\\u0000-\u0020\u007f]/.test(value)) return null;
