@@ -4,6 +4,8 @@
 const verifiedAffiliateUrls = new Set([
   // User supplied for Shokz OpenDot One, 2026-11-17.
   "http://app.ac/pEwL6dS53",
+  // User supplied for Agoda Mega Sale, 2026-11-17.
+  "http://app.ac/jEwLhFS93",
   // 44 approved merchants: exact generated URLs verified in owner dashboard, 2026-11-13.
   "https://lpweb.kr/click.php?m=yes24&a=A100703639&l=0000",
   "https://lpweb.kr/click.php?m=soomgo&a=A100703639&l=0000",
