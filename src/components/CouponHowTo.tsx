@@ -15,7 +15,7 @@ export default function CouponHowTo({ storeName, hasCode }: { storeName: string;
     return <section aria-label={`${storeName} 쿠폰 사용 순서`} className="mt-5 rounded-2xl bg-slate-50 p-4 sm:p-5">
         <h2 className="text-lg font-bold text-slate-900">{hasCode ? '복사한 할인코드, 이렇게 쓰세요' : '코드 없이 혜택 받는 방법'}</h2>
         <ol className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">{steps.map(({title,text,icon:Icon},i)=><li key={title} className="rounded-xl border border-slate-200 bg-white p-3">
-            <div className="mb-3 flex items-center justify-between"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">{i+1}</span><Icon size={22} className="text-blue-600" aria-hidden="true" /></div>
+            <div className="mb-3 flex items-center justify-between"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--store-accent,#2563eb)] text-xs font-bold text-white">{i+1}</span><Icon size={22} className="text-[var(--store-accent,#2563eb)]" aria-hidden="true" /></div>
             <h3 className="text-sm font-bold">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-600">{text}</p>
         </li>)}</ol>
         {hasCode && <p className="mt-3 text-xs text-slate-600">복사만으로 할인되지는 않습니다. 자동 복사가 안 되면 표시된 코드를 직접 입력하세요.</p>}
