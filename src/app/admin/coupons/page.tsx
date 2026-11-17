@@ -7,6 +7,7 @@ import type { CouponRow, StoreRow } from '@/lib/models';
 import { useEffect, useState } from 'react';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { saveAdminChange } from '@/lib/admin-mutation';
+import { assertCouponPublishable } from '@/lib/affiliate';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import TiptapEditor from '@/components/admin/TiptapEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
@@ -139,6 +140,13 @@ export default function AdminCoupons() {
                 v: currentCoupon.is_verified ?? true
             })
         };
+
+        try {
+            assertCouponPublishable(payload);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : '게시 검수에 실패했습니다.');
+            return;
+        }
 
         if (currentCoupon.id) {
             if (!await saveAdminChange(supabase.from('coupons').update(payload).eq('id', currentCoupon.id).select('id'))) return;
