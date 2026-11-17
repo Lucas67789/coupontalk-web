@@ -10,6 +10,7 @@ import * as utils from '../src/lib/utils.ts';
 import * as images from '../src/lib/content-images.ts';
 import * as affiliate from '../src/lib/affiliate.ts';
 import * as guide from '../src/lib/store-guide.ts';
+import * as theme from '../src/lib/store-theme.ts';
 
 const api = {};
 const noop = () => null;
@@ -24,6 +25,7 @@ runInNewContext(ts.transpile(readFileSync(new URL('../src/components/AliStoreLan
   if (name === '@/lib/content-images') return images;
   if (name === '@/lib/affiliate') return affiliate;
   if (name === '@/lib/store-guide') return guide;
+  if (name === '@/lib/store-theme') return theme;
   if (name === '@/lib/ali-store') return {
     aliEventLabel: title => title,
     aliOfferRows: coupon => [{code: coupon.code}],
@@ -48,6 +50,8 @@ test('shared landing keeps each merchant identity, individual thumbnail and deta
     assert.ok(html.includes('전용 안내'));
     assert.ok(!html.includes('/store/aliexpress/'));
     assert.ok(!html.includes('알리익스프레스'));
+    assert.ok(!html.includes('/images/ali-store/'));
+    assert.ok(html.includes('--store-accent:'));
   }
 });
 
