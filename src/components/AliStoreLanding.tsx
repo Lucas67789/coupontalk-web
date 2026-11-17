@@ -5,7 +5,7 @@ import type { CouponRow, Faq, ProductRow, StoreRow } from '@/lib/models';
 import { aliEventLabel, aliOfferInfo, aliOfferRows, aliPaymentContent } from '@/lib/ali-store';
 import { safeAffiliateUrl } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
-import { contentImages } from '@/lib/content-images';
+import { displayImages } from '@/lib/content-images';
 import AliOfferTable from './AliOfferTable';
 import CouponHowTo from './CouponHowTo';
 import type { CSSProperties, ReactNode } from 'react';
@@ -63,9 +63,9 @@ export default function AliStoreLanding({ store, coupons, expiredCoupons, produc
         const info = aliOfferInfo(coupon);
         const isUpcoming = couponStatus(coupon, Date.parse(now)) === 'upcoming';
         const isFlagship = coupon.id === 'coupon-aliexpress-nov2026-1111';
-        const thumbnail = contentImages(coupon.content_body)[0];
+        const thumbnail = displayImages(coupon.content_body)[0];
         return <article key={coupon.id} id={`ali-event-${coupon.id}`} className="scroll-mt-36 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          {isFlagship || !thumbnail ? <Banner storeId={store.id} kind="campaign" eyebrow={isUpcoming ? 'COMING SOON' : store.name} title={eventLabel(coupon.title)} description={coupon.discount || '행사별 할인 혜택을 확인하세요'} /> : <div className="relative aspect-[3/1] bg-[var(--store-soft)]"><Image src={thumbnail} alt={coupon.title} fill sizes="(max-width: 768px) 100vw, 960px" className="object-contain" /></div>}
+          {isFlagship || !thumbnail ? <Banner storeId={store.id} kind="campaign" eyebrow={isUpcoming ? 'COMING SOON' : store.name} title={eventLabel(coupon.title)} description={coupon.discount || '행사별 할인 혜택을 확인하세요'} /> : <div className="px-4 pt-4 sm:px-6 sm:pt-6" data-coupon-banner><img src={thumbnail} alt={coupon.title} loading="lazy" className="mx-auto block h-auto w-full max-w-2xl rounded-xl" /></div>}
           <div className="p-4 sm:p-6"><div className="mb-4 flex flex-wrap items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${isUpcoming ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>{isUpcoming ? '시작 예정' : '진행 기간 내'}</span><span className="inline-flex items-center gap-1 text-xs text-slate-500"><CalendarDays size={13} />종료일 {coupon.expiry || '판매처에서 확인'} · 한국시간</span></div>
             <h3 className="text-lg font-bold text-slate-900">{coupon.title}</h3><p className="mb-5 mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{info.condition}</p>
             <AliOfferTable storeName={store.name} coupons={[coupon]} now={now} />

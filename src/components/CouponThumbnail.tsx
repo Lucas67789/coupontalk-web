@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { publicContentImages } from '@/lib/content-images';
 
 // Keep the reserved thumbnail space even when a remote image fails to load.
 export default function CouponThumbnail({ src, fallback, alt, className = '', natural = false }: {
     src?: string; fallback?: string; alt: string; className?: string; natural?: boolean;
 }) {
     const [failed, setFailed] = useState<string[]>([]);
-    const image = [src, fallback].find(url => url && !failed.includes(url));
+    const image = [src, fallback].filter((url): url is string => !!url).map(publicContentImages).find(url => !failed.includes(url));
     return <div className={`relative ${natural ? '' : 'aspect-square'} w-full shrink-0 overflow-hidden rounded-xl bg-slate-50 ${className}`}>
         {image ? <img src={image} alt={alt} width={1200} height={1200} loading="lazy"
             onError={() => setFailed(previous => [...previous, image])}

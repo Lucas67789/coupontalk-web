@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { supabase, fetchAllRows } from '@/lib/supabase';
 import { saveAdminChange } from '@/lib/admin-mutation';
 import { assertCouponPublishable } from '@/lib/affiliate';
+import { assertPublicationImages, inspectBrowserImage } from '@/lib/image-publication';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import TiptapEditor from '@/components/admin/TiptapEditor';
 import { Plus, Edit2, Trash2, Save, X, Search, Image as ImageIcon, Loader2, Copy } from 'lucide-react';
@@ -143,6 +144,7 @@ export default function AdminCoupons() {
 
         try {
             assertCouponPublishable(payload);
+            await assertPublicationImages(payload, inspectBrowserImage);
         } catch (error) {
             alert(error instanceof Error ? error.message : '게시 검수에 실패했습니다.');
             return;

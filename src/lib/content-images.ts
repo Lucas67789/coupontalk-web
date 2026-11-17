@@ -53,3 +53,8 @@ export function publicContentImages(content: string): string {
         return url.href;
     });
 }
+
+// Screen images never consume the square, padded search-preview derivative.
+export function displayImages(content?: string | null): string[] {
+    return contentImages(content).map(url => publicContentImages(url));
+}
