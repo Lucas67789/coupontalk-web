@@ -1,5 +1,10 @@
 // Brand guide artwork, without time-limited discount claims.
 export const storeCoverImages: Record<string, string> = {
+  "베이비뵨": "/store-covers/20261117/babybjorn.webp",
+  "naturerepublic": "/store-covers/20261117/naturerepublic.webp",
+  "coupang": "/store-covers/20261117/coupang.webp",
+  "newper": "https://coupontalk.kr/coupon-images/thumbnails/newper-coupon-guide-20261105-v1.webp",
+  "refurlab": "/store-covers/20261117/refurlab.webp",
   "야놀자-nol": "https://coupontalk.kr/coupon-images/thumbnails/nol-europe-hotel-coupon-20261105-v1.webp",
   "socar": "https://coupontalk.kr/coupon-images/thumbnails/socar-20261102.png",
   "daesang": "https://coupontalk.kr/coupon-images/thumbnails/full-refresh-20261031/daesang-v1.webp",
