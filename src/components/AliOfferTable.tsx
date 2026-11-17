@@ -25,10 +25,10 @@ export default function AliOfferTable({ coupons, now, summary = false, storeName
             const info = aliOfferInfo(coupon);
             const status = couponStatus(coupon, Date.parse(now));
             const key = `${coupon.id}-${index}`;
-            return <tr key={key} className="hover:bg-orange-50/40">
+            return <tr key={key} className="hover:bg-[var(--store-soft,#f8fafc)]">
               <td className="px-3 py-3 sm:px-5">
                 <p className="text-xs leading-5 text-slate-500">{row.minimum}</p>
-                <p className="mt-0.5 text-base font-extrabold text-red-600 sm:text-lg">{row.discount}</p>
+                <p className="mt-0.5 text-base font-extrabold text-[var(--store-accent,#334155)] sm:text-lg">{row.discount}</p>
                 {summary && <a href={`#ali-event-${coupon.id}`} className="mt-1 block text-[11px] text-slate-500 underline underline-offset-2">{coupon.title.replace(/^알리익스프레스\s*/, '')}</a>}
               </td>
               <td className="px-2 py-3"><code className="break-all text-xs font-bold text-slate-800 sm:text-sm">{row.code || '별도 코드 없음'}</code></td>
@@ -41,7 +41,7 @@ export default function AliOfferTable({ coupons, now, summary = false, storeName
                     const message = await openCouponLink({ id: coupon.id, code: row.code }, info.url, storeName, !!row.code, summary ? `${storeName} 대표 요약표` : `${storeName} 대표 행사표`);
                     if (message.includes('복사 완료')) setCopied(key);
                     showToast(message);
-                  }} className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:bg-slate-200 disabled:text-slate-500 sm:px-4">
+                  }} className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-[var(--store-accent,#334155)] px-3 py-2 text-xs font-bold text-white transition-colors hover:brightness-90 disabled:bg-slate-200 disabled:text-slate-500 sm:px-4">
                   {copied === key ? <Check size={14} /> : row.code ? <Copy size={14} /> : <ArrowUpRight size={14} />}
                   {status === 'upcoming' ? '시작 예정' : status === 'expired' ? '기간 종료' : !info.url ? '링크 확인 중' : copied === key ? '복사 완료' : row.code ? '복사 · 이동' : '행사장'}
                 </button>
