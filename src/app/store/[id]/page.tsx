@@ -2,7 +2,6 @@ import SocarBenefits from '@/components/SocarBenefits';
 import AliStoreLanding from '@/components/AliStoreLanding';
 import { aliCouponTiers } from '@/lib/ali-coupon-tiers';
 import { storeEventStatus } from '@/lib/store-event-status';
-import CouponHowTo from '@/components/CouponHowTo';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import type { CouponRow, ProductRow, Faq } from '@/lib/models';
 import { defaultStoreFaqs, parseFaqs } from '@/lib/faq';
@@ -13,14 +12,9 @@ import { supabase } from '@/lib/supabase';
 import AgodaGuide, { agodaFaqs, agodaGuideUpdatedAt } from '@/components/AgodaGuide';
 import { hasStoreGuide, storeGuideTitle } from '@/lib/store-guide';
 import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
-import CouponListRow from '@/components/CouponListRow';
-import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, CalendarDays, HelpCircle, CheckCircle } from 'lucide-react';
 import StoreGuide from '@/components/StoreGuide';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import TableOfContents from '@/components/TableOfContents';
 import type { Metadata } from 'next';
 import RelatedStores from '@/components/RelatedStores';
 import TravelOfferGuide, { travelStoreIntros, travelGuideUpdatedAt } from '@/components/TravelOfferGuide';
@@ -187,200 +181,15 @@ export default async function StorePage(props: { params: Promise<{ id: string }>
         '@graph': [jsonLd, breadcrumbLd, faqLd, ...(itemListLd ? [itemListLd] : [])]
     };
 
-    if (storeId === 'aliexpress') return <>
+    return <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
-        <AliStoreLanding store={store} coupons={activeCoupons} expiredCoupons={expiredCoupons} products={publishedProducts} faqs={faqs} dateModified={dateModified} now={now} />
-    </>;
-
-    return (
-        <div className="container mx-auto max-w-5xl border-x min-h-screen bg-white shadow-sm pb-28" style={{ borderColor: 'var(--border-color)' }}>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schemaGraph) }} />
-
-            <div className="hidden md:block px-5 py-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
-                <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors">
-                    <ArrowLeft size={16} /> 전체 목록으로
-                </Link>
-            </div>
-
-            <header className="px-4 py-3 md:p-6 border-b border-gray-200">
-
-                <p className="text-xs md:text-sm font-semibold text-blue-700 mb-1">{guided ? "상품·이용 가이드" : activeCoupons.length ? `${currentYear}년 ${currentMonth}월 · 행사 ${ongoingCount}개 · 할인코드 ${codeCount}종${upcomingCount ? ` · 예정 ${upcomingCount}개` : ""}` : "현재 등록된 활성 쿠폰 없음"}</p>
-                <h1 className="text-2xl md:text-4xl font-bold leading-tight text-gray-900">{guided ? guideTitle : `${store.name} 할인코드`}</h1>
-                <p className="hidden sm:block mt-3 text-sm text-gray-600 leading-6">{activeCoupons.length ? "쿠폰을 선택하고 버튼 한 번으로 할인 페이지를 여세요." : "상품과 이용 조건을 판매처에서 확인하세요."}</p>
-                {storeUrl && <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-4 flex min-h-14 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-4 text-center text-base font-extrabold text-white shadow-sm hover:bg-blue-700 sm:w-fit sm:min-w-64">{storeId === 'socar' ? '쏘카 앱에서 쿠폰·예약 확인' : `${store.name} 상품·혜택 확인`} ↗</a>}
-                <nav aria-label={`${store.name} 페이지 목차`} className="mt-2 flex gap-2 overflow-x-auto md:flex-wrap">
-                    {(activeCoupons.length ? [["#coupons", "쿠폰 바로 사용"], ["#quick-how-to", "사용 방법"], ["#benefit-summary", "상세 조건"], ["#faq", "자주 묻는 질문"]] : [[storeId === "socar" ? "#socar-benefits" : "#store-guide", storeId === "socar" ? "카드·쿠폰 비교" : "상품·이용 안내"], ["#faq", "자주 묻는 질문"]]).map(([href, label], index) => <a key={`${href}-${index}`} href={href} className={`shrink-0 rounded-lg px-3 py-2 text-xs md:text-sm font-semibold ${index === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>{label}</a>)}
-                </nav>
-            </header>
-
-            {(!guided || activeCoupons.length > 0) && (
-                <div id="coupons" className="p-3 md:p-6 bg-slate-50 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-base md:text-2xl font-bold mb-2 md:mb-4 flex items-center gap-2">
-                        할인코드·혜택 <span className="text-blue-600">{codeCount ? `${codeCount}종` : `${activeCoupons.length}개`}</span>
-                    </h2>
-                    <div className="grid grid-cols-1 gap-4">
-                        {activeCoupons.map((coupon: CouponRow) => (
-                            <CouponListRow key={coupon.id} coupon={coupon} storeName={store.name} storeId={store.id} storeLogo={store.logo} isExpired={coupon.isExpired} />
-                        ))}
-                    </div>
-                    {activeCoupons.length === 0 && <p className="text-gray-600">현재 등록된 활성 쿠폰이 없습니다. 새로운 프로모션이 등록되면 이곳에서 확인할 수 있습니다.</p>}
-                </div>
-            )}
-
-            {activeCoupons.length > 0 && !activeCoupons.some((c: CouponRow) => aliCouponTiers(c).length) && <div id="quick-how-to" className="px-4 pb-6 md:px-6 scroll-mt-24"><CouponHowTo storeName={store.name} hasCode={codeCount > 0} /></div>}
-
-            <div className="px-5 md:px-6 py-2 bg-gray-50 border-b flex items-center gap-3 text-gray-700" style={{ borderColor: 'var(--border-color)' }}>
-                <CheckCircle size={20} className="text-green-600" />
-                <p className="font-semibold text-sm">
-                    {dateModified ? <>최근 내용 수정: <span className="text-gray-900 font-bold">{new Date(dateModified).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</span></> : '쿠폰별 유효기간과 적용 조건을 확인하세요.'}
-                </p>
-            </div>
-
-            <p className="px-5 pt-6 text-sm leading-7 text-slate-600">{guided ? store.description : travelStoreIntros[storeId]}</p>
+        <AliStoreLanding store={store} coupons={activeCoupons} expiredCoupons={expiredCoupons} products={publishedProducts} faqs={faqs.length ? faqs : defaultFaqs} dateModified={dateModified} now={now} guided={guided}>
             <TravelOfferGuide storeId={storeId} offers={activeCoupons} />
             {storeId === 'socar' && <SocarBenefits />}
-
-            {guided && <section id="store-guide" className="p-5 md:p-8 scroll-mt-24 border-b">
-                <MarkdownRenderer content={store.guide_content || ''} storeName={store.name} />
-                {storeUrl && <a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="mt-8 inline-flex rounded-xl border border-blue-600 px-6 py-3 font-bold text-blue-700">{store.name} 상품·서비스 확인 ↗</a>}
-            </section>}
-
-            {activeCoupons.length > 0 && (
-                <div id="benefit-summary" className="p-5 md:p-6 border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-xl font-bold mb-4 text-gray-900">📋 {currentMonth}월 {store.name} 혜택 요약표</h2>
-                    <p className="text-sm text-gray-600 leading-6 mb-4">등록된 사용·예약 마감일이 지나지 않은 혜택입니다. 대상 고객·상품과 실제 적용 여부는 각 프로모션 조건을 확인하세요.</p>
-                    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-100 text-gray-800 font-bold border-b border-gray-200">
-                                <tr>
-                                    <th className="px-4 py-3 whitespace-nowrap">할인 혜택</th>
-                                    <th className="px-4 py-3 whitespace-nowrap">할인코드</th>
-                                    <th className="px-4 py-3 whitespace-nowrap">조건</th>
-                                    <th className="px-4 py-3 whitespace-nowrap">유효기간</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {activeCoupons.map((coupon: CouponRow) => {
-                                    let parsedCond = coupon.condition;
-                                    try {
-                                        if (coupon.condition && coupon.condition.startsWith('{')) {
-                                            parsedCond = JSON.parse(coupon.condition).text || parsedCond;
-                                        }
-                                    } catch {}
-
-                                    // 우선순위 2: 방어 로직 (날짜 형식이 아니거나 알 수 없는 경우 예외 처리)
-                                    let displayExpiry = coupon.expiry;
-                                    if (!displayExpiry || displayExpiry.length < 2) displayExpiry = '판매처에서 확인';
-
-                                    return (
-                                        <tr key={coupon.id} className="bg-white hover:bg-gray-50 transition-colors">
-                                            <td className="px-4 py-3 font-semibold text-blue-700"><Link className="underline underline-offset-4" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{couponStatus(coupon, new Date(now).getTime()) === "upcoming" ? "[예정] " : "[진행 기간 내] "}{coupon.discount}</Link></td>
-                                            <td className="px-4 py-3 font-mono bg-blue-50/50 text-blue-900 font-bold">
-                                                {aliCouponTiers(coupon).length ? aliCouponTiers(coupon).map(t => t.code).join(" · ") : !hasCouponCode(coupon.code) ? (
-    '전용 링크에서 확인'
-) : (
-    <div className="flex flex-col gap-1">
-        {coupon.code.split(/\r?\n/).map((codeStr: string, idx: number) => (
-            <span key={idx} className="bg-blue-100 text-blue-900 px-2 py-1 rounded font-bold whitespace-nowrap text-xs md:text-sm inline-block w-fit">
-                {codeStr}
-            </span>
-        ))}
-    </div>
-)}
-                                            </td>
-                                            <td className="px-4 py-3 text-gray-600">{parsedCond}</td>
-                                            <td className="px-4 py-3 text-gray-500">{displayExpiry}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {store.events?.some((e: { date: string }) => storeEventStatus(e.date, new Date(now)) !== "record") && (
-                <div className="p-6 md:p-10 border-b bg-blue-50/50" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-blue-900">
-                        <CalendarDays size={20} className="text-blue-600" /> 진행 중·예정 이벤트
-                    </h2>
-                    <ul className="flex flex-col gap-3">
-                        {store.events?.filter((e: { date: string }) => storeEventStatus(e.date, new Date(now)) !== "record").map((event: { title: string; date: string }, i: number) => (
-                            <li key={i} className="flex flex-wrap gap-2 items-center bg-white p-4 rounded-xl shadow-sm border border-blue-100">
-                                <span className="font-bold text-gray-900">{event.title}</span>
-                                <span className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-700 rounded-full">{event.date}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-
-            {publishedProducts.length > 0 && (
-                <div id="products" className="p-6 md:p-10 bg-white border-b scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-6 flex items-center gap-2">
-                        🎁 추천 특가 상품 <span className="text-blue-600">({publishedProducts.length})</span>
-                    </h2>
-                    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-                        {publishedProducts.map((product: ProductRow) => (
-                            <ProductCard key={product.id} product={product} storeName={store.name} />
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {!guided && publishedCoupons.length === 0 && publishedProducts.length === 0 && (
-                <div className="p-6 md:p-10 bg-gray-50/50">
-                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
-                        <p className="text-gray-500">현재 등록된 할인코드 및 상품이 없습니다.</p>
-                    </div>
-                </div>
-            )}
-
-            {/* 우선순위 3: 콘텐츠 대폭 확장 (4단계 적용 가이드, 결제수단별 혜택, 예약 꿀팁, 브랜드 안내) */}
-            {!guided && (isAgoda ? <AgodaGuide /> : <StoreGuide name={store.name} travel={Boolean(travelStoreIntros[storeId]) || store.tags?.includes("travel")} storeId={storeId} showHowTo={activeCoupons.length === 0} />)}
-
-            {/* FAQs */}
-            <div id="faq" className="p-6 md:p-10 border-t scroll-mt-24" style={{ borderColor: 'var(--border-color)' }}>
-                <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-6 flex items-center gap-2">
-                    <HelpCircle size={24} className="text-blue-600" /> {store.name} 자주 묻는 질문 (FAQ)
-                </h2>
-                <div className="flex flex-col gap-4">
-                    {faqs.map((faq: Faq, i: number) => (
-                        <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-start gap-2">
-                                <span className="text-blue-600">Q.</span> {faq.question}
-                            </h3>
-                            <p className="text-gray-600 pl-6 leading-relaxed">
-                                {faq.answer}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Guide Content */}
-            {!guided && !['aliexpress', 'agoda', 'klook', 'hotelskr', 'lenovo', 'usimsa'].includes(storeId) && store.guide_content && (
-                <div className="px-6 md:px-10 py-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">📖 상세 가이드 및 팁</h2>
-                    <TableOfContents content={store.guide_content} />
-                    <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm">
-                        <MarkdownRenderer content={store.guide_content} storeName={store.name} />
-                    </div>
-                </div>
-            )}
-
-            {store.events?.some((e: { date: string }) => storeEventStatus(e.date, new Date(now)) === 'record') && <details className="mx-4 my-6 rounded-xl border p-4 text-sm text-slate-500"><summary className="cursor-pointer">지난 행사·기간 확인이 필요한 기록</summary><p className="mt-2">현재 사용 가능한 혜택 목록이 아닙니다.</p><ul className="mt-3 space-y-2">{store.events.filter((e: { date: string }) => storeEventStatus(e.date, new Date(now)) === 'record').map((e: { title: string; date: string }, i: number) => <li key={i}>{e.title} · {e.date}</li>)}</ul></details>}
-            {/* Sticky Bottom CTA */}
-            {expiredCoupons.length > 0 && <details className="mx-6 md:mx-10 my-8 rounded-xl border border-gray-200 p-5">
-                <summary className="cursor-pointer font-semibold text-gray-600">종료된 할인 혜택 ({expiredCoupons.length})</summary>
-                <p className="mt-3 text-sm text-gray-500">지난 프로모션 기록입니다. 현재 구매·예약에는 사용할 수 없습니다.</p>
-                <ul className="mt-4 divide-y divide-gray-100">{expiredCoupons.map((coupon: CouponRow) => <li key={coupon.id} className="py-3"><Link className="text-sm text-gray-600 hover:underline" href={`/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`}>{coupon.title}</Link><p className="mt-1 text-xs text-gray-500">{coupon.expiry}</p></li>)}</ul>
-            </details>}
+            {guided ? <MarkdownRenderer content={store.guide_content || ''} storeName={store.name} /> : isAgoda ? <AgodaGuide /> : storeId !== 'aliexpress' ? <StoreGuide name={store.name} travel={Boolean(travelStoreIntros[storeId]) || store.tags?.includes("travel")} storeId={storeId} showHowTo={false} /> : null}
+            {!guided && !['aliexpress', 'agoda', 'klook', 'hotelskr', 'lenovo', 'usimsa'].includes(storeId) && store.guide_content && <MarkdownRenderer content={store.guide_content} storeName={store.name} />}
+            {!!store.events?.length && <details className="mt-6 rounded-xl border p-4"><summary>스토어 행사 일정과 기록</summary><ul className="mt-3 space-y-3">{store.events.map((event: {title: string; date: string}, i: number) => <li key={i}>{event.title} · {event.date}<span className="ml-2 text-xs text-slate-500">{storeEventStatus(event.date, new Date(now)) === 'record' ? '지난 행사·기간 확인 필요' : '진행·예정'}</span></li>)}</ul></details>}
             <RelatedStores storeId={storeId} />
-            {(guided || activeCoupons.length === 0) && storeUrl && <div className="fixed bottom-0 left-0 z-40 w-full border-t border-gray-200 bg-white p-3 md:hidden"><a data-store-affiliate={store.id} href={storeUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="flex min-h-12 items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-center font-bold text-white">{storeId === 'socar' ? '쏘카 쿠폰·예약 확인' : `${store.name} 상품·혜택 확인`} ↗</a></div>}
-            {!guided && activeCoupons.length > 0 && <div className="fixed bottom-0 left-0 w-full z-40 p-3 bg-white border-t border-gray-200 md:hidden"><a href="#coupons" className="flex justify-center rounded-xl bg-blue-600 p-3 font-bold text-white">{store.name} {codeCount ? `할인코드 ${codeCount}종` : `혜택 ${activeCoupons.length}개`} 보기</a></div>}
-
-        </div>
-    );
+        </AliStoreLanding>
+    </>;
 }
