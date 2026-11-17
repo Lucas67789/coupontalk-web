@@ -290,7 +290,7 @@ export default async function CouponDetailPage(props: { params: Promise<{ id: st
 
                 {/* Hero Image Extracted from Markdown */}
                 {mainImage && (
-                    <CouponThumbnail src={mainImage} fallback={storeCoverImages[storeId] || store.logo}
+                    <CouponThumbnail natural src={mainImage} fallback={storeCoverImages[storeId] || store.logo}
                         alt={mainImageAlt} className="mb-8 mx-auto max-w-xl border border-gray-100" />
                 )}
 
