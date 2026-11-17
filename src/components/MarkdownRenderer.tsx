@@ -22,7 +22,7 @@ export function MarkdownRenderer({ content, storeName }: { content: string, stor
         // If it contains HTML, render using dangerouslySetInnerHTML but with Tailwind Typography styles
         return (
             <div
-                className="prose prose-blue max-w-none prose-img:rounded-xl prose-img:shadow-sm"
+                className="prose prose-blue max-w-none prose-img:rounded-xl prose-img:shadow-sm [&_img]:!h-auto [&_img]:!max-w-full"
                 dangerouslySetInnerHTML={{ __html: safeContent }}
             />
         );

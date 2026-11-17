@@ -9,8 +9,7 @@ import { hasCouponCode, safeAffiliateUrl } from '@/lib/affiliate';
 import { couponStatus } from '@/lib/utils';
 import { latestGuideTitle } from '@/lib/latest-guide';
 import Link from 'next/link';
-import Image from 'next/image';
-import { couponImages as contentImages } from '@/lib/content-images';
+import { displayImages } from '@/lib/content-images';
 
 export default function CouponListRow({ coupon, storeName, storeId, isExpired }: { coupon: CouponRow, storeName: string, storeId: string, storeLogo: string, isExpired?: boolean }) {
     const { showToast } = useToast();
@@ -35,15 +34,15 @@ export default function CouponListRow({ coupon, storeName, storeId, isExpired }:
     };
 
     const isNoCode = !hasCouponCode(coupon.code);
-    const thumbnail = contentImages(coupon.content_body)[0];
+    const thumbnail = displayImages(coupon.content_body)[0];
     const detailHref = `/store/${encodeURIComponent(storeId)}/coupon/${encodeURIComponent(coupon.id)}`;
 
     if (!isExpired && aliCouponTiers(coupon).length) return <div className="rounded-2xl border border-orange-100 bg-white p-2 sm:p-4"><AliCouponTiers coupon={coupon} affiliateUrl={parsedAffiliateUrl} /></div>;
 
     return (
         <article className={`grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-5 min-w-0 bg-white border rounded-2xl p-4 md:p-5 group relative overflow-hidden ${isExpired ? 'border-gray-200 text-gray-500' : 'border-gray-200'}`}>
-            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-6 hidden md:block w-24 md:w-auto aspect-square overflow-hidden rounded-xl bg-slate-50">
-                <Image src={thumbnail} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} fill sizes="(max-width: 768px) 90vw, 400px" className="object-contain" />
+            {thumbnail && <Link href={detailHref} className="relative mb-4 md:mb-0 md:row-span-6 hidden md:block w-24 md:w-auto self-start overflow-hidden rounded-xl">
+                <img src={thumbnail} alt={isExpired ? latestGuideTitle(storeName, coupon.title) : coupon.title} loading="lazy" className="block w-full h-auto" />
             </Link>}
             
             {/* Top: Badges */}

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { publicContentImages } from '@/lib/content-images';
 
 // Keep the reserved thumbnail space even when a remote image fails to load.
-export default function CouponThumbnail({ src, fallback, alt, className = '', natural = false }: {
+export default function CouponThumbnail({ src, fallback, alt, className = '', natural = true }: {
     src?: string; fallback?: string; alt: string; className?: string; natural?: boolean;
 }) {
     const [failed, setFailed] = useState<string[]>([]);

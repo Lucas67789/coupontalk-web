@@ -23,3 +23,8 @@ test('Agoda padded search derivative cannot reach store banner or shared screen 
  assert.match(fs.readFileSync('src/components/CouponThumbnail.tsx','utf8'),/map\(publicContentImages\)/);
  assert.match(fs.readFileSync('src/app/admin/coupons/page.tsx','utf8'),/await assertPublicationImages\(payload, inspectBrowserImage\)/);
 });
+
+test('home category and list images do not force square presentation',()=>{
+ assert.match(fs.readFileSync('src/components/CouponThumbnail.tsx','utf8'),/natural = true/);
+ for(const name of ['StoreCard','CouponListRow']){const src=fs.readFileSync('src/components/'+name+'.tsx','utf8');assert.doesNotMatch(src,/aspect-square|object-contain/);}
+});

@@ -6,6 +6,7 @@ import { hasStoreGuide } from '@/lib/store-guide';
 import type { StoreSummary } from '@/lib/models';
 import { storeCoverImages } from '@/lib/store-cover-images';
 import { ChevronRight } from 'lucide-react';
+import { publicContentImages } from '@/lib/content-images';
 
 const getGradientClass = (name: string) => {
     const gradients = [
@@ -31,14 +32,14 @@ const getGradientClass = (name: string) => {
 
 export default function StoreCard({ store }: { store: StoreSummary }) {
     const [failedLogo, setFailedLogo] = useState('');
-    const cover = storeCoverImages[store.id] || store.logo || '';
+    const cover = publicContentImages(storeCoverImages[store.id] || store.logo || '');
     const showCover = !!cover && failedLogo !== cover;
     const latestEventTitle = store.coupons?.length ? `${store.coupons.length}개의 할인 혜택` : hasStoreGuide(store.tags) ? '상품·이용 가이드 보기' : '현재 등록된 활성 쿠폰 없음';
 
     return (
         <Link href={`/store/${store.id}`} className="card flex h-full min-w-0 flex-col overflow-hidden group">
-            {showCover && <img src={cover} alt={`${store.name} 할인 혜택 안내`} width={1200} height={1200} loading="lazy" ref={image => { if (image?.complete && !image.naturalWidth) setFailedLogo(cover); }} onError={() => setFailedLogo(cover)} className="w-full aspect-square object-contain border-b border-slate-100" />}
-                {!showCover && <div className="aspect-square w-full flex items-center justify-center border-b border-slate-100">
+            {showCover && <img src={cover} alt={`${store.name} 할인 혜택 안내`} width={1200} height={1200} loading="lazy" ref={image => { if (image?.complete && !image.naturalWidth) setFailedLogo(cover); }} onError={() => setFailedLogo(cover)} className="block w-full h-auto border-b border-slate-100" />}
+                {!showCover && <div className="py-8 w-full flex items-center justify-center border-b border-slate-100">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${getGradientClass(store.name)} shadow-sm`}>
                         {store.name.charAt(0)}
                     </div>
