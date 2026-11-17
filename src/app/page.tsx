@@ -77,7 +77,7 @@ export default async function Home() {
       </nav>
       <section className="mb-12" id="new-coupons">
         <div className="flex items-center justify-between mb-5"><h2 className="text-2xl font-bold">새로 등록된 혜택</h2><Link href="/store" className="text-sm text-blue-700">전체 보기 →</Link></div>
-        <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">{newCoupons.map(coupon => <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.store_id} />)}</div>
+        <div className="grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">{newCoupons.map(coupon => <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.store_id} />)}</div>
       </section>
       <section className="mb-12 rounded-2xl border border-blue-100 bg-white p-6">
         <div className="mb-4 flex items-center justify-between gap-3"><h2 className="text-2xl font-bold">구독료도 비교해보세요</h2><Link href="/subscriptions" className="shrink-0 text-sm text-blue-700">전체 보기 →</Link></div>
@@ -85,7 +85,7 @@ export default async function Home() {
       </section>
       <section className="mb-12" id="popular-coupons">
         <h2 className="text-2xl font-bold mb-5">많이 찾는 할인 혜택</h2>
-        <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">{popularCoupons.map(coupon => <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.store_id} />)}</div>
+        <div className="grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">{popularCoupons.map(coupon => <CouponCard key={coupon.id} coupon={coupon} storeName={coupon.stores?.name} storeId={coupon.store_id} />)}</div>
       </section>
       <section className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
         <h2 className="text-xl font-bold mb-3">예약·구매 전, 세 가지만 확인하세요</h2>

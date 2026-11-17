@@ -132,7 +132,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
                 </div>
             </div>
 
-            <div className="flex flex-col gap-3 mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex flex-col gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
 
                 <div className="w-full text-center">
                     <p className={`text-xs font-medium mb-1 uppercase tracking-wider ${isExpired ? 'text-gray-300' : 'text-gray-400'}`}>프로모션 코드</p>
@@ -190,7 +190,7 @@ export default function CouponCard({ coupon, storeName, storeId, isExpired }: { 
     );
 
     return (
-        <div className="card p-4 sm:p-5 min-w-0 h-full flex flex-col gap-4 relative overflow-hidden">
+        <div className="card p-4 sm:p-5 min-w-0 self-start flex flex-col gap-4 relative overflow-hidden">
             {cardContent}
         </div>
     );
