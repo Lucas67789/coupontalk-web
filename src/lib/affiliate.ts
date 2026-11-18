@@ -2,6 +2,8 @@
 // Long URLs: owner checked 2026-11-04. Trip.com and GamsGo: user-supplied / owner dashboard.
 // New or changed URLs remain blocked until ownership is verified and this registry is updated.
 const verifiedAffiliateUrls = new Set([
+  // User supplied for AliExpress Black Friday, 2026-11-18.
+  "http://app.ac/VEwfOfS63",
   // User supplied for Shokz OpenDot One, 2026-11-17.
   "http://app.ac/pEwL6dS53",
   // User supplied for Agoda Mega Sale, 2026-11-17.
