@@ -2,8 +2,8 @@ import { gamsgoPromoCode } from './gamsgo-promotion';
 // Editorial comparisons: do not infer a coupon or availability from the affiliate URL.
 export const extraSubscriptionGuides = [
   {
-    slug: 'chatgpt-discount', title: '챗지피티 할인', service: '챗GPT', color: '#14796b',
-    description: '챗지피티 할인과 ChatGPT Plus 구독료 비교. 무료·유료 선택, 개인·공유 계정, 파일 업로드와 사용 한도, 겜스고 결제 전 확인사항을 안내합니다.',
+    slug: 'chatgpt-discount', title: '챗지피티 할인 | 구독료·코드 비교', service: '챗GPT', color: '#14796b',
+    description: '챗지피티 할인 구매 전 개인·공유형 구독료와 이용 조건을 비교하세요. 겜스고 코드 UXA7C 복사·상품 이동, 적용 방법과 최종 결제액 확인 순서를 안내합니다.',
     intro: '챗지피티를 매일 쓰는지, 한 달 동안만 필요한지에 따라 구독 선택이 달라집니다. 챗GPT 플러스 할인은 월 환산 가격과 내 작업에 필요한 사용 한도를 함께 비교하세요.',
     takeaway: '공유 계정의 낮은 가격과 개인 계정의 작업 환경을 구분하세요. 중요한 대화·파일을 다룬다면 계정 관리 권한부터 확인하는 것이 좋습니다.',
     columns: ['비교 대상', '가격 확인 방법', '먼저 볼 조건'],
@@ -12,7 +12,7 @@ export const extraSubscriptionGuides = [
       { heading: '챗지피티 무료·유료 차이, 내 작업으로 비교하기', text: '짧은 질문과 문장 정리가 목적이라면 먼저 무료로 실제 작업을 해보세요. 긴 문서 분석이나 이미지 작업이 자주 중단될 때는 유료 플랜의 사용 한도가 도움이 되는지 살펴볼 수 있습니다. 한도는 기능과 모델에 따라 다르므로 유료라는 이유만으로 모든 작업이 무제한이라고 생각하지 마세요.' },
       { heading: '챗지피티 플러스 싸게 쓰는 비용 계산', text: '공유형 한 달, 개인형 한 달, 장기 선결제 상품의 금액을 나란히 적어보세요. 6개월 총액을 6으로 나눈 금액과 실제 매달 납부하는 월 구독료는 다릅니다. 한 달짜리 프로젝트를 위해 긴 기간을 결제하면 월 환산가가 낮아도 총지출은 늘어날 수 있습니다.' },
       { heading: '공유 계정과 내 계정 충전은 무엇이 다른가요?', text: '판매자가 제공하는 계정에 로그인하는 방식인지, 기존 내 계정에 이용 기간을 추가하는 방식인지 확인하세요. 공유형은 대화 기록과 업로드 파일의 접근 범위, 비밀번호 변경 가능 여부를 따로 확인해야 합니다. 기존 Plus가 남아 있다면 충전 시작일과 중복 결제 여부도 확인하세요.' },
-      { heading: 'Codex·API가 목적이라면 별도 확인하세요', text: '겜스고 ChatGPT 상품 안내에는 Codex 이용이 보장되지 않는다는 문구가 표시됩니다. 코딩 도구가 주목적이라면 일반 챗GPT 상품 가격만으로 결정하지 마세요. API 사용료 역시 채팅 구독과 같은 결제로 가정하지 말고 필요한 제품과 이용 범위를 구분해야 합니다.' },
+      { heading: 'Codex·API가 목적이라면 별도 확인하세요', text: '코딩 도구가 목적이라면 선택한 판매 상품에 해당 기능과 인증 방식이 포함되는지 확인하세요. 일반 채팅 구독의 가격만으로 이용 범위를 판단하지 마세요. API 사용료도 같은 결제에 포함된다고 가정하지 말고 상품별 조건을 확인하세요.' },
     ],
     questions: [['챗지피티 학생 할인도 적용되나요?', '학생 대상 프로모션은 자격과 기간이 따로 있을 수 있습니다. 겜스고 상품을 공식 학생 할인으로 안내하지 않으며 해당 결제 화면에서 대상 여부를 확인하세요.'], ['기존 챗지피티 계정을 계속 쓸 수 있나요?', '개인 계정 충전인지 판매자 제공 계정인지에 따라 달라집니다. 기존 대화 기록을 이어 쓰려면 구매 전에 계정 제공 방식을 확인하세요.'], ['제휴 링크가 챗지피티 할인코드인가요?', `링크는 겜스고 제휴 링크입니다. 별도의 겜스고 프로모션 코드 ${gamsgoPromoCode}는 겜스고 결제 화면에서 입력하세요. ChatGPT 공식 결제용 코드는 아닙니다. 적용 여부는 상품별 결제 화면에서 확인하세요.`]],
     sources: [{ label: 'ChatGPT 공식 플랜 비교', url: 'https://chatgpt.com/ko-KR/pricing/' }], productSource: 'https://www.gamsgo.com/ko/details/chatgpt',
@@ -180,7 +180,7 @@ export const extraSubscriptionGuides = [
     sources: [{ label: 'Canva 공식 플랜 비교', url: 'https://www.canva.com/ko_kr/pricing/' }], productSource: 'https://www.gamsgo.com/ko/details/cannva',
   },
   {
-    slug: 'duolingo-discount-code', title: '겜스고 듀오링고', service: '듀오링고', color: '#487c16',
+    slug: 'duolingo-discount-code', title: '듀오링고 할인코드 | 겜스고 사용법', service: '듀오링고', color: '#487c16',
     description: '겜스고 듀오링고 가격과 할인코드 UXA7C 적용 방법을 확인하세요. 패밀리 초대와 내 계정 사용, 초대 알림이 안 올 때와 패밀리 종료 시 확인할 내용을 정리했습니다.',
     intro: '겜스고 듀오링고는 이용 기간과 계정 적용 방식에 따라 가격이 달라집니다. 가족 그룹 1자리와 내 계정 충전 옵션을 비교하고, 할인코드 적용 후 실제 결제할 총액을 확인하세요.',
     takeaway: '기존 학습 계정을 계속 쓸지 먼저 정하세요. 기간별 총액 → 초대·충전 방식 → 현재 구독과 중복 여부 → 자동 갱신 순서로 확인하면 됩니다.',

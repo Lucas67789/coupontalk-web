@@ -4,7 +4,7 @@ import { copyGamsgoAndOpen } from '@/lib/gamsgo-action';
 import { useState } from 'react';
 import { gamsgoPromoCode } from '@/lib/gamsgo-promotion';
 
-export default function GamsgoPromoCode({ slug }: { slug?: string }) {
+export default function GamsgoPromoCode({ slug, compact = false }: { slug?: string; compact?: boolean }) {
   const [message, setMessage] = useState('');
 
   async function copyCode() {
@@ -17,7 +17,7 @@ export default function GamsgoPromoCode({ slug }: { slug?: string }) {
       <code className="select-all text-2xl font-bold tracking-wider">{gamsgoPromoCode}</code>
       <button type="button" onClick={copyCode} className="rounded-lg bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800">코드 복사하고 할인받기 ↗</button>
     </div>
-    <p className="mt-3 text-sm leading-6">겜스고 결제 화면에 입력한 뒤 할인 적용 여부와 최종 금액을 확인하세요. 할인율·대상 상품·유효기간은 결제 화면의 조건을 따릅니다.</p>
+    <p className="mt-3 text-sm leading-6">{compact ? '복사와 동시에 해당 겜스고 상품이 열립니다. 공식 서비스 결제용 코드가 아니며, 선택한 상품의 할인 적용 결과를 확인하세요.' : '겜스고 결제 화면에 입력한 뒤 할인 적용 여부와 최종 금액을 확인하세요. 할인율·대상 상품·유효기간은 결제 화면의 조건을 따릅니다.'}</p>
     <p role="status" aria-live="polite" className="mt-2 text-sm">{message}</p>
   </div>;
 }

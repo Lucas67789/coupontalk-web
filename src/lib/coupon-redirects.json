@@ -53,5 +53,20 @@
     "source": "/store/agoda/coupon/coupon-1790644782875-agoda-sep-kr5",
     "destination": "/store/agoda/coupon/coupon-agoda-lpkr10-sep2026-1787975408415",
     "statusCode": 301
+  },
+  {
+    "source": "/store/aliexpress/coupon/coupon-1790665610656-ali-choiceday-linc04",
+    "destination": "/store/aliexpress",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/aliexpress/coupon/coupon-1790665610657-ali-choiceday-linc09",
+    "destination": "/store/aliexpress",
+    "statusCode": 301
+  },
+  {
+    "source": "/store/aliexpress/coupon/coupon-1790665610659-ali-choiceday-linc36",
+    "destination": "/store/aliexpress",
+    "statusCode": 301
   }
 ]

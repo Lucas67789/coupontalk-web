@@ -205,7 +205,12 @@ export function safeNavigationUrl(value: unknown): string | null {
     if (typeof value !== 'string' || /[\\\u0000-\u0020\u007f]/.test(value)) return null;
     try {
         const url = new URL(value, 'https://coupontalk.kr');
-        if (url.origin === 'https://coupontalk.kr' && !url.username && !url.password) return url.pathname + url.search + url.hash;
+        if (url.origin === 'https://coupontalk.kr' && !url.username && !url.password) {
+            // An embedded image URL is not a coupon route, even after encoding.
+            const path = decodeURIComponent(url.pathname);
+            if (/[<>]/.test(path) || /\/coupon\/.*https?:/i.test(path)) return null;
+            return url.pathname + url.search + url.hash;
+        }
         return safeAffiliateUrl(value);
     } catch { return null; }
 }
